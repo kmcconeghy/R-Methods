@@ -1,6 +1,6 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
-```{r packages, include=T, echo=F}
+```{r packages, include=F, echo=F}
 require("tidyverse", quietly=T, warn.conflicts = F)
 require("Hmisc", quietly=T, warn.conflicts = F)
 require("Scotty", quietly=T, warn.conflicts = F)
