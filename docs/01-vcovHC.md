@@ -1,46 +1,6 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
 
-```
-## Warning: package 'tidyverse' was built under R version 3.3.3
-```
-
-```
-## Loading tidyverse: ggplot2
-## Loading tidyverse: tibble
-## Loading tidyverse: tidyr
-## Loading tidyverse: readr
-## Loading tidyverse: purrr
-## Loading tidyverse: dplyr
-```
-
-```
-## Warning: package 'readr' was built under R version 3.3.3
-```
-
-```
-## Conflicts with tidy packages ----------------------------------------------
-```
-
-```
-## filter(): dplyr, stats
-## lag():    dplyr, stats
-```
-
-```
-## Warning: package 'lmtest' was built under R version 3.3.3
-```
-
-```
-## 
-## Attaching package: 'zoo'
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     as.Date, as.Date.numeric
-```
 
 ## Introduction  
 
