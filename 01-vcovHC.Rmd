@@ -1,8 +1,15 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
+<<<<<<< HEAD
 ```{r packages, include=T}
 require("tidyverse", quietly=T)
 require("Hmisc", quietly=T)
+=======
+```{r packages, include=T, echo=F}
+require("Scotty")
+require("tidyverse")
+require("Hmisc")
+>>>>>>> fe7e79e6afb75be9e120262b07b0ff2ba78f9659
 mu <- markupSpecs$html  
 
 require("sandwich", quietly=T)
@@ -10,6 +17,27 @@ require("lmtest", quietly=T)
 require("boot", quietly=T)
 ```
 
+## Introduction 
+
+In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA. 
+
+### Packages to use
+`r mu$session()`
+
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. 
+
+"sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE). 
+
+### Test Data
+
+The cluster data was obtained from:
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf
+https://sites.google.com/site/waynelinchang/r-code
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
+https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/
+
+### Other References
 ## R's calculation of standard errors
 
 ## Heteroskedascity
@@ -18,7 +46,11 @@ require("boot", quietly=T)
 
 ## Stata comparison
 
-In Stata, one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+A full discussion of STATA programming can be seen here: http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm
+STATA blog:http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
+
+Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+
 
 e.g. STATA example
 ```{}
@@ -127,5 +159,11 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
 }
 ```
 
-### Computer Session  
-`r mu$session()`  
+## Acknowledgements
+ This chapter is heavily adapted from several StackExchange and other blog posts.
+ See:
+ http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
+ 
+
+## Bibliography
+  
