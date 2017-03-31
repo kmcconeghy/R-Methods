@@ -1,0 +1,25 @@
+## Loading required package: tidyverse
+## Warning: package 'tidyverse' was built under R version 3.3.3
+## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr
+## Warning: package 'readr' was built under R version 3.3.3
+## Conflicts with tidy packages ----------------------------------------------
+## filter(): dplyr, stats
+## lag():    dplyr, stats
+## Loading required package: Hmisc
+## Loading required package: lattice
+## Loading required package: survival
+## Loading required package: Formula
+## 
+## Attaching package: 'Hmisc'
+## The following objects are masked from 'package:dplyr':
+## 
+##     combine, src, summarize
+## The following objects are masked from 'package:base':
+## 
+##     format.pval, round.POSIXt, trunc.POSIXt, units
+## Loading required package: Scotty

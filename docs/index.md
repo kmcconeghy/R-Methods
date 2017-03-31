@@ -14,4 +14,24 @@ description: "A collection of working papers covering various statistical, analy
 
 # Preface {-}
 
-This is the very first part of the book.
+## Setup for Rmd documents
+
+```r
+  require(tidyverse)
+```
+
+```r
+  require(Hmisc)
+```
+
+```r
+  require(Scotty)
+```
+
+```r
+  knitrSet(lang='markdown', h=4.5)
+  mu <- markupSpecs$html   # markupSpecs is in Hmisc
+  cap  <- mu$cap           # function to output html caption
+  lcap <- mu$lcap          # for continuation for long caption
+  # These last 2 functions are used by the putHfig function in Hmisc
+```
