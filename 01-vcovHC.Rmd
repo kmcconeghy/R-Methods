@@ -2,6 +2,9 @@
 
 ```{r packages, include=T}
 require("tidyverse")
+require("Hmisc")
+mu <- markupSpecs$html  
+
 require("sandwich")
 require("lmtest")
 require("boot")
@@ -123,5 +126,6 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
   return(res)
 }
 ```
-## Computer Session  
 
+### Computer Session  
+`r mu$session()`  

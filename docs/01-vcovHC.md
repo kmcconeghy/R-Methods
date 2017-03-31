@@ -36,6 +36,45 @@ require("tidyverse")
 ```
 
 ```r
+require("Hmisc")
+```
+
+```
+## Loading required package: Hmisc
+```
+
+```
+## Loading required package: lattice
+```
+
+```
+## Loading required package: survival
+```
+
+```
+## Loading required package: Formula
+```
+
+```
+## 
+## Attaching package: 'Hmisc'
+```
+
+```
+## The following objects are masked from 'package:dplyr':
+## 
+##     combine, src, summarize
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     format.pval, round.POSIXt, trunc.POSIXt, units
+```
+
+```r
+mu <- markupSpecs$html  
+
 require("sandwich")
 ```
 
@@ -78,6 +117,23 @@ require("boot")
 ## Loading required package: boot
 ```
 
+```
+## 
+## Attaching package: 'boot'
+```
+
+```
+## The following object is masked from 'package:survival':
+## 
+##     aml
+```
+
+```
+## The following object is masked from 'package:lattice':
+## 
+##     melanoma
+```
+
 ## R's calculation of standard errors
 
 ## Heteroskedascity
@@ -93,13 +149,14 @@ e.g. STATA example
 regress y x z, vce(robust)
 ```
 
-A Huber-White variance-covariance matrix can also be computed with a cluster option by some group with the *vce(cluster(group))* option in regression models.
+A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.
 
 e.g. STATA example
 ```{}
 regress y x z, vce(cluster(group))
 ```
 
+See: http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
 ## Heteroskedastic consistent errors in R  
 
 ## Cluster robust errors in R  
@@ -194,5 +251,26 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
   return(res)
 }
 ```
-## Computer Session  
 
+### Computer Session  
+<!--html_preserve--><pre>
+ R version 3.3.2 (2016-10-31)
+ Platform: x86_64-w64-mingw32/x64 (64-bit)
+ Running under: Windows 10 x64 (build 14393)
+ 
+ attached base packages:
+ [1] stats     graphics  grDevices utils     datasets  base     
+ 
+ other attached packages:
+  [1] boot_1.3-18     lmtest_0.9-35   zoo_1.7-14      sandwich_2.3-4 
+  [5] Hmisc_4.0-2     Formula_1.2-1   survival_2.40-1 lattice_0.20-34
+  [9] dplyr_0.5.0     purrr_0.2.2     readr_1.1.0     tidyr_0.6.1    
+ [13] tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1
+ </pre>
+ To cite R in publication use:
+ <p>R Core Team (2016).
+ <em>R: A Language and Environment for Statistical Computing</em>.
+ R Foundation for Statistical Computing, Vienna, Austria.
+ <a href="https://www.R-project.org/">https://www.R-project.org/</a>. 
+ </p>
+<!--/html_preserve-->  
