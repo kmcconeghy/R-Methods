@@ -1,14 +1,6 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
 
-```r
-require("tidyverse")
-```
-
-```
-## Loading required package: tidyverse
-```
-
 ```
 ## Warning: package 'tidyverse' was built under R version 3.3.3
 ```
@@ -35,26 +27,6 @@ require("tidyverse")
 ## lag():    dplyr, stats
 ```
 
-```r
-require("Hmisc")
-```
-
-```
-## Loading required package: Hmisc
-```
-
-```
-## Loading required package: lattice
-```
-
-```
-## Loading required package: survival
-```
-
-```
-## Loading required package: Formula
-```
-
 ```
 ## 
 ## Attaching package: 'Hmisc'
@@ -72,30 +44,12 @@ require("Hmisc")
 ##     format.pval, round.POSIXt, trunc.POSIXt, units
 ```
 
-```r
-mu <- markupSpecs$html  
-
-require("sandwich")
 ```
-
-```
-## Loading required package: sandwich
-```
-
-```r
-require("lmtest")
-```
-
-```
-## Loading required package: lmtest
+## Loading required package: Scotty
 ```
 
 ```
 ## Warning: package 'lmtest' was built under R version 3.3.3
-```
-
-```
-## Loading required package: zoo
 ```
 
 ```
@@ -107,14 +61,6 @@ require("lmtest")
 ## The following objects are masked from 'package:base':
 ## 
 ##     as.Date, as.Date.numeric
-```
-
-```r
-require("boot")
-```
-
-```
-## Loading required package: boot
 ```
 
 ```
@@ -134,6 +80,46 @@ require("boot")
 ##     melanoma
 ```
 
+## Introduction 
+
+In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA. 
+
+### Packages to use
+<!--html_preserve--><pre>
+ R version 3.3.2 (2016-10-31)
+ Platform: x86_64-w64-mingw32/x64 (64-bit)
+ Running under: Windows 10 x64 (build 14393)
+ 
+ attached base packages:
+ [1] stats     graphics  grDevices utils     datasets  base     
+ 
+ other attached packages:
+  [1] boot_1.3-18       lmtest_0.9-35     zoo_1.7-14       
+  [4] sandwich_2.3-4    Scotty_0.0.0.9000 Hmisc_4.0-2      
+  [7] Formula_1.2-1     survival_2.40-1   lattice_0.20-34  
+ [10] dplyr_0.5.0       purrr_0.2.2       readr_1.1.0      
+ [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
+ [16] tidyverse_1.1.1  
+ </pre>
+ To cite R in publication use:
+ <p>R Core Team (2016).
+ <em>R: A Language and Environment for Statistical Computing</em>.
+ R Foundation for Statistical Computing, Vienna, Austria.
+ <a href="https://www.R-project.org/">https://www.R-project.org/</a>. 
+ </p>
+<!--/html_preserve-->
+
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. 
+
+"sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE). 
+
+### Test Data
+
+The cluster data was obtained from:
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
+
+
+### Other References
 ## R's calculation of standard errors
 
 ## Heteroskedascity
@@ -142,7 +128,11 @@ require("boot")
 
 ## Stata comparison
 
-In Stata, one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+A full discussion of STATA programming can be seen here: http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm
+STATA blog:http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
+
+Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+
 
 e.g. STATA example
 ```{}
@@ -153,7 +143,7 @@ A Huber-White variance-covariance matrix can also be computed by some group with
 
 e.g. STATA example
 ```{}
-regress y x z, vce(cluster(group))
+regress y x z, vce(cluster *group*)
 ```
 
 See: http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
@@ -252,25 +242,16 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
 }
 ```
 
-### Computer Session  
-<!--html_preserve--><pre>
- R version 3.3.2 (2016-10-31)
- Platform: x86_64-w64-mingw32/x64 (64-bit)
- Running under: Windows 10 x64 (build 14393)
- 
- attached base packages:
- [1] stats     graphics  grDevices utils     datasets  base     
- 
- other attached packages:
-  [1] boot_1.3-18     lmtest_0.9-35   zoo_1.7-14      sandwich_2.3-4 
-  [5] Hmisc_4.0-2     Formula_1.2-1   survival_2.40-1 lattice_0.20-34
-  [9] dplyr_0.5.0     purrr_0.2.2     readr_1.1.0     tidyr_0.6.1    
- [13] tibble_1.2      ggplot2_2.2.1   tidyverse_1.1.1
- </pre>
- To cite R in publication use:
- <p>R Core Team (2016).
- <em>R: A Language and Environment for Statistical Computing</em>.
- R Foundation for Statistical Computing, Vienna, Austria.
- <a href="https://www.R-project.org/">https://www.R-project.org/</a>. 
- </p>
-<!--/html_preserve-->  
+## Acknowledgements  
+This chapter is heavily adapted from several StackExchange and other blog posts.
+See:
+http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf  
+https://sites.google.com/site/waynelinchang/r-code  
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm  
+https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
+
+## Bibliography
+@R-base
+@Bertrand04howmuch
+@angrist2008mostly

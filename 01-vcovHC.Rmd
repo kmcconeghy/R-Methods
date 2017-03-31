@@ -1,17 +1,12 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
-<<<<<<< HEAD
-```{r packages, include=T}
+```{r packages, include=T, echo=F}
 require("tidyverse", quietly=T)
 require("Hmisc", quietly=T)
-=======
-```{r packages, include=T, echo=F}
 require("Scotty")
 require("tidyverse")
 require("Hmisc")
->>>>>>> fe7e79e6afb75be9e120262b07b0ff2ba78f9659
 mu <- markupSpecs$html  
-
 require("sandwich", quietly=T)
 require("lmtest", quietly=T)
 require("boot", quietly=T)
@@ -32,10 +27,7 @@ In this chapter we are evaluating R's capability to compute standard errors. Ove
 
 The cluster data was obtained from:
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf
-https://sites.google.com/site/waynelinchang/r-code
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
-https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/
+
 
 ### Other References
 ## R's calculation of standard errors
@@ -61,7 +53,7 @@ A Huber-White variance-covariance matrix can also be computed by some group with
 
 e.g. STATA example
 ```{}
-regress y x z, vce(cluster(group))
+regress y x z, vce(cluster *group*)
 ```
 
 See: http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
@@ -159,11 +151,16 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
 }
 ```
 
-## Acknowledgements
- This chapter is heavily adapted from several StackExchange and other blog posts.
- See:
- http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
- 
+## Acknowledgements  
+This chapter is heavily adapted from several StackExchange and other blog posts.
+See:
+http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf  
+https://sites.google.com/site/waynelinchang/r-code  
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm  
+https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
 
 ## Bibliography
-  
+@R-base
+@Bertrand04howmuch
+@angrist2008mostly
