@@ -1,6 +1,6 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
-```{r packages, echo=T, results=F}
+```{r packages, include=T}
 require("tidyverse")
 require("sandwich")
 require("lmtest")
@@ -22,13 +22,14 @@ e.g. STATA example
 regress y x z, vce(robust)
 ```
 
-A Huber-White variance-covariance matrix can also be computed with a cluster option by some group with the *vce(cluster(group))* option in regression models.
+A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.
 
 e.g. STATA example
 ```{}
 regress y x z, vce(cluster(group))
 ```
 
+See: http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
 ## Heteroskedastic consistent errors in R  
 
 ## Cluster robust errors in R  
