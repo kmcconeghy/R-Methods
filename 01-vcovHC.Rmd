@@ -31,7 +31,7 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ## R's calculation of standard errors  
 
 ## Heteroskedascity  
-Heteroskedascity in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
+*Heteroskedascity* in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
 
 ```{r testdataHomo, include=T}
 #Generate Data  
@@ -48,6 +48,7 @@ ggplot(data=df, aes(x=x, y=yHomo)) +
   theme_bw()
  
 ```  
+  
 **Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* constant across the range of X variable.
 
 ```{r testdataHetero, include=T}
@@ -58,7 +59,8 @@ ggplot(data=df, aes(x=x, y=yHetero)) +
   xlab("X variable") +
   theme_bw()
 ```
-**Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.
+  
+**Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.  
 
 
 @angrist2008mostly  
