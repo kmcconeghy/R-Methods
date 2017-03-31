@@ -28,23 +28,6 @@
 ```
 
 ```
-## 
-## Attaching package: 'Hmisc'
-```
-
-```
-## The following objects are masked from 'package:dplyr':
-## 
-##     combine, src, summarize
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     format.pval, round.POSIXt, trunc.POSIXt, units
-```
-
-```
 ## Warning: package 'lmtest' was built under R version 3.3.3
 ```
 
@@ -59,28 +42,11 @@
 ##     as.Date, as.Date.numeric
 ```
 
-```
-## 
-## Attaching package: 'boot'
-```
+## Introduction  
 
-```
-## The following object is masked from 'package:survival':
-## 
-##     aml
-```
+In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
-```
-## The following object is masked from 'package:lattice':
-## 
-##     melanoma
-```
-
-## Introduction 
-
-In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA. 
-
-### Packages to use
+### Packages to use  
 <!--html_preserve--><pre>
  R version 3.3.2 (2016-10-31)
  Platform: x86_64-w64-mingw32/x64 (64-bit)
@@ -97,57 +63,59 @@ In this chapter we are evaluating R's capability to compute standard errors. Ove
  [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
  [16] tidyverse_1.1.1  
  </pre>
-<!--/html_preserve-->
+<!--/html_preserve-->  
 
-"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. 
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful.  
 
-"sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE). 
+"sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
 
-### Test Data
+### Test Data  
 
-The cluster data was obtained from:
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
-
-
-### Other References
-## R's calculation of standard errors
-
-## Heteroskedascity
-@angrist2008mostly
-
-## Clustering
-@Bertrand04howmuch
-
-## Stata comparison
-
-A full discussion of STATA programming can be seen here: http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm
-STATA blog:http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
-
-Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+The cluster data was obtained from:  
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt  
 
 
-e.g. STATA example
+### Other References  
+## R's calculation of standard errors  
+
+## Heteroskedascity  
+@angrist2008mostly  
+
+## Clustering  
+@Bertrand04howmuch  
+
+## Stata comparison  
+
+A full discussion of STATA programming can be seen here:   http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm  
+STATA blog:  
+http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
+
+Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+
+
+e.g. robust option in STATA    
 ```{}
 regress y x z, vce(robust)
 ```
 
-A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.
+A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.  
 
-e.g. STATA example
+e.g. cluster option in STATA  
 ```{}
-regress y x z, vce(cluster *group*)
+regress y x z, vce(cluster group)
 ```
 
-See: http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/
+See:  
+http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
 ## Heteroskedastic consistent errors in R  
 
 ## Cluster robust errors in R  
 
 ## Block bootstrapping  
 
-An alternative to computing special variance-covariance matrices is non-parametric  "block" bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or "block" instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.(Insert Bertrand citation).  
+An alternative to computing special variance-covariance matrices is non-parametric  "block" bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or "block" instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.@Bertrand04howmuch  
 
-### Bootstrap Program
+### Bootstrap Program  
 
 ```r
 Boot.ATE <- function (model, treat, R = 250, block = "", df) 
@@ -236,13 +204,12 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
 
 ## Acknowledgements  
 This chapter is heavily adapted from several StackExchange and other blog posts.
-See:
-http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/
+See:  
+http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/  
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf  
 https://sites.google.com/site/waynelinchang/r-code  
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm  
 https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
 
-## Bibliography
-@R-base
-
+## Bibliography  
+@R-base  

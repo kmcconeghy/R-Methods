@@ -155,28 +155,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
 <pre><code>## filter(): dplyr, stats
 ## lag():    dplyr, stats</code></pre>
-<pre><code>## 
-## Attaching package: &#39;Hmisc&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
-## 
-##     combine, src, summarize</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     format.pval, round.POSIXt, trunc.POSIXt, units</code></pre>
 <pre><code>## Warning: package &#39;lmtest&#39; was built under R version 3.3.3</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;zoo&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     as.Date, as.Date.numeric</code></pre>
-<pre><code>## 
-## Attaching package: &#39;boot&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:survival&#39;:
-## 
-##     aml</code></pre>
-<pre><code>## The following object is masked from &#39;package:lattice&#39;:
-## 
-##     melanoma</code></pre>
 <div id="introduction" class="section level2">
 <h2><span class="header-section-number">1.1</span> Introduction</h2>
 <p>In this chapter we are evaluating R’s capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.</p>
@@ -204,7 +188,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="test-data" class="section level3">
 <h3><span class="header-section-number">1.1.2</span> Test Data</h3>
-<p>The cluster data was obtained from: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt</a></p>
+<p>The cluster data was obtained from:<br />
+<a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt</a></p>
 </div>
 <div id="other-references" class="section level3">
 <h3><span class="header-section-number">1.1.3</span> Other References</h3>
@@ -223,21 +208,25 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="stata-comparison" class="section level2">
 <h2><span class="header-section-number">1.5</span> Stata comparison</h2>
-<p>A full discussion of STATA programming can be seen here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm</a> STATA blog:<a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a></p>
-<p>Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the <em>vce(robust)</em> option in regression models.  </p>
-<p>e.g. STATA example</p>
+<p>A full discussion of STATA programming can be seen here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm</a><br />
+STATA blog:<br />
+<a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a></p>
+<p>Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the <em>vce(robust)</em> option in regression models.</p>
+<p>e.g. robust option in STATA</p>
 <pre><code>regress y x z, vce(robust)</code></pre>
 <p>A Huber-White variance-covariance matrix can also be computed by some group with the <strong>vce(cluster <em>group</em>)</strong> option in regression models.</p>
-<p>e.g. STATA example</p>
-<pre><code>regress y x z, vce(cluster *group*)</code></pre>
-<p>See: <a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a> ## Heteroskedastic consistent errors in R</p>
+<p>e.g. cluster option in STATA</p>
+<pre><code>regress y x z, vce(cluster group)</code></pre>
+<p>See:<br />
+<a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a><br />
+## Heteroskedastic consistent errors in R</p>
 </div>
 <div id="cluster-robust-errors-in-r" class="section level2">
 <h2><span class="header-section-number">1.6</span> Cluster robust errors in R</h2>
 </div>
 <div id="block-bootstrapping" class="section level2">
 <h2><span class="header-section-number">1.7</span> Block bootstrapping</h2>
-<p>An alternative to computing special variance-covariance matrices is non-parametric “block” bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or “block” instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.(Insert Bertrand citation).</p>
+<p>An alternative to computing special variance-covariance matrices is non-parametric “block” bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or “block” instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.<span class="citation">Bertrand M (<a href="#ref-Bertrand04howmuch">2004</a>)</span></p>
 <div id="bootstrap-program" class="section level3">
 <h3><span class="header-section-number">1.7.1</span> Bootstrap Program</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Boot.ATE &lt;-<span class="st"> </span>function (model, treat, <span class="dt">R =</span> <span class="dv">250</span>, <span class="dt">block =</span> <span class="st">&quot;&quot;</span>, df) 
@@ -326,7 +315,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="acknowledgements" class="section level2">
 <h2><span class="header-section-number">1.8</span> Acknowledgements</h2>
-<p>This chapter is heavily adapted from several StackExchange and other blog posts. See: <a href="http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/" class="uri">http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/</a> <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf</a><br />
+<p>This chapter is heavily adapted from several StackExchange and other blog posts. See:<br />
+<a href="http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/" class="uri">http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/</a><br />
+<a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf</a><br />
 <a href="https://sites.google.com/site/waynelinchang/r-code" class="uri">https://sites.google.com/site/waynelinchang/r-code</a><br />
 <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm</a><br />
 <a href="https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/" class="uri">https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/</a></p>
