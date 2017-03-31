@@ -3,9 +3,7 @@
 ```{r packages, include=T, echo=F}
 require("tidyverse", quietly=T)
 require("Hmisc", quietly=T)
-require("Scotty")
-require("tidyverse")
-require("Hmisc")
+require("Scotty", quietly=T)
 mu <- markupSpecs$html  
 require("sandwich", quietly=T)
 require("lmtest", quietly=T)
@@ -17,7 +15,7 @@ require("boot", quietly=T)
 In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA. 
 
 ### Packages to use
-`r mu$session()`
+`r mu$session(cite=F)`
 
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. 
 
@@ -33,8 +31,10 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ## R's calculation of standard errors
 
 ## Heteroskedascity
+@angrist2008mostly
 
 ## Clustering
+@Bertrand04howmuch
 
 ## Stata comparison
 
@@ -162,5 +162,4 @@ https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-cluster
 
 ## Bibliography
 @R-base
-@Bertrand04howmuch
-@angrist2008mostly
+

@@ -45,10 +45,6 @@
 ```
 
 ```
-## Loading required package: Scotty
-```
-
-```
 ## Warning: package 'lmtest' was built under R version 3.3.3
 ```
 
@@ -101,12 +97,6 @@ In this chapter we are evaluating R's capability to compute standard errors. Ove
  [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
  [16] tidyverse_1.1.1  
  </pre>
- To cite R in publication use:
- <p>R Core Team (2016).
- <em>R: A Language and Environment for Statistical Computing</em>.
- R Foundation for Statistical Computing, Vienna, Austria.
- <a href="https://www.R-project.org/">https://www.R-project.org/</a>. 
- </p>
 <!--/html_preserve-->
 
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. 
@@ -123,8 +113,10 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ## R's calculation of standard errors
 
 ## Heteroskedascity
+@angrist2008mostly
 
 ## Clustering
+@Bertrand04howmuch
 
 ## Stata comparison
 
@@ -253,5 +245,4 @@ https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-cluster
 
 ## Bibliography
 @R-base
-@Bertrand04howmuch
-@angrist2008mostly
+
