@@ -12,7 +12,7 @@ require("boot", quietly=T, warn.conflicts = F)
 
 ## Introduction  
 
-In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
+In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
 `r mu$session(cite=F)`  
@@ -31,6 +31,31 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ## R's calculation of standard errors  
 
 ## Heteroskedascity  
+Heteroskedascity in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
+
+```{r testdataHomo, include=T}
+  x <- seq(1:100) 
+  y <- x + rnorm(0,10)
+  ggplot( aes(x=x, y=y)) +     
+    geom_point() +     
+    geom_line() +    
+    xlab("X variable") +    
+    theme_bw()
+```  
+**Figure 1.** Example of homoskedascity
+
+```{r testdataHetero, include=T
+  y[70:100] <- x + rnorm(0,100) #observations 70-100, set to have a different sigma than 1:69
+
+  ggplot( aes(x=x, y=y)) + 
+    geom_point() + 
+    geom_line() +
+    xlab("X variable") +
+    theme_bw()
+```
+**Figure 2.** Example of heteroskedascity, variance is greater in X>=69
+
+
 @angrist2008mostly  
 
 ## Clustering  
