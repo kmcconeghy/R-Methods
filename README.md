@@ -1,5 +1,9 @@
-This is the absolute minimum you need to start a [bookdown](https://bookdown.org/home/about.html) book. You can find the
-preview of this book at http://seankross.com/bookdown-start/
+I use this book to publish working drafts, essays and my own written programs.
 
-All of the content of this repository is licensed 
-[CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+Contained herein include a variety of topics including:
+
+**Translating STATA to R**  
+  1. **Cluster robust standard errors**   
+  2. **Model-based standardization**
+  
+Enjoy!
