@@ -4,7 +4,7 @@
 
 ## Introduction  
 
-In this chapter we are evaluating R's capability to compute standard errors. Overall like most things, R has substantial capacity but its flexibility can be daunting. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
+In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
 <!--html_preserve--><pre>
@@ -39,6 +39,41 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ## R's calculation of standard errors  
 
 ## Heteroskedascity  
+Heteroskedascity in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
+
+
+```r
+#Generate Data  
+  x <- runif(500)
+  yHomo <- 2*x + rnorm(500)
+  yHetero <- 2*x + x*rnorm(500) + rnorm(500)
+  df <- as.data.frame(cbind(x, yHomo, yHetero))
+
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=x, y=yHomo)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
+```
+
+<img src="01-vcovHC_files/figure-html/testdataHomo-1.png" width="672" />
+**Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* constant across the range of X variable.
+
+
+```r
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=x, y=yHetero)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
+```
+
+<img src="01-vcovHC_files/figure-html/testdataHetero-1.png" width="672" />
+**Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.
+
+
 @angrist2008mostly  
 
 ## Clustering  

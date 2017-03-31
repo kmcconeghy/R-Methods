@@ -32,8 +32,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
+<link rel="prev" href="heteroskedastic-cluster-robust-standard-errors.html">
 
-<link rel="next" href="heteroskedastic-cluster-robust-standard-errors.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -146,22 +146,59 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R-methods</h1>
-<h4 class="author"><em>Kevin W. McConeghy</em></h4>
-<h4 class="date"><em>2017-03-31</em></h4>
-</div>
-<div id="preface" class="section level1 unnumbered">
-<h1>Preface</h1>
+<div id="ggplot2-examples" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> ggplot2 Examples</h1>
+<div id="introduction-1" class="section level2">
+<h2><span class="header-section-number">2.1</span> Introduction</h2>
+<p>In this chapter we are evaluating R’s capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.</p>
+<div id="packages-to-use-1" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Packages to use</h3>
+<pre>
+ R version 3.3.2 (2016-10-31)
+ Platform: x86_64-w64-mingw32/x64 (64-bit)
+ Running under: Windows 10 x64 (build 14393)
+ 
+ attached base packages:
+ [1] stats     graphics  grDevices utils     datasets  base     
+ 
+ other attached packages:
+  [1] Scotty_0.0.0.9000 Hmisc_4.0-2       Formula_1.2-1    
+  [4] survival_2.40-1   lattice_0.20-34   dplyr_0.5.0      
+  [7] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
+ [10] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+ </pre>
 
+<p>“Scotty” is my own package. “tidyverse” is Wickam et al. general suite of packages/commands to work with R. “Hmisc” is Frank Harrel’s miscellaneous commands, many of which are quite useful. ## Acknowledgements<br />
+This chapter is heavily adapted from several StackExchange and other blog posts. See:</p>
+<p><span class="citation">R Core Team (<a href="#ref-R-base">2016</a>)</span></p>
+
+<div id="refs" class="references">
+<div>
+<p>Angrist, J.D., and J.S. Pischke. 2008. <em>Mostly Harmless Econometrics: An Empiricist’s Companion</em>. Princeton University Press. <a href="https://books.google.com/books?id=ztXL21Xd8v8C" class="uri">https://books.google.com/books?id=ztXL21Xd8v8C</a>.</p>
+</div>
+<div>
+<p>Bertrand M, Mullainathan S, Duflo E. 2004. “How Much Should We Trust Differences-in-Differences Estimates?” <em>QUARTERLY JOURNAL OF ECONOMICS</em>, 24975.</p>
+</div>
+<div>
+<p>R Core Team. 2016. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-R-base">
+<p>R Core Team. 2016. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
+<a href="heteroskedastic-cluster-robust-standard-errors.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="heteroskedastic-cluster-robust-standard-errors.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

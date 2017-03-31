@@ -34,26 +34,31 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 Heteroskedascity in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
 
 ```{r testdataHomo, include=T}
-  x <- seq(1:100) 
-  y <- x + rnorm(0,10)
-  ggplot( aes(x=x, y=y)) +     
-    geom_point() +     
-    geom_line() +    
-    xlab("X variable") +    
-    theme_bw()
+#Generate Data  
+  x <- runif(500)
+  yHomo <- 2*x + rnorm(500)
+  yHetero <- 2*x + x*rnorm(500) + rnorm(500)
+  df <- as.data.frame(cbind(x, yHomo, yHetero))
+
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=x, y=yHomo)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
+ 
 ```  
-**Figure 1.** Example of homoskedascity
+**Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* constant across the range of X variable.
 
-```{r testdataHetero, include=T
-  y[70:100] <- x + rnorm(0,100) #observations 70-100, set to have a different sigma than 1:69
-
-  ggplot( aes(x=x, y=y)) + 
-    geom_point() + 
-    geom_line() +
-    xlab("X variable") +
-    theme_bw()
+```{r testdataHetero, include=T}
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=x, y=yHetero)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
 ```
-**Figure 2.** Example of heteroskedascity, variance is greater in X>=69
+**Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.
 
 
 @angrist2008mostly  
