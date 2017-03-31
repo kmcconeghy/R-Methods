@@ -1,13 +1,13 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
 ```{r packages, include=T}
-require("tidyverse")
-require("Hmisc")
+require("tidyverse", quietly=T)
+require("Hmisc", quietly=T)
 mu <- markupSpecs$html  
 
-require("sandwich")
-require("lmtest")
-require("boot")
+require("sandwich", quietly=T)
+require("lmtest", quietly=T)
+require("boot", quietly=T)
 ```
 
 ## R's calculation of standard errors
