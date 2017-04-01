@@ -8,6 +8,7 @@ mu <- markupSpecs$html
 require("sandwich", quietly=T, warn.conflicts = F)
 require("lmtest", quietly=T, warn.conflicts = F)
 require("boot", quietly=T, warn.conflicts = F)
+require("knitr", quietly=T, warn.conflicts = F)
 ```
 
 ## Introduction  
@@ -79,19 +80,84 @@ Briefly: In Stata one can specify a variance-covariance matrix that is heteroske
 
 e.g. robust option in STATA    
 ```{}
-regress y x z, vce(robust)
+regress y x, vce(robust)
 ```
 
 A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.  
 
 e.g. cluster option in STATA  
 ```{}
-regress y x z, vce(cluster group)
+regress y x, vce(cluster group)
 ```
 
 See:  
 http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
+
+## Test data  
+
+```{r getPeterson}
+url <- "http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt"
+df <- as_tibble(read.table(url))
+print("Head of test dataframe")
+names(df) <- c("group", "year", "x", "y")
+head(df)
+
+```
+  This data represent financial information. As a benchmark I will use a widely available set financial data.(@peterson2009) Several online posts compare this data using different specifications and software.
+  
+The expected results we will recreate are given here:
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
+
+## Standard Least Squares with homoskedasctic standard errors  
+```{r lm}
+m1 <- lm(y ~ x, data = df)
+coeftest(m1)
+```
+
+These are the results with Table "OLS Coefficients and Standard Errors". R computes the regression coefficients with $( \textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+Variance in general is computed like so:
+$Var(X) = E[X − E(X)]^2 = E[(X − E(X)) (X − E(X))]$
+
+In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. 
+
+Equation 1. Covariance matrix of the error term $u$
+$E[{uu}'|\textbf{X}] = \mathbf{\Sigma_{u}}$
+
+Equation 2.  
+$\mathbf{\Sigma_{u}} = \sigma^2 I_{N}$
+
+Equation 3. Expectation of the variance of $\beta$ conditional on X.  
+$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}'\textbf{X})^{-1}(\textbf{X}' \mathbf{\Sigma_{u}} \textbf{X}) (\textbf{X}'\textbf{X})^{-1}$
+
+Under the assumption of independent and identically distributed errors and homoskedascity, Equation 3 is simplified to equation 4 (transpose matrix, using diagonal elements).  
+
+Equation 4. iid assumed
+$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}'\textbf{X})^{-1}$
+
+Assuming $\sigma_u^2$ is fixed but unknown, and equation to esimate $s^2$ can be used:
+
+Equation 5. standard error
+
+$s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$
+
+Where $e$ squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
+
+The Standard errors above can be replicated manually like so:
+```{r manualSE}
+# get X matrix/predictors
+X <- model.matrix(m1)
+# number of obs
+n <- dim(X)[1]
+# n of predictors
+k <- dim(X)[2]
+# calculate stan errs as in the above
+# sq root of diag elements in vcov
+se <- sqrt(diag(solve(crossprod(X)) * as.numeric(crossprod(resid(m1))/(n-k))))
+se
+```
+
 ## Heteroskedastic consistent errors in R  
+
 
 ## Cluster robust errors in R  
 
@@ -100,6 +166,7 @@ http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-opt
 An alternative to computing special variance-covariance matrices is non-parametric  "block" bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or "block" instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.@Bertrand04howmuch  
 
 ### Bootstrap Program  
+
 ```{r BootProg}
 Boot.ATE <- function (model, treat, R = 250, block = "", df) 
 {
