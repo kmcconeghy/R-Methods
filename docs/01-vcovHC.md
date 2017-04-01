@@ -66,11 +66,6 @@ ggplot(data=df, aes(x=x, y=yHetero)) +
   
 **Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.  
 
-@angrist2008mostly  
-
-## Clustering  
-@Bertrand04howmuch  
-
 ## Test data  
 
 The cluster data was obtained from:  
@@ -108,7 +103,8 @@ head(df)
 The expected results we will recreate are given here:
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
 
-## Standard Errors under iid  
+## Regression parameter standard errors under iid  
+
 
 ```r
 m1 <- lm(y ~ x, data = df)
@@ -126,7 +122,7 @@ coeftest(m1)
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-You can compare these results with Table "OLS Coefficients and Standard Errors". R computes the regression coefficients with $( \textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+You can compare these results with first table "OLS Coefficients and Standard Errors" with the Peterson link above. R computes the regression coefficients with $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
 
 In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. 
 
@@ -144,7 +140,7 @@ Under the assumption of independent and identically distributed errors (homosked
 Equation 4. iid assumed
 $\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}'\textbf{X})^{-1}$
 
-Assuming $\sigma_u^2$ is fixed but unknown, and equation to esimate $s^2$ can be used:
+Assuming $\sigma_u^2$ is fixed but unknown, this equation to esimate $s^2$ can be used:
 
 Equation 5. Standard Error
 
@@ -155,13 +151,11 @@ Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the num
 With this information the standard errors above can be replicated manually like so:
 
 ```r
-# get X matrix/predictors
-X <- model.matrix(m1)
-# number of obs
-n <- dim(X)[1]
-# n of predictors
-k <- dim(X)[2]
-# calculate stan errs as in the above
+X <- model.matrix(m1) # get X matrix/predictors
+n <- dim(X)[1] # number of obs
+k <- dim(X)[2] # n of predictors
+
+# calculate stan errs as eq in the above
 # sq root of diag elements in vcov
 se <- sqrt(diag(solve(crossprod(X)) * as.numeric(crossprod(resid(m1))/(n-k))))
 se
@@ -172,13 +166,113 @@ se
 ##  0.02835932  0.02858329
 ```
 
-## Heteroskedastic consistent errors in R  
+## "White" heteroskedastic consistent errors 
+
+  In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).(@white1980) The assumption of the residuals $u$ being *identically* distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.(@white1980)  
+
+  With the "robust" approach proposed by White et al., you assume  the variance of the residual is estimated as a diagonal matrix of each squared residual (vs. average above with $s^2$). Each j-th row-column element is $\hat{u}_{j}^{2}$ in the diagonal terms of ${\Sigma_{u}}$. 
+
+The full equation is:  
+
+### Manual estimator  
+
+```r
+u <- matrix(resid(m1)) # residual vector
+meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
+dfc <- n/(n-k) # degrees of freedom adjust  
+se <- sqrt(dfc*diag(solve(crossprod(X)) %*% meat1 %*% solve(crossprod(X))))
+se
+```
+
+```
+## (Intercept)           x 
+##  0.02836067  0.02839516
+```
+
+  You will find these "White" or robust standard errors are consistent with the second Peterson table.@peterson2009  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper, but it includes a degree of freedom adjustment.  
+  
+### R standard function   
+
+Using the already written commands you can specific "White" standard errors by specifying the vcovHC function in the sandwich package.(@Zeileis2006) You can report correct standard errors like below with vcovHC option in function coeftest.  
+
+vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' Omega X (X'X)^{-1}$.  
+
+The specification of $Omega$ is determined by the `type=` option.  
+
+HC2 : ωi =
+uˆ
+2
+i
+1 − hi
+HC3 : ωi =
+uˆ
+2
+i
+(1 − hi)
+2
+HC4 : ωi =
+uˆ
+2
+i
+(1 − hi)
+δi
+
+`type="cons"` $\omega_i = \sigma^2$ Constant variance
+`type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix  
+`type=HC1`    $\omega_i = \frac{n}{n-k}\mu^2_i$ Small sample correction (STATA). 
+`type=HC2`    $\omega_i = \frac{\mu^2_i}{1-h_i}$
+`type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$
+`type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$
+
+where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$.
+
+The documentation for the sandwich package recommends HC4 based on recent literature.(@Cribari2004)
+
+`type=HC0` is the "White" calculation.
+
+
+Lifehack: Rather than use the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
+
+
+```r
+s <- summary(m1)
+s$coefficients[, 2] <- sqrt(diag(vcovHC(m1, type="HC1")))
+s
+```
+
+```
+## 
+## Call:
+## lm(formula = y ~ x, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.7611 -1.3680 -0.0166  1.3387  8.6779 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  0.02968    0.02836   1.047    0.295    
+## x            1.03483    0.02840  36.204   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.005 on 4998 degrees of freedom
+## Multiple R-squared:  0.2078,	Adjusted R-squared:  0.2076 
+## F-statistic:  1311 on 1 and 4998 DF,  p-value: < 2.2e-16
+```
+
+## Clustering  
+@Bertrand04howmuch  
 
 ## Cluster robust errors in R  
 
 ## Block bootstrapping  
 
-An alternative to computing special variance-covariance matrices is non-parametric  "block" bootstrapping. To do this, you perform a bootstrapping procedure where you sample the group or "block" instead of unit observation. This has been shown to be about as consistent and unbiased as the above sandwich estimators, and may be advantgeous when the number of clusters is small.@Bertrand04howmuch  
+  An alternative to computing a special variance-covariance matrix is using a non-parametric "brute-force" method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or "block" instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simple report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.
+  
+## Permutation or "Randomization" Test
+
+(@Bertrand04howmuch) 
 
 ### Bootstrap Program  
 
@@ -300,3 +394,4 @@ https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-cluster
 
 ## Bibliography  
 @R-base  
+@angrist2008mostly  
