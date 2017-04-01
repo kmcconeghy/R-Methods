@@ -37,7 +37,7 @@ In this chapter we are evaluating R's capability to compute different kinds of s
 #Generate Data  
   x <- runif(500)
   yHomo <- 2*x + rnorm(500)
-  yHetero <- 2*x + x*rnorm(500) + rnorm(500)
+  yHetero <- 2*x + x*rnorm(500)
   df <- as.data.frame(cbind(x, yHomo, yHetero))
 
 #Scatter and Fitted Line 
@@ -103,12 +103,12 @@ head(df)
 ## 5     1     5 -0.0014262  0.9146864
 ## 6     1     6 -1.2127370 -1.4246860
 ```
-  This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software (@peterson2009).
+  This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.@peterson2009
   
 The expected results we will recreate are given here:
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
 
-## Standard Least Squares with homoskedasctic standard errors  
+## Standard Errors under iid  
 
 ```r
 m1 <- lm(y ~ x, data = df)
@@ -128,12 +128,9 @@ coeftest(m1)
 
 You can compare these results with Table "OLS Coefficients and Standard Errors". R computes the regression coefficients with $( \textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
 
-Variance in general is computed like so:
-$Var(X) = E[X − E(X)]^2 = E[(X − E(X)) (X − E(X))]$
-
 In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. 
 
-Equation 1. Covariance matrix of the error term $u$
+Equation 1. Covariance matrix of the error term $u$  
 $E[{uu}'|\textbf{X}] = \mathbf{\Sigma_{u}}$
 
 Equation 2.  
@@ -142,18 +139,18 @@ $\mathbf{\Sigma_{u}} = \sigma^2 I_{N}$
 Equation 3. Expectation of the variance of $\beta$ conditional on X.  
 $\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}'\textbf{X})^{-1}(\textbf{X}' \mathbf{\Sigma_{u}} \textbf{X}) (\textbf{X}'\textbf{X})^{-1}$
 
-Under the assumption of independent and identically distributed errors and homoskedascity, Equation 3 is simplified to equation 4 (transpose matrix, using diagonal elements).  
+Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).  
 
 Equation 4. iid assumed
 $\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}'\textbf{X})^{-1}$
 
 Assuming $\sigma_u^2$ is fixed but unknown, and equation to esimate $s^2$ can be used:
 
-Equation 5. standard error
+Equation 5. Standard Error
 
 $s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$
 
-Where $e$ squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
+Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
 
 With this information the standard errors above can be replicated manually like so:
 
@@ -272,7 +269,6 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
 ```
 
 ## Stata comparison  
-
 A full discussion of STATA programming can be seen here:   http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm  
 STATA blog:  
 http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
@@ -299,9 +295,7 @@ http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-opt
 This chapter is heavily adapted from several StackExchange and other blog posts.
 See:  
 http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/  
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf  
 https://sites.google.com/site/waynelinchang/r-code  
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm  
 https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
 
 ## Bibliography  

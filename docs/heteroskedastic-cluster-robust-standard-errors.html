@@ -111,7 +111,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.2" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#heteroskedascity"><i class="fa fa-check"></i><b>1.2</b> Heteroskedascity</a></li>
 <li class="chapter" data-level="1.3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#clustering"><i class="fa fa-check"></i><b>1.3</b> Clustering</a></li>
 <li class="chapter" data-level="1.4" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#test-data"><i class="fa fa-check"></i><b>1.4</b> Test data</a></li>
-<li class="chapter" data-level="1.5" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#standard-least-squares-with-homoskedasctic-standard-errors"><i class="fa fa-check"></i><b>1.5</b> Standard Least Squares with homoskedasctic standard errors</a></li>
+<li class="chapter" data-level="1.5" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#standard-errors-under-iid"><i class="fa fa-check"></i><b>1.5</b> Standard Errors under iid</a></li>
 <li class="chapter" data-level="1.6" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#heteroskedastic-consistent-errors-in-r"><i class="fa fa-check"></i><b>1.6</b> Heteroskedastic consistent errors in R</a></li>
 <li class="chapter" data-level="1.7" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#cluster-robust-errors-in-r"><i class="fa fa-check"></i><b>1.7</b> Cluster robust errors in R</a></li>
 <li class="chapter" data-level="1.8" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#block-bootstrapping"><i class="fa fa-check"></i><b>1.8</b> Block bootstrapping</a><ul>
@@ -180,7 +180,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Generate Data  </span>
   x &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">500</span>)
   yHomo &lt;-<span class="st"> </span><span class="dv">2</span>*x +<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">500</span>)
-  yHetero &lt;-<span class="st"> </span><span class="dv">2</span>*x +<span class="st"> </span>x*<span class="kw">rnorm</span>(<span class="dv">500</span>) +<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">500</span>)
+  yHetero &lt;-<span class="st"> </span><span class="dv">2</span>*x +<span class="st"> </span>x*<span class="kw">rnorm</span>(<span class="dv">500</span>)
   df &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">cbind</span>(x, yHomo, yHetero))
 
 <span class="co">#Scatter and Fitted Line </span>
@@ -224,11 +224,11 @@ df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="
 ## 4     1     4 -0.1524857 -1.1093940
 ## 5     1     5 -0.0014262  0.9146864
 ## 6     1     6 -1.2127370 -1.4246860</code></pre>
-<p>This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software (<span class="citation">Petersen (<a href="#ref-peterson2009">2009</a>)</span>).</p>
+<p>This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.<span class="citation">Petersen (<a href="#ref-peterson2009">2009</a>)</span></p>
 <p>The expected results we will recreate are given here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm</a></p>
 </div>
-<div id="standard-least-squares-with-homoskedasctic-standard-errors" class="section level2">
-<h2><span class="header-section-number">1.5</span> Standard Least Squares with homoskedasctic standard errors</h2>
+<div id="standard-errors-under-iid" class="section level2">
+<h2><span class="header-section-number">1.5</span> Standard Errors under iid</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(y ~<span class="st"> </span>x, <span class="dt">data =</span> df)
 <span class="kw">coeftest</span>(m1)</code></pre></div>
 <pre><code>## 
@@ -240,19 +240,19 @@ df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>You can compare these results with Table “OLS Coefficients and Standard Errors”. R computes the regression coefficients with <span class="math inline">\(( \textbf{X}&#39;\textbf{X})^{-1}\textbf{X}&#39;\textbf{y}\)</span> i.e. the coefficient is a function of X and y.</p>
-<p>Variance in general is computed like so: <span class="math inline">\(Var(X) = E[X − E(X)]^2 = E[(X − E(X)) (X − E(X))]\)</span></p>
 <p>In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix.</p>
-<p>Equation 1. Covariance matrix of the error term <span class="math inline">\(u\)</span> <span class="math inline">\(E[{uu}&#39;|\textbf{X}] = \mathbf{\Sigma_{u}}\)</span></p>
+<p>Equation 1. Covariance matrix of the error term <span class="math inline">\(u\)</span><br />
+<span class="math inline">\(E[{uu}&#39;|\textbf{X}] = \mathbf{\Sigma_{u}}\)</span></p>
 <p>Equation 2.<br />
 <span class="math inline">\(\mathbf{\Sigma_{u}} = \sigma^2 I_{N}\)</span></p>
 <p>Equation 3. Expectation of the variance of <span class="math inline">\(\beta\)</span> conditional on X.<br />
 <span class="math inline">\(\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}&#39;\textbf{X})^{-1}(\textbf{X}&#39; \mathbf{\Sigma_{u}} \textbf{X}) (\textbf{X}&#39;\textbf{X})^{-1}\)</span></p>
-<p>Under the assumption of independent and identically distributed errors and homoskedascity, Equation 3 is simplified to equation 4 (transpose matrix, using diagonal elements).</p>
+<p>Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).</p>
 <p>Equation 4. iid assumed <span class="math inline">\(\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}&#39;\textbf{X})^{-1}\)</span></p>
 <p>Assuming <span class="math inline">\(\sigma_u^2\)</span> is fixed but unknown, and equation to esimate <span class="math inline">\(s^2\)</span> can be used:</p>
-<p>Equation 5. standard error</p>
+<p>Equation 5. Standard Error</p>
 <p><span class="math inline">\(s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}\)</span></p>
-<p>Where <span class="math inline">\(e\)</span> squared residuals, <span class="math inline">\(n\)</span> is the sample size, and <span class="math inline">\(k\)</span> are the number of regressors.</p>
+<p>Where <span class="math inline">\(e\)</span> are the squared residuals, <span class="math inline">\(n\)</span> is the sample size, and <span class="math inline">\(k\)</span> are the number of regressors.</p>
 <p>With this information the standard errors above can be replicated manually like so:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get X matrix/predictors</span>
 X &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(m1)
@@ -380,9 +380,7 @@ STATA blog:<br />
 <h2><span class="header-section-number">1.10</span> Acknowledgements</h2>
 <p>This chapter is heavily adapted from several StackExchange and other blog posts. See:<br />
 <a href="http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/" class="uri">http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/</a><br />
-<a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/standarderror_extra_tables.pdf</a><br />
 <a href="https://sites.google.com/site/waynelinchang/r-code" class="uri">https://sites.google.com/site/waynelinchang/r-code</a><br />
-<a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm</a><br />
 <a href="https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/" class="uri">https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/</a></p>
 </div>
 <div id="bibliography" class="section level2">
