@@ -1,8 +1,10 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
+
+
 ## Introduction  
 
-In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
+In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
 <!--html_preserve--><pre>
@@ -26,15 +28,6 @@ In this chapter we are evaluating R's capability to compute different kinds of s
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful.  
 
 "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
-
-### Test Data  
-
-The cluster data was obtained from:  
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt  
-
-
-### Other References  
-## R's calculation of standard errors  
 
 ## Heteroskedascity  
 *Heteroskedascity* in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
@@ -73,37 +66,15 @@ ggplot(data=df, aes(x=x, y=yHetero)) +
   
 **Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.  
 
-
 @angrist2008mostly  
 
 ## Clustering  
 @Bertrand04howmuch  
 
-## Stata comparison  
-
-A full discussion of STATA programming can be seen here:   http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm  
-STATA blog:  
-http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
-
-Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
-
-
-e.g. robust option in STATA    
-```{}
-regress y x, vce(robust)
-```
-
-A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.  
-
-e.g. cluster option in STATA  
-```{}
-regress y x, vce(cluster group)
-```
-
-See:  
-http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
-
 ## Test data  
+
+The cluster data was obtained from:  
+http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt  
 
 
 ```r
@@ -132,7 +103,7 @@ head(df)
 ## 5     1     5 -0.0014262  0.9146864
 ## 6     1     6 -1.2127370 -1.4246860
 ```
-  This data represent financial information. As a benchmark I will use a widely available set financial data.(@peterson2009) Several online posts compare this data using different specifications and software.
+  This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software (@peterson2009).
   
 The expected results we will recreate are given here:
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
@@ -155,7 +126,8 @@ coeftest(m1)
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-These are the results with Table "OLS Coefficients and Standard Errors". R computes the regression coefficients with $( \textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+You can compare these results with Table "OLS Coefficients and Standard Errors". R computes the regression coefficients with $( \textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+
 Variance in general is computed like so:
 $Var(X) = E[X − E(X)]^2 = E[(X − E(X)) (X − E(X))]$
 
@@ -183,7 +155,7 @@ $s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$
 
 Where $e$ squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
 
-The Standard errors above can be replicated manually like so:
+With this information the standard errors above can be replicated manually like so:
 
 ```r
 # get X matrix/predictors
@@ -204,7 +176,6 @@ se
 ```
 
 ## Heteroskedastic consistent errors in R  
-
 
 ## Cluster robust errors in R  
 
@@ -299,6 +270,30 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
   return(res)
 }
 ```
+
+## Stata comparison  
+
+A full discussion of STATA programming can be seen here:   http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm  
+STATA blog:  
+http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
+
+Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
+
+
+e.g. robust option in STATA    
+```{}
+regress y x, vce(robust)
+```
+
+A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.  
+
+e.g. cluster option in STATA  
+```{}
+regress y x, vce(cluster group)
+```
+
+See:  
+http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
 
 ## Acknowledgements  
 This chapter is heavily adapted from several StackExchange and other blog posts.
