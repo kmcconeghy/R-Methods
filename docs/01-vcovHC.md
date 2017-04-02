@@ -18,14 +18,175 @@ In this chapter we are evaluating R's capability to compute different kinds of s
  other attached packages:
   [1] knitr_1.15.17     boot_1.3-18       lmtest_0.9-35    
   [4] zoo_1.7-14        sandwich_2.3-4    Scotty_0.0.0.9000
-  [7] Hmisc_4.0-2       Formula_1.2-1     survival_2.40-1  
- [10] lattice_0.20-34   dplyr_0.5.0       purrr_0.2.2      
- [13] readr_1.1.0       tidyr_0.6.1       tibble_1.2       
- [16] ggplot2_2.2.1     tidyverse_1.1.1  
+  [7] devtools_1.12.0   Hmisc_4.0-2       Formula_1.2-1    
+ [10] survival_2.40-1   lattice_0.20-34   dplyr_0.5.0      
+ [13] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
+ [16] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
  </pre>
 <!--/html_preserve-->  
 
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
+
+## Test data  
+
+ To test and demonstrate code and assumptions are correct. I utilize the "PublicSchools" dataset in the "sandwich" package. This dataset is well-described in peer-reviewed research, and standard text books (Table 14.1 in Green [1993]).[@CIS-6161, @Zeileis2004, @Zeileis2006, @Cribari2004] The data comes originally from a 1979 report on per capita public school expenditures and per capita income by state from the U.S. Dept. of Commerce. 
+
+
+```r
+## Load public schools data, omit NA in Wisconsin, scale income and make squared Income term:
+data(PublicSchools)
+df <- as_tibble(PublicSchools %>% na.omit() %>% mutate(Income = Income*1e-04)) %>% mutate(Income2 = Income^2)
+head(df)
+```
+
+```
+## # A tibble: 6 × 3
+##   Expenditure Income   Income2
+##         <int>  <dbl>     <dbl>
+## 1         275 0.6247 0.3902501
+## 2         821 1.0851 1.1774420
+## 3         339 0.7374 0.5437588
+## 4         275 0.6183 0.3822949
+## 5         387 0.8850 0.7832250
+## 6         452 0.8001 0.6401600
+```
+
+
+```r
+se_results <- as_tibble(matrix(nrow=4,ncol=6))
+names(se_results) <- c("method","vcov Matrix", "Income_Beta","Income_SE","Income2_Beta","Income2_SE")
+
+method <- c("manual","lm","manual","HC0")
+
+#,"HC1","HC2","HC3","HC4")
+
+type <- c("iid","iid","White","White (dfc)")
+
+for (i in 1:nrow(se_results)) {
+  se_results[i,1] <- method[i]
+  se_results[i,2] <- type[i]
+}
+```
+
+## Linear Regression Model 
+
+First, I start with the classical ordinary least squares framework.
+$$y_i = X_i\beta + u_{i} \quad \textrm{where} \quad i = 1,..,n$$
+
+Where $y$ is a dependent variable, $X$ is a vector of regressors (i.e. independent variables) with $k$-dimensions,$\beta$ is a vector of the coefficients for $X$, and $u$ is the residual error term. In matrix notation often simply as: $y= X\beta+u$.  
+
+Under normal assumptions, the mean of $u_i$ (that is the residual of a given observation $i$) should be zero and possess a constant variance across all subsets of $i$. The second assumption is my focus here, which is often incorrect in empirical research. 
+
+## Estimation of regression parameters and variance 
+
+Typically in empirical research you are interested in estimating some or all parameter coefficients, and a measure of variance or precision on that parameter. With this most empiricists will make statement along the lines of "A 1-unit change in $x$ produces a $\beta$-unit change in $y$, and a null hypothesis of $\beta$=0 is rejected with 95% confidence".
+
+In our example, assume we want to model per capita expenditures regressed on income. 
+
+First, I demonstrate how to estimate your parameter coefficient, $\beta_1$ the coefficient on income and the square root of the variance, $\sigma$.  
+
+### Manually computed beta parameters  
+R basically computes the regression coefficients with the standard $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+
+You can do this manually like so:  
+
+```r
+Y = as.matrix(df$Expenditure)
+X = as.matrix(cbind(1,df$Income, df$Income2)) #Add one for intercept
+beta = solve(t(X) %*% X) %*% (t(X) %*% Y) 
+rownames(beta) <- c("Int","Income","Income2") 
+colnames(beta) <- c("Beta")
+se_results[1,3] <- beta[2,1]
+se_results[1,5] <- beta[3,1]
+se_results  
+```
+
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <lgl>        <dbl>      <lgl>
+## 1 manual           iid   -1834.203        NA     1587.042         NA
+## 2     lm           iid          NA        NA           NA         NA
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
+```
+
+### Manually computed standard errors  
+
+In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. As defined above, consider $u$ is normally distributied with mean=0, and standard deviation, $\sigma^2I$. Where $\sigma^2$ is the variance. 
+
+First, define the expectation of the variance of $\beta$ conditional on X.  
+$$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}'\textbf{X})^{-1}(\textbf{X}' \mathbf{\sigma^2_{u}}\mathbf{I}\textbf{X}) (\textbf{X}'\textbf{X})^{-1}$$
+
+If you assume that $u$ is indepedent (i.e. orthogonal) to $\beta$, and identically distributed across subpopulations of $\beta$. The variance of a random vector X and non-random matrix = matrix * Var(X) * matrix', can be expressed as:
+$$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \mathbf{\sigma^2_{u}}(\textbf{X}'\textbf{X})^{-1}$$
+
+
+$$E[{uu}'|\textbf{X}] = \mathbf{\Sigma_{u}}$$
+
+
+
+
+Assuming $\sigma_u^2$ is fixed but unknown, a given random sample's variance, $s^2$, can be estimated:
+
+Equation 5. Standard Error
+
+$$s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$$
+
+Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
+
+With this information the standard errors above can be replicated manually like so:
+
+```r
+Y = as.matrix(df$Expenditure) #Dependent variable
+X = as.matrix(cbind(1,df$Income, df$Income2)) #Design matrix, add one for intercept
+beta = solve(t(X) %*% X) %*% (t(X) %*% Y) #Solve for beta as above
+n <- dim(X)[1] # number of obs
+k <- dim(X)[2] # n of predictors
+
+# calculate stan errs as eq in the above
+SigmaSq <- sum((Y - X%*%beta)^2)/(n-k)  # (sum residuals)^2 / (degree of freedom correction) i.e. estimate of sigma-squared
+vcovMat <- SigmaSq*chol2inv(chol(t(X)%*%X)) # variance covariance matrix
+StdErr <- sqrt(diag(vcovMat)) #sq root of diagonal
+se_results[1,4] <- StdErr[2]
+se_results[1,6] <- StdErr[3]
+se_results
+```
+
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid          NA        NA           NA         NA
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
+```
+
+### R lm function
+
+To confirm the above we can compute the same with the the lm function
+
+```r
+  m1 <- lm(Expenditure ~ Income + Income2, data = df)
+  se_results[2,3] <- coeftest(m1)[2,1]
+  se_results[2,4] <- coeftest(m1)[2,2]
+  se_results[2,5] <- coeftest(m1)[3,1]
+  se_results[2,6] <- coeftest(m1)[3,2]
+  se_results
+```
+
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
+```
+
+The estimates are identical. However the critical assumption here of $u$ being "iid", can often be wrong in empirical research. In the following, I broadly define these concepts.
 
 ## Heteroskedascity  
 *Heteroskedascity* in this context refers to a random variable where a given subset of a sample will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
@@ -36,10 +197,10 @@ In this chapter we are evaluating R's capability to compute different kinds of s
   x <- runif(500)
   yHomo <- 2*x + rnorm(500)
   yHetero <- 2*x + x*rnorm(500)
-  df <- as.data.frame(cbind(x, yHomo, yHetero))
+  df2 <- as.data.frame(cbind(x, yHomo, yHetero))
 
 #Scatter and Fitted Line 
-ggplot(data=df, aes(x=x, y=yHomo)) + 
+ggplot(data=df2, aes(x=x, y=yHomo)) + 
   geom_point() +
   geom_smooth(method='lm', se=F) + 
   xlab("X variable") +
@@ -53,7 +214,7 @@ ggplot(data=df, aes(x=x, y=yHomo)) +
 
 ```r
 #Scatter and Fitted Line 
-ggplot(data=df, aes(x=x, y=yHetero)) + 
+ggplot(data=df2, aes(x=x, y=yHetero)) + 
   geom_point() +
   geom_smooth(method='lm', se=F) + 
   xlab("X variable") +
@@ -61,137 +222,37 @@ ggplot(data=df, aes(x=x, y=yHetero)) +
 ```
 
 <img src="01-vcovHC_files/figure-html/testdataHetero-1.png" width="672" />
-  
+
 **Figure 2.** Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.  
-
-## Test data  
-
-The cluster data was obtained from:  
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt  
-
-
-```r
-url <- "http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt"
-df <- as_tibble(read.table(url))
-names(df) <- c("group", "year", "x", "y")
-head(df)
-```
-
-```
-## # A tibble: 6 × 4
-##   group  year          x          y
-##   <int> <int>      <dbl>      <dbl>
-## 1     1     1 -1.1139730  2.2515350
-## 2     1     2 -0.0808538  1.2423460
-## 3     1     3 -0.2376072 -1.4263760
-## 4     1     4 -0.1524857 -1.1093940
-## 5     1     5 -0.0014262  0.9146864
-## 6     1     6 -1.2127370 -1.4246860
-```
-  This data represents financial information by year on a group of firms. I use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.@peterson2009
-  
-The expected results I will recreate are given here:
-http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
-
-
-```r
-se_results <- as_tibble(matrix(nrow=8,ncol=6))
-names(se_results) <- c("method","v-cov", "int","x","peterson_int","peterson_x")
-method <- c("lm","manual","manual","HC0","HC1","HC2","HC3","HC4")
-type <- c("cons","cons","whitedfc","white","whitedfc","","","")
-peterson_int=c(0.0284,NA,0.0284,NA,NA,NA,NA,0.0670)
-peterson_x=  c(0.0286,NA,0.0284,NA,NA,NA,NA,0.0506)
-
-for (i in 1:nrow(se_results)) {
-  se_results[i,1] <- method[i]
-  se_results[i,2] <- type[i]
-  se_results[i,5] <- peterson_int[i]
-  se_results[i,6] <- peterson_x[i]
-}
-```
-
-## Regression parameter standard errors under iid  
-
-
-```r
-m1 <- lm(y ~ x, data = df)
-se_results[1,3] <- coeftest(m1)[1,2]
-se_results[1,4] <- coeftest(m1)[2,2]
-se_results
-```
-
-```
-## # A tibble: 8 × 6
-##   method  `v-cov`        int          x peterson_int peterson_x
-##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
-## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
-## 2 manual     cons         NA         NA           NA         NA
-## 3 manual whitedfc         NA         NA       0.0284     0.0284
-## 4    HC0    white         NA         NA           NA         NA
-## 5    HC1 whitedfc         NA         NA           NA         NA
-## 6    HC2                  NA         NA           NA         NA
-## 7    HC3                  NA         NA           NA         NA
-## 8    HC4                  NA         NA       0.0670     0.0506
-```
-
-You can compare these results with the first table "OLS Coefficients and Standard Errors" in the Peterson link above. R computes the regression coefficients with the standard $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
-
-In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. 
-
-Equation 1. Covariance matrix of the error term $u$  
-$E[{uu}'|\textbf{X}] = \mathbf{\Sigma_{u}}$
-
-Equation 2.  
-$\mathbf{\Sigma_{u}} = \sigma^2 I_{N}$
-
-Equation 3. Expectation of the variance of $\beta$ conditional on X.  
-$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}'\textbf{X})^{-1}(\textbf{X}' \mathbf{\Sigma_{u}} \textbf{X}) (\textbf{X}'\textbf{X})^{-1}$
 
 Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).  
 
-Equation 4. iid assumed
-$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}'\textbf{X})^{-1}$
+### Heteroskedascity in income data
 
-Assuming $\sigma_u^2$ is fixed but unknown, a given random sample's variance, $s^2$, can be estimated:
-
-Equation 5. Standard Error
-
-$s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$
-
-Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
-
-With this information the standard errors above can be replicated manually like so:
 
 ```r
-X <- model.matrix(m1) # get X matrix/predictors
-n <- dim(X)[1] # number of obs
-k <- dim(X)[2] # n of predictors
-
-# calculate stan errs as eq in the above
-# sq root of diag elements in vcov
-se <- sqrt(diag(solve(crossprod(X)) * as.numeric(crossprod(resid(m1))/(n-k))))
-se_results[2,3] <- se[1]
-se_results[2,4] <- se[2]
-se_results
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=Income, y=Expenditure)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula=y ~ x + poly(x,2), se=F) + 
+  geom_smooth(method='lm', linetype=2, se=F) +
+  xlab("Income") +
+  theme_bw()
 ```
 
 ```
-## # A tibble: 8 × 6
-##   method  `v-cov`        int          x peterson_int peterson_x
-##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
-## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
-## 2 manual     cons 0.02835932 0.02858329           NA         NA
-## 3 manual whitedfc         NA         NA       0.0284     0.0284
-## 4    HC0    white         NA         NA           NA         NA
-## 5    HC1 whitedfc         NA         NA           NA         NA
-## 6    HC2                  NA         NA           NA         NA
-## 7    HC3                  NA         NA           NA         NA
-## 8    HC4                  NA         NA       0.0670     0.0506
+## Warning in predict.lm(model, newdata = data.frame(x = xseq), se.fit = se, :
+## prediction from a rank-deficient fit may be misleading
 ```
+
+<img src="01-vcovHC_files/figure-html/realdataHetero-1.png" width="672" />
+
+
+In our "real-world" small sample of data a visual representation of data can be challenging to draw conclusions from. We see there is an outlier ("Alaska"). However, it is difficult to judge overall dispersion with either a squared term [solid line] or a linear term [dashed line]. 
 
 ## "White" heteroskedastic consistent errors 
 
-  In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).(@white1980) The assumption of the residuals $u$ being *identically* distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.(@white1980)  
+  In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).[@white1980] The assumption of the residuals $u$ being *identically* distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.[@white1980]  
 
   With the "robust" approach proposed by White et al., you assume  the variance of the residual is estimated as a diagonal matrix of each squared residual (vs. average above with $s^2$). Each j-th row-column element is $\hat{u}_{j}^{2}$ in the diagonal terms of ${\Sigma_{u}}$. 
 
@@ -200,27 +261,23 @@ The full equation is:
 ### Manual estimator  
 
 ```r
-u <- matrix(resid(m1)) # residual vector
+u <- matrix(resid(m1)) # residuals from model object
 meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
 dfc <- n/(n-k) # degrees of freedom adjust  
 se <- sqrt(dfc*diag(solve(crossprod(X)) %*% meat1 %*% solve(crossprod(X))))
-se_results[3,3] <- se[1]
 se_results[3,4] <- se[2]
+se_results[3,6] <- se[3]
 se_results
 ```
 
 ```
-## # A tibble: 8 × 6
-##   method  `v-cov`        int          x peterson_int peterson_x
-##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
-## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
-## 2 manual     cons 0.02835932 0.02858329           NA         NA
-## 3 manual whitedfc 0.02836067 0.02839516       0.0284     0.0284
-## 4    HC0    white         NA         NA           NA         NA
-## 5    HC1 whitedfc         NA         NA           NA         NA
-## 6    HC2                  NA         NA           NA         NA
-## 7    HC3                  NA         NA           NA         NA
-## 8    HC4                  NA         NA       0.0670     0.0506
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
+## 3 manual         White          NA 1282.1010           NA   856.0721
+## 4    HC0   White (dfc)          NA        NA           NA         NA
 ```
 
   You will find these "White" or robust standard errors are consistent with the second Peterson table.[@peterson2009]  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.  
@@ -255,9 +312,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028359  1.0466   0.2954    
-## x           1.034833   0.028583 36.2041   <2e-16 ***
+##             Estimate Std. Error t value Pr(>|t|)   
+## (Intercept)   832.91     327.29  2.5449 0.014275 * 
+## Income      -1834.20     828.99 -2.2126 0.031820 * 
+## Income2      1587.04     519.08  3.0574 0.003677 **
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -270,9 +328,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028355  1.0467   0.2953    
-## x           1.034833   0.028389 36.4513   <2e-16 ***
+##             Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)   832.91     460.89  1.8072  0.07714 .
+## Income      -1834.20    1243.04 -1.4756  0.14673  
+## Income2      1587.04     829.99  1.9121  0.06197 .
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -285,9 +344,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028361  1.0465   0.2954    
-## x           1.034833   0.028395 36.4440   <2e-16 ***
+##             Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)   832.91     475.37  1.7521  0.08627 .
+## Income      -1834.20    1282.10 -1.4306  0.15915  
+## Income2      1587.04     856.07  1.8539  0.07004 .
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -300,11 +360,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028361  1.0465   0.2954    
-## x           1.034833   0.028401 36.4368   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91     688.48  1.2098   0.2324
+## Income      -1834.20    1866.41 -0.9827   0.3308
+## Income2      1587.04    1250.15  1.2695   0.2105
 ```
 
 ```
@@ -315,11 +374,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028366  1.0463   0.2955    
-## x           1.034833   0.028412 36.4223   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91    1095.00  0.7607   0.4507
+## Income      -1834.20    2975.41 -0.6165   0.5406
+## Income2      1587.04    1995.24  0.7954   0.4304
 ```
 
 ```
@@ -330,11 +388,10 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i =
 ## 
 ## t test of coefficients:
 ## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028363  1.0464   0.2954    
-## x           1.034833   0.028418 36.4150   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91    3008.01  0.2769   0.7831
+## Income      -1834.20    8183.19 -0.2241   0.8236
+## Income2      1587.04    5488.93  0.2891   0.7737
 ```
 
 Lifehack: Rather than use the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
@@ -349,22 +406,23 @@ s
 ```
 ## 
 ## Call:
-## lm(formula = y ~ x, data = df)
+## lm(formula = Expenditure ~ Income + Income2, data = df)
 ## 
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.7611 -1.3680 -0.0166  1.3387  8.6779 
+##      Min       1Q   Median       3Q      Max 
+## -160.709  -36.896   -4.551   37.290  109.729 
 ## 
 ## Coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  0.02968    0.02836   1.047    0.295    
-## x            1.03483    0.02840  36.204   <2e-16 ***
+##             Estimate Std. Error t value Pr(>|t|)   
+## (Intercept)    832.9      475.4   2.545  0.01428 * 
+## Income       -1834.2     1282.1  -2.213  0.03182 * 
+## Income2       1587.0      856.1   3.057  0.00368 **
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 2.005 on 4998 degrees of freedom
-## Multiple R-squared:  0.2078,	Adjusted R-squared:  0.2076 
-## F-statistic:  1311 on 1 and 4998 DF,  p-value: < 2.2e-16
+## Residual standard error: 56.68 on 47 degrees of freedom
+## Multiple R-squared:  0.6553,	Adjusted R-squared:  0.6407 
+## F-statistic: 44.68 on 2 and 47 DF,  p-value: 1.345e-11
 ```
 
 ## Clustering  
@@ -464,6 +522,65 @@ Boot.ATE <- function (model, treat, R = 250, block = "", df)
   res = list(level = 0.95, model_ci = m1.confint, coeff = coeff, 
     ate = ate, rr = rr, boots = boot.iter)
   return(res)
+  ##############################################
+## Testing coefficients in time-series data ##
+##############################################
+
+## Load investment equation data:
+data(Investment)
+
+# Fit regression model:
+fm.inv <- lm(RealInv ~ RealGNP + RealInt, data = Investment)
+
+## Test coefficients using Newey-West HAC estimator with
+## user-defined and data-driven bandwidth and with Parzen kernel:
+coeftest(fm.inv, df = Inf, vcov = NeweyWest(fm.inv, lag = 4, prewhite = FALSE))
+coeftest(fm.inv, df = Inf, vcov = NeweyWest)
+
+parzenHAC <- function(x, ...) kernHAC(x, kernel = "Parzen", prewhite = 2,
+  adjust = FALSE, bw = bwNeweyWest, ...)
+coeftest(fm.inv, df = Inf, vcov = parzenHAC)
+
+## Time-series visualization:
+plot(Investment[, "RealInv"], type = "b", pch = 19, ylab = "Real investment")
+lines(ts(fitted(fm.inv), start = 1964), col = 4)
+
+## 3-dimensional visualization:
+library(scatterplot3d)
+s3d <- scatterplot3d(Investment[,c(5,7,6)],
+  type = "b", angle = 65, scale.y = 1, pch = 16)
+s3d$plane3d(fm.inv, lty.box = "solid", col = 4)
+
+
+
+###########################################################
+## Testing and dating structural changes in the presence ##
+## of heteroskedasticity and autocorrelation             ##
+###########################################################
+
+## Load real interest series:
+data(RealInt)
+
+## OLS-based CUSUM test with quadratic spectral kernel HAC estimate:
+ocus <- gefp(RealInt ~ 1, fit = lm, vcov = kernHAC)
+plot(ocus, aggregate = FALSE)
+sctest(ocus)
+
+## supF test with quadratic spectral kernel HAC estimate:
+fs <- Fstats(RealInt ~ 1, vcov = kernHAC)
+plot(fs)
+sctest(fs)
+
+## Breakpoint estimation and confidence intervals
+## with quadratic spectral kernel HAC estimate:
+bp <- breakpoints(RealInt ~ 1)
+confint(bp, vcov = kernHAC)
+plot(bp)
+
+## Visualization:
+plot(RealInt, ylab = "Real interest rate")
+lines(ts(fitted(bp), start = start(RealInt), freq = 4), col = 4)
+lines(confint(bp, vcov = kernHAC))
 }
 ```
 
