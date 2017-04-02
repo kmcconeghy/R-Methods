@@ -25,12 +25,10 @@ In this chapter we are evaluating R's capability to compute different kinds of s
  </pre>
 <!--/html_preserve-->  
 
-"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful.  
-
-"sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
 
 ## Heteroskedascity  
-*Heteroskedascity* in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
+*Heteroskedascity* in this context refers to a random variable where a given subset of a sample will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
 
 
 ```r
@@ -50,7 +48,7 @@ ggplot(data=df, aes(x=x, y=yHomo)) +
 
 <img src="01-vcovHC_files/figure-html/testdataHomo-1.png" width="672" />
   
-**Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* constant across the range of X variable.
+**Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* of the points constant across the range of X variable.
 
 
 ```r
@@ -64,7 +62,7 @@ ggplot(data=df, aes(x=x, y=yHetero)) +
 
 <img src="01-vcovHC_files/figure-html/testdataHetero-1.png" width="672" />
   
-**Figure 2.** Example of heteroskedascity. See how the dispersion appears greater as X increases.  
+**Figure 2.** Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.  
 
 ## Test data  
 
@@ -75,14 +73,6 @@ http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt
 ```r
 url <- "http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt"
 df <- as_tibble(read.table(url))
-print("Head of test dataframe")
-```
-
-```
-## [1] "Head of test dataframe"
-```
-
-```r
 names(df) <- c("group", "year", "x", "y")
 head(df)
 ```
@@ -98,31 +88,53 @@ head(df)
 ## 5     1     5 -0.0014262  0.9146864
 ## 6     1     6 -1.2127370 -1.4246860
 ```
-  This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.@peterson2009
+  This data represents financial information by year on a group of firms. I use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.@peterson2009
   
-The expected results we will recreate are given here:
+The expected results I will recreate are given here:
 http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm
+
+
+```r
+se_results <- as_tibble(matrix(nrow=8,ncol=6))
+names(se_results) <- c("method","v-cov", "int","x","peterson_int","peterson_x")
+method <- c("lm","manual","manual","HC0","HC1","HC2","HC3","HC4")
+type <- c("cons","cons","whitedfc","white","whitedfc","","","")
+peterson_int=c(0.0284,NA,0.0284,NA,NA,NA,NA,0.0670)
+peterson_x=  c(0.0286,NA,0.0284,NA,NA,NA,NA,0.0506)
+
+for (i in 1:nrow(se_results)) {
+  se_results[i,1] <- method[i]
+  se_results[i,2] <- type[i]
+  se_results[i,5] <- peterson_int[i]
+  se_results[i,6] <- peterson_x[i]
+}
+```
 
 ## Regression parameter standard errors under iid  
 
 
 ```r
 m1 <- lm(y ~ x, data = df)
-coeftest(m1)
+se_results[1,3] <- coeftest(m1)[1,2]
+se_results[1,4] <- coeftest(m1)[2,2]
+se_results
 ```
 
 ```
-## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept) 0.029680   0.028359  1.0466   0.2954    
-## x           1.034833   0.028583 36.2041   <2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons         NA         NA           NA         NA
+## 3 manual whitedfc         NA         NA       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506
 ```
 
-You can compare these results with first table "OLS Coefficients and Standard Errors" with the Peterson link above. R computes the regression coefficients with $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+You can compare these results with the first table "OLS Coefficients and Standard Errors" in the Peterson link above. R computes the regression coefficients with the standard $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
 
 In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. 
 
@@ -140,7 +152,7 @@ Under the assumption of independent and identically distributed errors (homosked
 Equation 4. iid assumed
 $\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}'\textbf{X})^{-1}$
 
-Assuming $\sigma_u^2$ is fixed but unknown, this equation to esimate $s^2$ can be used:
+Assuming $\sigma_u^2$ is fixed but unknown, a given random sample's variance, $s^2$, can be estimated:
 
 Equation 5. Standard Error
 
@@ -158,12 +170,23 @@ k <- dim(X)[2] # n of predictors
 # calculate stan errs as eq in the above
 # sq root of diag elements in vcov
 se <- sqrt(diag(solve(crossprod(X)) * as.numeric(crossprod(resid(m1))/(n-k))))
-se
+se_results[2,3] <- se[1]
+se_results[2,4] <- se[2]
+se_results
 ```
 
 ```
-## (Intercept)           x 
-##  0.02835932  0.02858329
+## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons 0.02835932 0.02858329           NA         NA
+## 3 manual whitedfc         NA         NA       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506
 ```
 
 ## "White" heteroskedastic consistent errors 
@@ -181,55 +204,138 @@ u <- matrix(resid(m1)) # residual vector
 meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
 dfc <- n/(n-k) # degrees of freedom adjust  
 se <- sqrt(dfc*diag(solve(crossprod(X)) %*% meat1 %*% solve(crossprod(X))))
-se
+se_results[3,3] <- se[1]
+se_results[3,4] <- se[2]
+se_results
 ```
 
 ```
-## (Intercept)           x 
-##  0.02836067  0.02839516
+## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    <chr>    <chr>      <dbl>      <dbl>        <dbl>      <dbl>
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons 0.02835932 0.02858329           NA         NA
+## 3 manual whitedfc 0.02836067 0.02839516       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506
 ```
 
-  You will find these "White" or robust standard errors are consistent with the second Peterson table.@peterson2009  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper, but it includes a degree of freedom adjustment.  
+  You will find these "White" or robust standard errors are consistent with the second Peterson table.[@peterson2009]  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.  
   
 ### R standard function   
 
-Using the already written commands you can specific "White" standard errors by specifying the vcovHC function in the sandwich package.(@Zeileis2006) You can report correct standard errors like below with vcovHC option in function coeftest.  
+Using the already written commands you can specify "White" standard errors with the vcovHC function in the sandwich package.[@Zeileis2006] You can report correct standard errors like below with vcovHC option in function coeftest.  
 
 vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' Omega X (X'X)^{-1}$.  
 
 The specification of $Omega$ is determined by the `type=` option.  
 
-HC2 : ωi =
-uˆ
-2
-i
-1 − hi
-HC3 : ωi =
-uˆ
-2
-i
-(1 − hi)
-2
-HC4 : ωi =
-uˆ
-2
-i
-(1 − hi)
-δi
+`type="cons"` $\omega_i = \sigma^2$ Constant variance  
+`type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix   
+`type=HC1`    $\omega_i = \frac{n}{n-k}\mu^2_i$ Small sample correction (STATA).  
+`type=HC2`    $\omega_i = \frac{\mu^2_i}{1-h_i}$  
+`type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$  
+`type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$  
 
-`type="cons"` $\omega_i = \sigma^2$ Constant variance
-`type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix  
-`type=HC1`    $\omega_i = \frac{n}{n-k}\mu^2_i$ Small sample correction (STATA). 
-`type=HC2`    $\omega_i = \frac{\mu^2_i}{1-h_i}$
-`type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$
-`type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$
+Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC4 based on recent literature.[@Cribari2004]  
 
-where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$.
 
-The documentation for the sandwich package recommends HC4 based on recent literature.(@Cribari2004)
+```
+## Different variance-covariance options with vcovHC
+```
 
-`type=HC0` is the "White" calculation.
+```
+## type = cons
+```
 
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028359  1.0466   0.2954    
+## x           1.034833   0.028583 36.2041   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC0
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028355  1.0467   0.2953    
+## x           1.034833   0.028389 36.4513   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC1
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028361  1.0465   0.2954    
+## x           1.034833   0.028395 36.4440   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC2,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028361  1.0465   0.2954    
+## x           1.034833   0.028401 36.4368   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC3,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028366  1.0463   0.2955    
+## x           1.034833   0.028412 36.4223   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC4,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 0.029680   0.028363  1.0464   0.2954    
+## x           1.034833   0.028418 36.4150   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
 
 Lifehack: Rather than use the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
 
@@ -262,13 +368,12 @@ s
 ```
 
 ## Clustering  
-@Bertrand04howmuch  
 
 ## Cluster robust errors in R  
 
 ## Block bootstrapping  
 
-  An alternative to computing a special variance-covariance matrix is using a non-parametric "brute-force" method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or "block" instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simple report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.
+  An alternative to computing a special variance-covariance matrix is using a non-parametric "brute-force" method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or "block" instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simply report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.
   
 ## Permutation or "Randomization" Test
 

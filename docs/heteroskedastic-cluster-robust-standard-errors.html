@@ -174,13 +174,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  [16] ggplot2_2.2.1     tidyverse_1.1.1  
  </pre>
 
-<p>“Scotty” is my own package. “tidyverse” is Wickam et al. general suite of packages/commands to work with R. “Hmisc” is Frank Harrel’s miscellaneous commands, many of which are quite useful.</p>
-<p>“sandwich”, “lmtest” and “boot” are specifically relevant to this chapter in order to compute various standard errors (SE).</p>
+<p>“Scotty” is my own package. “tidyverse” is Wickam et al. general suite of packages/commands to work with R. “Hmisc” is Frank Harrel’s miscellaneous commands, many of which are quite useful. “sandwich”, “lmtest” and “boot” are specifically relevant to this chapter in order to compute various standard errors (SE).</p>
 </div>
 </div>
 <div id="heteroskedascity" class="section level2">
 <h2><span class="header-section-number">1.2</span> Heteroskedascity</h2>
-<p><em>Heteroskedascity</em> in this context refers to a collection of random variables where a given sub-population will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast <em>homoskedascity</em> is when variance is constant across these subpopulations (Figure 1).</p>
+<p><em>Heteroskedascity</em> in this context refers to a random variable where a given subset of a sample will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast <em>homoskedascity</em> is when variance is constant across these subpopulations (Figure 1).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Generate Data  </span>
   x &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">500</span>)
   yHomo &lt;-<span class="st"> </span><span class="dv">2</span>*x +<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">500</span>)
@@ -194,7 +193,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;X variable&quot;</span>) +
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="01-vcovHC_files/figure-html/testdataHomo-1.png" width="672" /></p>
-<p><strong>Figure 1.</strong> Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion <em>appears</em> constant across the range of X variable.</p>
+<p><strong>Figure 1.</strong> Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion <em>appears</em> of the points constant across the range of X variable.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Scatter and Fitted Line </span>
 <span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>x, <span class="dt">y=</span>yHetero)) +<span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_point</span>() +
@@ -202,7 +201,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;X variable&quot;</span>) +
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="01-vcovHC_files/figure-html/testdataHetero-1.png" width="672" /></p>
-<p><strong>Figure 2.</strong> Example of heteroskedascity. See how the dispersion appears greater as X increases.</p>
+<p><strong>Figure 2.</strong> Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.</p>
 </div>
 <div id="test-data" class="section level2">
 <h2><span class="header-section-number">1.3</span> Test data</h2>
@@ -210,9 +209,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt</a></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">url &lt;-<span class="st"> &quot;http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.txt&quot;</span>
 df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">read.table</span>(url))
-<span class="kw">print</span>(<span class="st">&quot;Head of test dataframe&quot;</span>)</code></pre></div>
-<pre><code>## [1] &quot;Head of test dataframe&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(df) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;group&quot;</span>, <span class="st">&quot;year&quot;</span>, <span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)
+<span class="kw">names</span>(df) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;group&quot;</span>, <span class="st">&quot;year&quot;</span>, <span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)
 <span class="kw">head</span>(df)</code></pre></div>
 <pre><code>## # A tibble: 6 × 4
 ##   group  year          x          y
@@ -223,22 +220,40 @@ df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="
 ## 4     1     4 -0.1524857 -1.1093940
 ## 5     1     5 -0.0014262  0.9146864
 ## 6     1     6 -1.2127370 -1.4246860</code></pre>
-<p>This data represents financial information by year on a group of firms. We use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.<span class="citation">Petersen (<a href="#ref-peterson2009">2009</a>)</span></p>
-<p>The expected results we will recreate are given here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm</a></p>
+<p>This data represents financial information by year on a group of firms. I use this as a benchmark because several other online posts/bloggers compare this data using different specifications and software.<span class="citation">Petersen (<a href="#ref-peterson2009">2009</a>)</span></p>
+<p>The expected results I will recreate are given here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/test_data.htm</a></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">se_results &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">matrix</span>(<span class="dt">nrow=</span><span class="dv">8</span>,<span class="dt">ncol=</span><span class="dv">6</span>))
+<span class="kw">names</span>(se_results) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;method&quot;</span>,<span class="st">&quot;v-cov&quot;</span>, <span class="st">&quot;int&quot;</span>,<span class="st">&quot;x&quot;</span>,<span class="st">&quot;peterson_int&quot;</span>,<span class="st">&quot;peterson_x&quot;</span>)
+method &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;lm&quot;</span>,<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;HC0&quot;</span>,<span class="st">&quot;HC1&quot;</span>,<span class="st">&quot;HC2&quot;</span>,<span class="st">&quot;HC3&quot;</span>,<span class="st">&quot;HC4&quot;</span>)
+type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;cons&quot;</span>,<span class="st">&quot;cons&quot;</span>,<span class="st">&quot;whitedfc&quot;</span>,<span class="st">&quot;white&quot;</span>,<span class="st">&quot;whitedfc&quot;</span>,<span class="st">&quot;&quot;</span>,<span class="st">&quot;&quot;</span>,<span class="st">&quot;&quot;</span>)
+peterson_int=<span class="kw">c</span>(<span class="fl">0.0284</span>,<span class="ot">NA</span>,<span class="fl">0.0284</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="fl">0.0670</span>)
+peterson_x=<span class="st">  </span><span class="kw">c</span>(<span class="fl">0.0286</span>,<span class="ot">NA</span>,<span class="fl">0.0284</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="ot">NA</span>,<span class="fl">0.0506</span>)
+
+for (i in <span class="dv">1</span>:<span class="kw">nrow</span>(se_results)) {
+  se_results[i,<span class="dv">1</span>] &lt;-<span class="st"> </span>method[i]
+  se_results[i,<span class="dv">2</span>] &lt;-<span class="st"> </span>type[i]
+  se_results[i,<span class="dv">5</span>] &lt;-<span class="st"> </span>peterson_int[i]
+  se_results[i,<span class="dv">6</span>] &lt;-<span class="st"> </span>peterson_x[i]
+}</code></pre></div>
 </div>
 <div id="regression-parameter-standard-errors-under-iid" class="section level2">
 <h2><span class="header-section-number">1.4</span> Regression parameter standard errors under iid</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(y ~<span class="st"> </span>x, <span class="dt">data =</span> df)
-<span class="kw">coeftest</span>(m1)</code></pre></div>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) 0.029680   0.028359  1.0466   0.2954    
-## x           1.034833   0.028583 36.2041   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>You can compare these results with first table “OLS Coefficients and Standard Errors” with the Peterson link above. R computes the regression coefficients with <span class="math inline">\((\textbf{X}&#39;\textbf{X})^{-1}\textbf{X}&#39;\textbf{y}\)</span> i.e. the coefficient is a function of X and y.</p>
+se_results[<span class="dv">1</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">1</span>,<span class="dv">2</span>]
+se_results[<span class="dv">1</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">2</span>,<span class="dv">2</span>]
+se_results</code></pre></div>
+<pre><code>## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons         NA         NA           NA         NA
+## 3 manual whitedfc         NA         NA       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506</code></pre>
+<p>You can compare these results with the first table “OLS Coefficients and Standard Errors” in the Peterson link above. R computes the regression coefficients with the standard <span class="math inline">\((\textbf{X}&#39;\textbf{X})^{-1}\textbf{X}&#39;\textbf{y}\)</span> i.e. the coefficient is a function of X and y.</p>
 <p>In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix.</p>
 <p>Equation 1. Covariance matrix of the error term <span class="math inline">\(u\)</span><br />
 <span class="math inline">\(E[{uu}&#39;|\textbf{X}] = \mathbf{\Sigma_{u}}\)</span></p>
@@ -248,7 +263,7 @@ df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="
 <span class="math inline">\(\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}&#39;\textbf{X})^{-1}(\textbf{X}&#39; \mathbf{\Sigma_{u}} \textbf{X}) (\textbf{X}&#39;\textbf{X})^{-1}\)</span></p>
 <p>Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).</p>
 <p>Equation 4. iid assumed <span class="math inline">\(\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \sigma_{u}^{2}(\textbf{X}&#39;\textbf{X})^{-1}\)</span></p>
-<p>Assuming <span class="math inline">\(\sigma_u^2\)</span> is fixed but unknown, this equation to esimate <span class="math inline">\(s^2\)</span> can be used:</p>
+<p>Assuming <span class="math inline">\(\sigma_u^2\)</span> is fixed but unknown, a given random sample’s variance, <span class="math inline">\(s^2\)</span>, can be estimated:</p>
 <p>Equation 5. Standard Error</p>
 <p><span class="math inline">\(s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}\)</span></p>
 <p>Where <span class="math inline">\(e\)</span> are the squared residuals, <span class="math inline">\(n\)</span> is the sample size, and <span class="math inline">\(k\)</span> are the number of regressors.</p>
@@ -260,13 +275,24 @@ k &lt;-<span class="st"> </span><span class="kw">dim</span>(X)[<span class="dv">
 <span class="co"># calculate stan errs as eq in the above</span>
 <span class="co"># sq root of diag elements in vcov</span>
 se &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">diag</span>(<span class="kw">solve</span>(<span class="kw">crossprod</span>(X)) *<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">crossprod</span>(<span class="kw">resid</span>(m1))/(n-k))))
-se</code></pre></div>
-<pre><code>## (Intercept)           x 
-##  0.02835932  0.02858329</code></pre>
+se_results[<span class="dv">2</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span>se[<span class="dv">1</span>]
+se_results[<span class="dv">2</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span>se[<span class="dv">2</span>]
+se_results</code></pre></div>
+<pre><code>## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons 0.02835932 0.02858329           NA         NA
+## 3 manual whitedfc         NA         NA       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506</code></pre>
 </div>
 <div id="white-heteroskedastic-consistent-errors" class="section level2">
 <h2><span class="header-section-number">1.5</span> “White” heteroskedastic consistent errors</h2>
-<p>In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).(<span class="citation">H (<a href="#ref-white1980">1980</a>)</span>) The assumption of the residuals <span class="math inline">\(u\)</span> being <em>identically</em> distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.(<span class="citation">H (<a href="#ref-white1980">1980</a>)</span>)</p>
+<p>In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).(<span class="citation">White (<a href="#ref-white1980">1980</a>)</span>) The assumption of the residuals <span class="math inline">\(u\)</span> being <em>identically</em> distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.(<span class="citation">White (<a href="#ref-white1980">1980</a>)</span>)</p>
 <p>With the “robust” approach proposed by White et al., you assume the variance of the residual is estimated as a diagonal matrix of each squared residual (vs. average above with <span class="math inline">\(s^2\)</span>). Each j-th row-column element is <span class="math inline">\(\hat{u}_{j}^{2}\)</span> in the diagonal terms of <span class="math inline">\({\Sigma_{u}}\)</span>.</p>
 <p>The full equation is:</p>
 <div id="manual-estimator" class="section level3">
@@ -275,22 +301,89 @@ se</code></pre></div>
 meat1 &lt;-<span class="st"> </span><span class="kw">t</span>(X) %*%<span class="st"> </span><span class="kw">diag</span>(<span class="kw">diag</span>(<span class="kw">crossprod</span>(<span class="kw">t</span>(u)))) %*%<span class="st"> </span>X <span class="co"># Sigma is a diagonal with u^2 as elements</span>
 dfc &lt;-<span class="st"> </span>n/(n-k) <span class="co"># degrees of freedom adjust  </span>
 se &lt;-<span class="st"> </span><span class="kw">sqrt</span>(dfc*<span class="kw">diag</span>(<span class="kw">solve</span>(<span class="kw">crossprod</span>(X)) %*%<span class="st"> </span>meat1 %*%<span class="st"> </span><span class="kw">solve</span>(<span class="kw">crossprod</span>(X))))
-se</code></pre></div>
-<pre><code>## (Intercept)           x 
-##  0.02836067  0.02839516</code></pre>
-<p>You will find these “White” or robust standard errors are consistent with the second Peterson table.<span class="citation">Petersen (<a href="#ref-peterson2009">2009</a>)</span> They are also consistent with STATA’s <em>robust</em> option. It is not technically the same as the White paper, but it includes a degree of freedom adjustment.</p>
+se_results[<span class="dv">3</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span>se[<span class="dv">1</span>]
+se_results[<span class="dv">3</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span>se[<span class="dv">2</span>]
+se_results</code></pre></div>
+<pre><code>## # A tibble: 8 × 6
+##   method  `v-cov`        int          x peterson_int peterson_x
+##    &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+## 1     lm     cons 0.02835932 0.02858329       0.0284     0.0286
+## 2 manual     cons 0.02835932 0.02858329           NA         NA
+## 3 manual whitedfc 0.02836067 0.02839516       0.0284     0.0284
+## 4    HC0    white         NA         NA           NA         NA
+## 5    HC1 whitedfc         NA         NA           NA         NA
+## 6    HC2                  NA         NA           NA         NA
+## 7    HC3                  NA         NA           NA         NA
+## 8    HC4                  NA         NA       0.0670     0.0506</code></pre>
+<p>You will find these “White” or robust standard errors are consistent with the second Peterson table.<span class="citation">(Petersen <a href="#ref-peterson2009">2009</a>)</span> They are also consistent with STATA’s <em>robust</em> option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.</p>
 </div>
 <div id="r-standard-function" class="section level3">
 <h3><span class="header-section-number">1.5.2</span> R standard function</h3>
-<p>Using the already written commands you can specific “White” standard errors by specifying the vcovHC function in the sandwich package.(<span class="citation">Zeileis (<a href="#ref-Zeileis2006">2006</a>)</span>) You can report correct standard errors like below with vcovHC option in function coeftest.</p>
+<p>Using the already written commands you can specify “White” standard errors with the vcovHC function in the sandwich package.<span class="citation">(Zeileis <a href="#ref-Zeileis2006">2006</a>)</span> You can report correct standard errors like below with vcovHC option in function coeftest.</p>
 <p>vcovHC has several types available. The general formula for the var-cov matrix is: <span class="math inline">\((X&#39;X)^{-1} X&#39; Omega X (X&#39;X)^{-1}\)</span>.</p>
 <p>The specification of <span class="math inline">\(Omega\)</span> is determined by the <code>type=</code> option.</p>
-<p>HC2 : ωi = uˆ 2 i 1 − hi HC3 : ωi = uˆ 2 i (1 − hi) 2 HC4 : ωi = uˆ 2 i (1 − hi) δi</p>
-<p><code>type=&quot;cons&quot;</code> <span class="math inline">\(\omega_i = \sigma^2\)</span> Constant variance <code>type=HC0</code> <span class="math inline">\(\omega_i = \mu^2_i\)</span> the White variance-covariance matrix<br />
-<code>type=HC1</code> <span class="math inline">\(\omega_i = \frac{n}{n-k}\mu^2_i\)</span> Small sample correction (STATA). <code>type=HC2</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{1-h_i}\)</span> <code>type=HC3</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}\)</span> <code>type=HC4</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}\)</span></p>
-<p>where <span class="math inline">\(h_i = H_{ii}\)</span> are the diagonal elements of the hat matrix and <span class="math inline">\(\delta_i = min({4 }, {h_i}{h¯})\)</span>.</p>
-<p>The documentation for the sandwich package recommends HC4 based on recent literature.(<span class="citation">(“Cribari-Neto F” <a href="#ref-Cribari2004">2004</a>)</span>)</p>
-<p><code>type=HC0</code> is the “White” calculation.</p>
+<p><code>type=&quot;cons&quot;</code> <span class="math inline">\(\omega_i = \sigma^2\)</span> Constant variance<br />
+<code>type=HC0</code> <span class="math inline">\(\omega_i = \mu^2_i\)</span> the White variance-covariance matrix<br />
+<code>type=HC1</code> <span class="math inline">\(\omega_i = \frac{n}{n-k}\mu^2_i\)</span> Small sample correction (STATA).<br />
+<code>type=HC2</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{1-h_i}\)</span><br />
+<code>type=HC3</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}\)</span><br />
+<code>type=HC4</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}\)</span></p>
+<p>Where <span class="math inline">\(h_i = H_{ii}\)</span> are the diagonal elements of the hat matrix and <span class="math inline">\(\delta_i = min({4 }, {h_i}{h¯})\)</span>. The documentation for the sandwich package recommends HC4 based on recent literature.<span class="citation">(“Cribari-Neto F” <a href="#ref-Cribari2004">2004</a>)</span></p>
+<pre><code>## Different variance-covariance options with vcovHC</code></pre>
+<pre><code>## type = cons</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028359  1.0466   0.2954    
+## x           1.034833   0.028583 36.2041   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## type = HC0</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028355  1.0467   0.2953    
+## x           1.034833   0.028389 36.4513   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## type = HC1</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028361  1.0465   0.2954    
+## x           1.034833   0.028395 36.4440   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## type = HC2,</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028361  1.0465   0.2954    
+## x           1.034833   0.028401 36.4368   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## type = HC3,</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028366  1.0463   0.2955    
+## x           1.034833   0.028412 36.4223   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## type = HC4,</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.029680   0.028363  1.0464   0.2954    
+## x           1.034833   0.028418 36.4150   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Lifehack: Rather than use the <code>coeftest</code> function you can also directly modify the standard errors in the regression summary object.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">s &lt;-<span class="st"> </span><span class="kw">summary</span>(m1)
 s$coefficients[, <span class="dv">2</span>] &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">diag</span>(<span class="kw">vcovHC</span>(m1, <span class="dt">type=</span><span class="st">&quot;HC1&quot;</span>)))
@@ -317,14 +410,13 @@ s</code></pre></div>
 </div>
 <div id="clustering" class="section level2">
 <h2><span class="header-section-number">1.6</span> Clustering</h2>
-<p>1</p>
 </div>
 <div id="cluster-robust-errors-in-r" class="section level2">
 <h2><span class="header-section-number">1.7</span> Cluster robust errors in R</h2>
 </div>
 <div id="block-bootstrapping" class="section level2">
 <h2><span class="header-section-number">1.8</span> Block bootstrapping</h2>
-<p>An alternative to computing a special variance-covariance matrix is using a non-parametric “brute-force” method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or “block” instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simple report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.</p>
+<p>An alternative to computing a special variance-covariance matrix is using a non-parametric “brute-force” method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or “block” instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simply report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.</p>
 </div>
 <div id="permutation-or-randomization-test" class="section level2">
 <h2><span class="header-section-number">1.9</span> Permutation or “Randomization” Test</h2>
@@ -451,7 +543,7 @@ STATA blog:<br />
 <p>Petersen, MA. 2009. “Estimating Standard Errors in Finance Panel Data Sets: Comparing Approaches.” <em>Review of Financial Studies</em> 22: 435–80.</p>
 </div>
 <div id="ref-white1980">
-<p>H, White. 1980. “A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity.” <em>Econometrika</em> 48 (4): 817–88.</p>
+<p>White, Halbert. 1980. “A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity.” <em>Econometrika</em> 48 (4): 817–88.</p>
 </div>
 <div id="ref-Zeileis2006">
 <p>Zeileis, Achim. 2006. “Object-Oriented Computation of Sandwich Estimators.” <em>Journal of Statistical Software</em> 16 (9): 1–16. <a href="http://www.jstatsoft.org/v16/i09/." class="uri">http://www.jstatsoft.org/v16/i09/.</a></p>
