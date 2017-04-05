@@ -4,12 +4,12 @@ Contained herein include a variety of topics including:
 
 **Data manipulation in R**  
 
-  1. Shaping longitudinal datasets from individual patient data  
+1. Shaping longitudinal datasets from individual patient data  
   
 **Translating STATA to R**  
 
-  2. Heteroskedasctic consistent standard errors   
-  3. Cluster robust standard errors  
-  4. Model-based standardization  
+2. Heteroskedasctic consistent standard errors   
+3. Cluster robust standard errors  
+4. Model-based standardization  
   
 Enjoy!
