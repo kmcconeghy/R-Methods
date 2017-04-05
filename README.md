@@ -8,7 +8,7 @@ Contained herein include a variety of topics including:
   
 **Statistical Analysis in R**  
 
-2. Heteroskedasctic consistent standard errors   
+2. Heteroskedastic consistent standard errors   
 3. Cluster robust standard errors  
 4. Model-based standardization  
   
