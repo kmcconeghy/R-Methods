@@ -6,7 +6,7 @@ Contained herein include a variety of topics including:
 
 1. Shaping longitudinal datasets from individual patient data  
   
-**Translating STATA to R**  
+**Statistical Analysis in R**  
 
 2. Heteroskedasctic consistent standard errors   
 3. Cluster robust standard errors  
