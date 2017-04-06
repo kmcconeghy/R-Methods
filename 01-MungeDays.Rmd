@@ -66,7 +66,7 @@ If you simply seek to count the total no. of records by groups this is simple.
 ```
 If you wish to count records this is about as simple, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
 
-### Cohort entries by year count
+### Cohort entries by year counts
 ```{r ByYear}
 #First make year var
 df <- df %>%
