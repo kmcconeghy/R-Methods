@@ -434,5 +434,4 @@ https://sites.google.com/site/waynelinchang/r-code
 https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
 
 ## Bibliography  
-@R-base  
-@angrist2008mostly  
+ 

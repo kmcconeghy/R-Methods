@@ -103,15 +103,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="./">R-methods</a></li>
 
 <li class="divider"></li>
-<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#introduction"><i class="fa fa-check"></i><b>1.1</b> Introduction</a></li>
+</ul></li>
 <li class="chapter" data-level="2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html"><i class="fa fa-check"></i><b>2</b> Creating Longitudinal DataSets From Individual Records</a><ul>
 <li class="chapter" data-level="2.0.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#packages-to-use"><i class="fa fa-check"></i><b>2.0.1</b> Packages to use</a></li>
-<li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
+<li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction-1"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
 <li class="chapter" data-level="2.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#construct-dataset"><i class="fa fa-check"></i><b>2.2</b> Construct dataset</a></li>
 <li class="chapter" data-level="2.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#show-data"><i class="fa fa-check"></i><b>2.3</b> Show Data</a></li>
+<li class="chapter" data-level="2.4" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#reshape-process"><i class="fa fa-check"></i><b>2.4</b> Reshape Process</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#calculate-time-distance"><i class="fa fa-check"></i><b>2.4.1</b> Calculate time distance</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>3</b> Heteroskedastic &amp; Cluster Robust Standard Errors</a><ul>
-<li class="chapter" data-level="3.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#introduction-1"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
+<li class="chapter" data-level="3.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#introduction-2"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
 <li class="chapter" data-level="3.1.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#packages-to-use-1"><i class="fa fa-check"></i><b>3.1.1</b> Packages to use</a></li>
 </ul></li>
 <li class="chapter" data-level="3.2" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#test-data"><i class="fa fa-check"></i><b>3.2</b> Test data</a></li>
@@ -132,7 +137,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="3.8" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#bibliography"><i class="fa fa-check"></i><b>3.8</b> Bibliography</a></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>4</b> Cluster Robust Standard Errors</a><ul>
-<li class="chapter" data-level="4.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#introduction-2"><i class="fa fa-check"></i><b>4.1</b> Introduction</a><ul>
+<li class="chapter" data-level="4.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#introduction-3"><i class="fa fa-check"></i><b>4.1</b> Introduction</a><ul>
 <li class="chapter" data-level="4.1.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#packages-to-use-2"><i class="fa fa-check"></i><b>4.1.1</b> Packages to use</a></li>
 </ul></li>
 <li class="chapter" data-level="4.2" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#clustering"><i class="fa fa-check"></i><b>4.2</b> Clustering</a></li>
@@ -174,28 +179,61 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  Running under: Windows 10 x64 (build 14393)
  
  attached base packages:
- [1] stats     graphics  grDevices utils     datasets  base     
+ [1] methods   stats     graphics  grDevices utils     datasets  base     
  
  other attached packages:
-  [1] knitr_1.15.17     Scotty_0.0.0.9000 devtools_1.12.0  
-  [4] Hmisc_4.0-2       Formula_1.2-1     survival_2.41-2  
-  [7] lattice_0.20-35   dplyr_0.5.0       purrr_0.2.2      
- [10] readr_1.1.0       tidyr_0.6.1       tibble_1.2       
- [13] ggplot2_2.2.1     tidyverse_1.1.1  
+  [1] lubridate_1.6.0   knitr_1.15.17     Scotty_0.0.0.9000
+  [4] devtools_1.12.0   Hmisc_4.0-2       Formula_1.2-1    
+  [7] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
+ [10] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
+ [13] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
  </pre>
 
 </div>
-<div id="introduction" class="section level2">
+<div id="introduction-1" class="section level2">
 <h2><span class="header-section-number">2.1</span> Introduction</h2>
 <p>I often come across the following issue in my work:</p>
-<p>I have a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, I need to reshape and summarize these individual records into counts in a panel dataset. In this new dataset structure I want each row to be a unique time- group- cross-section of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).</p>
+<p>I am provided with a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, I need to reshape and summarize these individual records into counts in a panel dataset. In this new dataset structure I want each row to be a unique time- group- summary of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).</p>
 </div>
 <div id="construct-dataset" class="section level2">
 <h2><span class="header-section-number">2.2</span> Construct dataset</h2>
+<p>First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because hypothetically you stop collecting info at this point). Each entry will then have a random group classification (state), and event (0 or 1).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id=</span><span class="dv">1</span>:<span class="dv">10000</span>,
+                 <span class="dt">CohortEntry =</span> <span class="kw">sample</span>(<span class="kw">seq</span>(<span class="kw">as.Date</span>(<span class="st">&#39;2000/01/01&#39;</span>), <span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>), <span class="dt">by=</span><span class="st">&#39;day&#39;</span>), <span class="dt">replace=</span>T, <span class="dv">10000</span>))
+df &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">CohortExit =</span> CohortEntry+<span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">365</span>,<span class="dv">10000</span>, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#CohortExit Date (up to 1000 days from start)</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Group =</span> <span class="kw">sample</span>(state.name, <span class="dv">10000</span>, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#Random state for each group</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Event =</span> <span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">1</span>, <span class="dv">10000</span>, <span class="dt">replace=</span>T))
+
+df$CohortExit &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">sapply</span>(df$CohortExit, function(x) <span class="kw">min</span>(x,<span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>))), <span class="dt">origin=</span>origin) <span class="co">#Censor at &#39;study end&#39;</span></code></pre></div>
 </div>
 <div id="show-data" class="section level2">
 <h2><span class="header-section-number">2.3</span> Show Data</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Scatter and Fitted Line </span>
+p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortEntry)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">5</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
+<span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">col=</span><span class="dv">2</span>) +
+<span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cohort Entry&quot;</span>) +
+<span class="st">  </span><span class="kw">theme_bw</span>()
+<span class="kw">suppressMessages</span>(<span class="kw">print</span>(p))</code></pre></div>
+<p><img src="01-MungeDays_files/figure-html/Entry%20Date-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortExit)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">5</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
+<span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">col=</span><span class="dv">2</span>) +
+<span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cohort Exit&quot;</span>) +
+<span class="st">  </span><span class="kw">theme_bw</span>()
+<span class="kw">suppressMessages</span>(<span class="kw">print</span>(p))</code></pre></div>
+<p><img src="01-MungeDays_files/figure-html/Entry%20Date-2.png" width="672" /></p>
+<p>A simple, even distribution to work with (cohort exit is even except censored at study end date).</p>
+</div>
+<div id="reshape-process" class="section level2">
+<h2><span class="header-section-number">2.4</span> Reshape Process</h2>
+<div id="calculate-time-distance" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Calculate time distance</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">TimeDiff =</span> <span class="kw">as.integer</span>(CohortExit -<span class="st"> </span>CohortEntry)) <span class="co">#timeDiff</span></code></pre></div>
 
+</div>
 </div>
 </div>
             </section>
