@@ -1,4 +1,4 @@
-# Creating Longitudinal DataSets From Individual Records
+# Creating Longitudinal Datasets From Individual Records
 
 ```{r packages, include=F, echo=F, warning=F}
 require("tidyverse", quietly=T, warn.conflicts = F)
