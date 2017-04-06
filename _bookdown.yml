@@ -3,7 +3,8 @@ chapter_name: "Chapter "
 repo: https://github.com/kmcconeghy/R-Methods
 output_dir: docs
 rmd_files: ["index.Rmd", 
-          "01-vcovHC.Rmd", 
-          "02-ggplot2.Rmd"]
+          "01-MungeDays.Rmd",
+          "02-vcovHC.Rmd",
+          "03-cluster.Rmd"]
 clean: [packages.bib, bookdown.bbl]
 new_session: yes

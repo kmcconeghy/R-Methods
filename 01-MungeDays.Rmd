@@ -1,0 +1,27 @@
+# Creating Longitudinal DataSets From Individual Records
+
+```{r packages, include=F, echo=F}
+require("tidyverse", quietly=T, warn.conflicts = F)
+require("Hmisc", quietly=T, warn.conflicts = F)
+require("devtools", quietly=T, warn.conflicts = F)
+require("Scotty", quietly=T, warn.conflicts = F)
+mu <- markupSpecs$html  
+require("knitr", quietly=T, warn.conflicts = F)
+```
+
+### Packages to use  
+`r mu$session(cite=F)`  
+
+## Introduction  
+
+I often come across the following issue in my work:  
+
+  I have a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, I need to reshape and summarize these individual records into counts in a panel dataset. In this new dataset structure I want each row to be a unique time- group- cross-section of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge). 
+
+## Construct dataset
+
+```{r TestData}
+
+```
+
+## Show Data

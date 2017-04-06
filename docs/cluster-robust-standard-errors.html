@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>R-methods</title>
+  <meta name="description" content="A collection of working papers covering various statistical, analytical or causal inference problems.">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
+
+  <meta property="og:title" content="R-methods" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="http://github.com/kmcconeghy/R-Methods" />
+  
+  <meta property="og:description" content="A collection of working papers covering various statistical, analytical or causal inference problems." />
+  <meta name="github-repo" content="/kmcconeghy/R-Methods" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="R-methods" />
+  
+  <meta name="twitter:description" content="A collection of working papers covering various statistical, analytical or causal inference problems." />
+  
+
+<meta name="author" content="Kevin W. McConeghy">
+
+
+<meta name="date" content="2017-04-05">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="heteroskedastic-cluster-robust-standard-errors.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">R-methods</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html"><i class="fa fa-check"></i><b>2</b> Creating Longitudinal DataSets From Individual Records</a><ul>
+<li class="chapter" data-level="2.0.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#packages-to-use"><i class="fa fa-check"></i><b>2.0.1</b> Packages to use</a></li>
+<li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
+<li class="chapter" data-level="2.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#construct-dataset"><i class="fa fa-check"></i><b>2.2</b> Construct dataset</a></li>
+<li class="chapter" data-level="2.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#show-data"><i class="fa fa-check"></i><b>2.3</b> Show Data</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>3</b> Heteroskedastic &amp; Cluster Robust Standard Errors</a><ul>
+<li class="chapter" data-level="3.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#introduction-1"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#packages-to-use-1"><i class="fa fa-check"></i><b>3.1.1</b> Packages to use</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#test-data"><i class="fa fa-check"></i><b>3.2</b> Test data</a></li>
+<li class="chapter" data-level="3.3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#linear-regression-model"><i class="fa fa-check"></i><b>3.3</b> Linear Regression Model</a></li>
+<li class="chapter" data-level="3.4" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#estimation-of-regression-parameters-and-variance"><i class="fa fa-check"></i><b>3.4</b> Estimation of regression parameters and variance</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#manually-computed-beta-parameters"><i class="fa fa-check"></i><b>3.4.1</b> Manually computed beta parameters</a></li>
+<li class="chapter" data-level="3.4.2" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#manually-computed-standard-errors"><i class="fa fa-check"></i><b>3.4.2</b> Manually computed standard errors</a></li>
+<li class="chapter" data-level="3.4.3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#r-lm-function"><i class="fa fa-check"></i><b>3.4.3</b> R lm function</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#heteroskedascity"><i class="fa fa-check"></i><b>3.5</b> Heteroskedascity</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#heteroskedascity-in-income-data"><i class="fa fa-check"></i><b>3.5.1</b> Heteroskedascity in income data</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#white-heteroskedastic-consistent-errors"><i class="fa fa-check"></i><b>3.6</b> “White” heteroskedastic consistent errors</a><ul>
+<li class="chapter" data-level="3.6.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#manual-estimator"><i class="fa fa-check"></i><b>3.6.1</b> Manual estimator</a></li>
+<li class="chapter" data-level="3.6.2" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#r-standard-function"><i class="fa fa-check"></i><b>3.6.2</b> R standard function</a></li>
+</ul></li>
+<li class="chapter" data-level="3.7" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#acknowledgements"><i class="fa fa-check"></i><b>3.7</b> Acknowledgements</a></li>
+<li class="chapter" data-level="3.8" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#bibliography"><i class="fa fa-check"></i><b>3.8</b> Bibliography</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>4</b> Cluster Robust Standard Errors</a><ul>
+<li class="chapter" data-level="4.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#introduction-2"><i class="fa fa-check"></i><b>4.1</b> Introduction</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#packages-to-use-2"><i class="fa fa-check"></i><b>4.1.1</b> Packages to use</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#clustering"><i class="fa fa-check"></i><b>4.2</b> Clustering</a></li>
+<li class="chapter" data-level="4.3" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#cluster-robust-errors-in-r"><i class="fa fa-check"></i><b>4.3</b> Cluster robust errors in R</a></li>
+<li class="chapter" data-level="4.4" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#block-bootstrapping"><i class="fa fa-check"></i><b>4.4</b> Block bootstrapping</a></li>
+<li class="chapter" data-level="4.5" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#permutation-or-randomization-test"><i class="fa fa-check"></i><b>4.5</b> Permutation or “Randomization” Test</a><ul>
+<li class="chapter" data-level="4.5.1" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#bootstrap-program"><i class="fa fa-check"></i><b>4.5.1</b> Bootstrap Program</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#stata-comparison"><i class="fa fa-check"></i><b>4.6</b> Stata comparison</a></li>
+<li class="chapter" data-level="4.7" data-path="cluster-robust-standard-errors.html"><a href="cluster-robust-standard-errors.html#acknowledgements-1"><i class="fa fa-check"></i><b>4.7</b> Acknowledgements</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">R-methods</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="cluster-robust-standard-errors" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Cluster Robust Standard Errors</h1>
+<div id="introduction-2" class="section level2">
+<h2><span class="header-section-number">4.1</span> Introduction</h2>
+<p>In this chapter we are evaluating R’s capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.</p>
+<div id="packages-to-use-2" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> Packages to use</h3>
+<pre>
+ R version 3.3.2 (2016-10-31)
+ Platform: x86_64-w64-mingw32/x64 (64-bit)
+ Running under: Windows 10 x64 (build 14393)
+ 
+ attached base packages:
+ [1] stats     graphics  grDevices utils     datasets  base     
+ 
+ other attached packages:
+  [1] Scotty_0.0.0.9000 Hmisc_4.0-2       Formula_1.2-1    
+  [4] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
+  [7] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
+ [10] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+ </pre>
+
+<p>“Scotty” is my own package. “tidyverse” is Wickam et al. general suite of packages/commands to work with R. “Hmisc” is Frank Harrel’s miscellaneous commands, many of which are quite useful.</p>
+</div>
+</div>
+<div id="clustering" class="section level2">
+<h2><span class="header-section-number">4.2</span> Clustering</h2>
+</div>
+<div id="cluster-robust-errors-in-r" class="section level2">
+<h2><span class="header-section-number">4.3</span> Cluster robust errors in R</h2>
+</div>
+<div id="block-bootstrapping" class="section level2">
+<h2><span class="header-section-number">4.4</span> Block bootstrapping</h2>
+<p>An alternative to computing a special variance-covariance matrix is using a non-parametric “brute-force” method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or “block” instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simply report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.</p>
+</div>
+<div id="permutation-or-randomization-test" class="section level2">
+<h2><span class="header-section-number">4.5</span> Permutation or “Randomization” Test</h2>
+<ol class="example" style="list-style-type: decimal">
+<li></li>
+</ol>
+<div id="bootstrap-program" class="section level3">
+<h3><span class="header-section-number">4.5.1</span> Bootstrap Program</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Boot.ATE &lt;-<span class="st"> </span>function (model, treat, <span class="dt">R =</span> <span class="dv">250</span>, <span class="dt">block =</span> <span class="st">&quot;&quot;</span>, df) 
+{
+  <span class="kw">require</span>(boot)
+  <span class="kw">require</span>(dplyr)
+  family &lt;-<span class="st"> </span>model$family
+  if (block ==<span class="st"> &quot;&quot;</span>) {
+    boot.mod &lt;-<span class="st"> </span>function(x, i, model, treat) {
+      samp.df &lt;-<span class="st"> </span>x[i, ]
+      samp.glm &lt;-<span class="st"> </span><span class="kw">try</span>(<span class="kw">glm</span>(model, <span class="dt">data =</span> samp.df, <span class="dt">family =</span> family))
+      if (<span class="kw">inherits</span>(samp.glm, <span class="st">&quot;try-error&quot;</span>)) {
+        coef &lt;-<span class="st"> </span><span class="ot">NA</span>
+        ate &lt;-<span class="st"> </span><span class="ot">NA</span>
+        rr &lt;-<span class="st"> </span><span class="ot">NA</span>
+        <span class="kw">c</span>(coef, ate, rr)
+      }
+      else {
+        df2 &lt;-<span class="st"> </span>samp.df
+        df2[, <span class="kw">paste</span>(treat)] =<span class="st"> </span><span class="dv">1</span>
+        pred1. &lt;-<span class="st"> </span><span class="kw">predict.glm</span>(samp.glm, <span class="dt">newdata =</span> df2, 
+          <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
+        df2[, <span class="kw">paste</span>(treat)] =<span class="st"> </span><span class="dv">0</span>
+        pred0. &lt;-<span class="st"> </span><span class="kw">predict.glm</span>(samp.glm, <span class="dt">newdata =</span> df2, 
+          <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
+        coef &lt;-<span class="st"> </span>samp.glm$coefficients[<span class="kw">paste0</span>(treat)]
+        ate &lt;-<span class="st"> </span><span class="kw">mean</span>(pred1.) -<span class="st"> </span><span class="kw">mean</span>(pred0.)
+        rr &lt;-<span class="st"> </span><span class="kw">mean</span>(pred1.)/<span class="kw">mean</span>(pred0.)
+        <span class="kw">c</span>(coef, ate, rr)
+      }
+    }
+    boot.m &lt;-<span class="st"> </span><span class="kw">boot</span>(<span class="dt">data =</span> df, <span class="dt">statistic =</span> boot.mod, <span class="dt">R =</span> R, 
+      <span class="dt">model =</span> model, <span class="dt">treat =</span> treat)
+  }
+  else {
+    Groups =<span class="st"> </span><span class="kw">unique</span>(df[, <span class="kw">paste</span>(block)])
+    boot.mod &lt;-<span class="st"> </span>function(x, i, model, treat, df, block, 
+      <span class="dt">iter =</span> <span class="dv">0</span>) {
+      block.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">group =</span> x[i])
+      <span class="kw">names</span>(block.df) =<span class="st"> </span>block
+      samp.df &lt;-<span class="st"> </span><span class="kw">left_join</span>(block.df, df, <span class="dt">by =</span> block)
+      samp.glm &lt;-<span class="st"> </span><span class="kw">try</span>(<span class="kw">glm</span>(model, <span class="dt">data =</span> samp.df, <span class="dt">family =</span> family))
+      if (<span class="kw">inherits</span>(samp.glm, <span class="st">&quot;try-error&quot;</span>)) {
+        coef &lt;-<span class="st"> </span><span class="ot">NA</span>
+        ate &lt;-<span class="st"> </span><span class="ot">NA</span>
+        rr &lt;-<span class="st"> </span><span class="ot">NA</span>
+        <span class="kw">c</span>(coef, ate, rr)
+      }
+      else {
+        df2 &lt;-<span class="st"> </span>samp.df
+        df2[, <span class="kw">paste</span>(treat)] =<span class="st"> </span><span class="dv">1</span>
+        pred1. &lt;-<span class="st"> </span><span class="kw">predict.glm</span>(samp.glm, <span class="dt">newdata =</span> df2, 
+          <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
+        df2[, <span class="kw">paste</span>(treat)] =<span class="st"> </span><span class="dv">0</span>
+        pred0. &lt;-<span class="st"> </span><span class="kw">predict.glm</span>(samp.glm, <span class="dt">newdata =</span> df2, 
+          <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
+        coef &lt;-<span class="st"> </span>samp.glm$coefficients[<span class="kw">paste0</span>(treat)]
+        ate &lt;-<span class="st"> </span><span class="kw">mean</span>(pred1.) -<span class="st"> </span><span class="kw">mean</span>(pred0.)
+        rr &lt;-<span class="st"> </span><span class="kw">mean</span>(pred1.)/<span class="kw">mean</span>(pred0.)
+        <span class="kw">c</span>(coef, ate, rr)
+      }
+    }
+    boot.m &lt;-<span class="st"> </span><span class="kw">boot</span>(<span class="dt">data =</span> Groups, <span class="dt">statistic =</span> boot.mod, 
+      <span class="dt">R =</span> R, <span class="dt">model =</span> model, <span class="dt">treat =</span> treat, <span class="dt">df =</span> df, <span class="dt">block =</span> block)
+  }
+  m1.confint &lt;-<span class="st"> </span><span class="kw">c</span>(model$coefficients[<span class="kw">paste0</span>(treat)], <span class="kw">confint</span>(model, 
+    treat, <span class="dt">level =</span> <span class="fl">0.95</span>))
+  coeff =<span class="st"> </span><span class="kw">boot.ci</span>(boot.m, <span class="dt">index =</span> <span class="dv">1</span>, <span class="dt">type =</span> <span class="st">&quot;perc&quot;</span>)
+  coeff =<span class="st"> </span><span class="kw">c</span>(<span class="kw">median</span>(boot.m$t[, <span class="dv">1</span>]), coeff$percent[, <span class="dv">4</span>], coeff$percent[, 
+    <span class="dv">5</span>])
+  <span class="kw">names</span>(coeff) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Coeff.&quot;</span>, <span class="st">&quot;2.5%&quot;</span>, <span class="st">&quot;97.5%&quot;</span>)
+  ate =<span class="st"> </span><span class="kw">boot.ci</span>(boot.m, <span class="dt">index =</span> <span class="dv">2</span>, <span class="dt">type =</span> <span class="st">&quot;perc&quot;</span>)
+  ate =<span class="st"> </span><span class="kw">c</span>(<span class="kw">median</span>(boot.m$t[, <span class="dv">2</span>]), ate$percent[, <span class="dv">4</span>], ate$percent[, 
+    <span class="dv">5</span>])
+  <span class="kw">names</span>(ate) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;ATE&quot;</span>, <span class="st">&quot;2.5%&quot;</span>, <span class="st">&quot;97.5%&quot;</span>)
+  rr =<span class="st"> </span><span class="kw">boot.ci</span>(boot.m, <span class="dt">index =</span> <span class="dv">3</span>, <span class="dt">type =</span> <span class="st">&quot;perc&quot;</span>)
+  rr =<span class="st"> </span><span class="kw">c</span>(<span class="kw">median</span>(boot.m$t[, <span class="dv">3</span>]), rr$percent[, <span class="dv">4</span>], rr$percent[, 
+    <span class="dv">5</span>])
+  <span class="kw">names</span>(rr) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Rr&quot;</span>, <span class="st">&quot;2.5%&quot;</span>, <span class="st">&quot;97.5%&quot;</span>)
+  boot.iter =<span class="st"> </span>boot.m$t
+  res =<span class="st"> </span><span class="kw">list</span>(<span class="dt">level =</span> <span class="fl">0.95</span>, <span class="dt">model_ci =</span> m1.confint, <span class="dt">coeff =</span> coeff, 
+    <span class="dt">ate =</span> ate, <span class="dt">rr =</span> rr, <span class="dt">boots =</span> boot.iter)
+  <span class="kw">return</span>(res)
+  ##############################################
+## Testing coefficients in time-series data ##
+##############################################
+
+## Load investment equation data:
+<span class="kw">data</span>(Investment)
+
+<span class="co"># Fit regression model:</span>
+fm.inv &lt;-<span class="st"> </span><span class="kw">lm</span>(RealInv ~<span class="st"> </span>RealGNP +<span class="st"> </span>RealInt, <span class="dt">data =</span> Investment)
+
+## Test coefficients using Newey-West HAC estimator with
+## user-defined and data-driven bandwidth and with Parzen kernel:
+<span class="kw">coeftest</span>(fm.inv, <span class="dt">df =</span> <span class="ot">Inf</span>, <span class="dt">vcov =</span> <span class="kw">NeweyWest</span>(fm.inv, <span class="dt">lag =</span> <span class="dv">4</span>, <span class="dt">prewhite =</span> <span class="ot">FALSE</span>))
+<span class="kw">coeftest</span>(fm.inv, <span class="dt">df =</span> <span class="ot">Inf</span>, <span class="dt">vcov =</span> NeweyWest)
+
+parzenHAC &lt;-<span class="st"> </span>function(x, ...) <span class="kw">kernHAC</span>(x, <span class="dt">kernel =</span> <span class="st">&quot;Parzen&quot;</span>, <span class="dt">prewhite =</span> <span class="dv">2</span>,
+  <span class="dt">adjust =</span> <span class="ot">FALSE</span>, <span class="dt">bw =</span> bwNeweyWest, ...)
+<span class="kw">coeftest</span>(fm.inv, <span class="dt">df =</span> <span class="ot">Inf</span>, <span class="dt">vcov =</span> parzenHAC)
+
+## Time-series visualization:
+<span class="kw">plot</span>(Investment[, <span class="st">&quot;RealInv&quot;</span>], <span class="dt">type =</span> <span class="st">&quot;b&quot;</span>, <span class="dt">pch =</span> <span class="dv">19</span>, <span class="dt">ylab =</span> <span class="st">&quot;Real investment&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">ts</span>(<span class="kw">fitted</span>(fm.inv), <span class="dt">start =</span> <span class="dv">1964</span>), <span class="dt">col =</span> <span class="dv">4</span>)
+
+## 3-dimensional visualization:
+<span class="kw">library</span>(scatterplot3d)
+s3d &lt;-<span class="st"> </span><span class="kw">scatterplot3d</span>(Investment[,<span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">6</span>)],
+  <span class="dt">type =</span> <span class="st">&quot;b&quot;</span>, <span class="dt">angle =</span> <span class="dv">65</span>, <span class="dt">scale.y =</span> <span class="dv">1</span>, <span class="dt">pch =</span> <span class="dv">16</span>)
+s3d$<span class="kw">plane3d</span>(fm.inv, <span class="dt">lty.box =</span> <span class="st">&quot;solid&quot;</span>, <span class="dt">col =</span> <span class="dv">4</span>)
+
+
+
+###########################################################
+## Testing and dating structural changes in the presence ##
+## of heteroskedasticity and autocorrelation             ##
+###########################################################
+
+## Load real interest series:
+<span class="kw">data</span>(RealInt)
+
+## OLS-based CUSUM test with quadratic spectral kernel HAC estimate:
+ocus &lt;-<span class="st"> </span><span class="kw">gefp</span>(RealInt ~<span class="st"> </span><span class="dv">1</span>, <span class="dt">fit =</span> lm, <span class="dt">vcov =</span> kernHAC)
+<span class="kw">plot</span>(ocus, <span class="dt">aggregate =</span> <span class="ot">FALSE</span>)
+<span class="kw">sctest</span>(ocus)
+
+## supF test with quadratic spectral kernel HAC estimate:
+fs &lt;-<span class="st"> </span><span class="kw">Fstats</span>(RealInt ~<span class="st"> </span><span class="dv">1</span>, <span class="dt">vcov =</span> kernHAC)
+<span class="kw">plot</span>(fs)
+<span class="kw">sctest</span>(fs)
+
+## Breakpoint estimation and confidence intervals
+## with quadratic spectral kernel HAC estimate:
+bp &lt;-<span class="st"> </span><span class="kw">breakpoints</span>(RealInt ~<span class="st"> </span><span class="dv">1</span>)
+<span class="kw">confint</span>(bp, <span class="dt">vcov =</span> kernHAC)
+<span class="kw">plot</span>(bp)
+
+## Visualization:
+<span class="kw">plot</span>(RealInt, <span class="dt">ylab =</span> <span class="st">&quot;Real interest rate&quot;</span>)
+<span class="kw">lines</span>(<span class="kw">ts</span>(<span class="kw">fitted</span>(bp), <span class="dt">start =</span> <span class="kw">start</span>(RealInt), <span class="dt">freq =</span> <span class="dv">4</span>), <span class="dt">col =</span> <span class="dv">4</span>)
+<span class="kw">lines</span>(<span class="kw">confint</span>(bp, <span class="dt">vcov =</span> kernHAC))
+}</code></pre></div>
+</div>
+</div>
+<div id="stata-comparison" class="section level2">
+<h2><span class="header-section-number">4.6</span> Stata comparison</h2>
+<p>A full discussion of STATA programming can be seen here: <a href="http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm" class="uri">http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm</a><br />
+STATA blog:<br />
+<a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a></p>
+<p>Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the <em>vce(robust)</em> option in regression models.</p>
+<p>e.g. robust option in STATA</p>
+<pre><code>regress y x, vce(robust)</code></pre>
+<p>A Huber-White variance-covariance matrix can also be computed by some group with the <strong>vce(cluster <em>group</em>)</strong> option in regression models.</p>
+<p>e.g. cluster option in STATA</p>
+<pre><code>regress y x, vce(cluster group)</code></pre>
+<p>See:<br />
+<a href="http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/" class="uri">http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/</a></p>
+</div>
+<div id="acknowledgements-1" class="section level2">
+<h2><span class="header-section-number">4.7</span> Acknowledgements</h2>
+<p>This chapter is heavily adapted from several StackExchange and other blog posts.<br />
+See:<br />
+<a href="http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/" class="uri">http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/</a><br />
+<a href="https://sites.google.com/site/waynelinchang/r-code" class="uri">https://sites.google.com/site/waynelinchang/r-code</a><br />
+<a href="https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/" class="uri">https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/</a></p>
+
+<div id="refs" class="references">
+<div>
+<p>Angrist, J.D., and J.S. Pischke. 2008. <em>Mostly Harmless Econometrics: An Empiricist’s Companion</em>. Princeton University Press. <a href="https://books.google.com/books?id=ztXL21Xd8v8C" class="uri">https://books.google.com/books?id=ztXL21Xd8v8C</a>.</p>
+</div>
+<div>
+<p>“Cribari-Neto F.” 2004. <em>Computational Statistics &amp; Data Analysis</em> 45.</p>
+</div>
+<div>
+<p>Greene, William H. 1993. <em>Econometric Analysis</em>. New York; London: Macmillan Publishing Co Inc.</p>
+</div>
+<div>
+<p>Petersen, MA. 2009. “Estimating Standard Errors in Finance Panel Data Sets: Comparing Approaches.” <em>Review of Financial Studies</em> 22: 435–80.</p>
+</div>
+<div>
+<p>R Core Team. 2016. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+</div>
+<div>
+<p>White, Halbert. 1980. “A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity.” <em>Econometrika</em> 48 (4): 817–88.</p>
+</div>
+<div>
+<p>Zeileis, Achim. 2004. “Econometric Computing with Hc and Hac Covariance Matrix Estimators.” <em>Journal of Statistical Software</em> 11 (10): 1–16. <a href="https://www.jstatsoft.org/article/view/v011i10" class="uri">https://www.jstatsoft.org/article/view/v011i10</a>.</p>
+</div>
+<div>
+<p>———. 2006. “Object-Oriented Computation of Sandwich Estimators.” <em>Journal of Statistical Software</em> 16 (9): 1–16. <a href="http://www.jstatsoft.org/v16/i09/." class="uri">http://www.jstatsoft.org/v16/i09/.</a></p>
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="heteroskedastic-cluster-robust-standard-errors.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

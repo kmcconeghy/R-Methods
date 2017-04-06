@@ -1,0 +1,265 @@
+# Heteroskedastic & Cluster Robust Standard Errors  
+
+```{r packages, include=F, echo=F}
+require("tidyverse", quietly=T, warn.conflicts = F)
+require("Hmisc", quietly=T, warn.conflicts = F)
+require("devtools", quietly=T, warn.conflicts = F)
+require("Scotty", quietly=T, warn.conflicts = F)
+mu <- markupSpecs$html  
+require("sandwich", quietly=T, warn.conflicts = F)
+require("lmtest", quietly=T, warn.conflicts = F)
+require("boot", quietly=T, warn.conflicts = F)
+require("knitr", quietly=T, warn.conflicts = F)
+```
+
+## Introduction  
+
+In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
+
+### Packages to use  
+`r mu$session(cite=F)`  
+
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
+
+## Test data  
+
+ To test and demonstrate code and assumptions are correct. I utilize the "PublicSchools" dataset in the "sandwich" package. This dataset is well-described in peer-reviewed research, and standard text books (Table 14.1 in Green [1993]).[@CIS-6161, @Zeileis2004, @Zeileis2006, @Cribari2004] The data comes originally from a 1979 report on per capita public school expenditures and per capita income by state from the U.S. Dept. of Commerce. 
+
+```{r getData}
+## Load public schools data, omit NA in Wisconsin, scale income and make squared Income term:
+data(PublicSchools)
+df <- as_tibble(PublicSchools %>% na.omit() %>% mutate(Income = Income*1e-04)) %>% mutate(Income2 = Income^2)
+head(df)
+```
+
+```{r SetTab}
+se_results <- as_tibble(matrix(nrow=4,ncol=6))
+names(se_results) <- c("method","vcov Matrix", "Income_Beta","Income_SE","Income2_Beta","Income2_SE")
+
+method <- c("manual","lm","manual","HC0")
+
+#,"HC1","HC2","HC3","HC4")
+
+type <- c("iid","iid","White","White (dfc)")
+
+for (i in 1:nrow(se_results)) {
+  se_results[i,1] <- method[i]
+  se_results[i,2] <- type[i]
+}
+```
+
+## Linear Regression Model 
+
+First, I start with the classical ordinary least squares framework.
+$$y_i = X_i\beta + u_{i} \quad \textrm{where} \quad i = 1,..,n$$
+
+Where $y$ is a dependent variable, $X$ is a vector of regressors (i.e. independent variables) with $k$-dimensions,$\beta$ is a vector of the coefficients for $X$, and $u$ is the residual error term. In matrix notation often simply as: $y= X\beta+u$.  
+
+Under normal assumptions, the mean of $u_i$ (that is the residual of a given observation $i$) should be zero and possess a constant variance across all subsets of $i$. The second assumption is my focus here, which is often incorrect in empirical research. 
+
+## Estimation of regression parameters and variance 
+
+Typically in empirical research you are interested in estimating some or all parameter coefficients, and a measure of variance or precision on that parameter. With this most empiricists will make statement along the lines of "A 1-unit change in $x$ produces a $\beta$-unit change in $y$, and a null hypothesis of $\beta$=0 is rejected with 95% confidence".
+
+In our example, assume we want to model per capita expenditures regressed on income. 
+
+First, I demonstrate how to estimate your parameter coefficient, $\beta_1$ the coefficient on income and the square root of the variance, $\sigma$.  
+
+### Manually computed beta parameters  
+R basically computes the regression coefficients with the standard $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
+
+You can do this manually like so:  
+```{r manBeta}
+Y = as.matrix(df$Expenditure)
+X = as.matrix(cbind(1,df$Income, df$Income2)) #Add one for intercept
+beta = solve(t(X) %*% X) %*% (t(X) %*% Y) 
+rownames(beta) <- c("Int","Income","Income2") 
+colnames(beta) <- c("Beta")
+se_results[1,3] <- beta[2,1]
+se_results[1,5] <- beta[3,1]
+se_results  
+```
+
+### Manually computed standard errors  
+
+In a regression framework you compute standard errors by taking the square root of the diagonal elements of the variance-covariance matrix. As defined above, consider $u$ is normally distributied with mean=0, and standard deviation, $\sigma^2I$. Where $\sigma^2$ is the variance. 
+
+First, define the expectation of the variance of $\beta$ conditional on X.  
+$$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = (\textbf{X}'\textbf{X})^{-1}(\textbf{X}' \mathbf{\sigma^2_{u}}\mathbf{I}\textbf{X}) (\textbf{X}'\textbf{X})^{-1}$$
+
+If you assume that $u$ is indepedent (i.e. orthogonal) to $\beta$, and identically distributed across subpopulations of $\beta$. The variance of a random vector X and non-random matrix = matrix * Var(X) * matrix', can be expressed as:
+$$\textrm{Var}[\hat{\mathbf{\beta}}|\textbf{X}] = \mathbf{\sigma^2_{u}}(\textbf{X}'\textbf{X})^{-1}$$
+
+
+$$E[{uu}'|\textbf{X}] = \mathbf{\Sigma_{u}}$$
+
+
+
+
+Assuming $\sigma_u^2$ is fixed but unknown, a given random sample's variance, $s^2$, can be estimated:
+
+Equation 5. Standard Error
+
+$$s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$$
+
+Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
+
+With this information the standard errors above can be replicated manually like so:
+```{r manualSE}
+Y = as.matrix(df$Expenditure) #Dependent variable
+X = as.matrix(cbind(1,df$Income, df$Income2)) #Design matrix, add one for intercept
+beta = solve(t(X) %*% X) %*% (t(X) %*% Y) #Solve for beta as above
+n <- dim(X)[1] # number of obs
+k <- dim(X)[2] # n of predictors
+
+# calculate stan errs as eq in the above
+SigmaSq <- sum((Y - X%*%beta)^2)/(n-k)  # (sum residuals)^2 / (degree of freedom correction) i.e. estimate of sigma-squared
+vcovMat <- SigmaSq*chol2inv(chol(t(X)%*%X)) # variance covariance matrix
+StdErr <- sqrt(diag(vcovMat)) #sq root of diagonal
+se_results[1,4] <- StdErr[2]
+se_results[1,6] <- StdErr[3]
+se_results
+```
+
+### R lm function
+
+To confirm the above we can compute the same with the the lm function
+```{r lm}
+  m1 <- lm(Expenditure ~ Income + Income2, data = df)
+  se_results[2,3] <- coeftest(m1)[2,1]
+  se_results[2,4] <- coeftest(m1)[2,2]
+  se_results[2,5] <- coeftest(m1)[3,1]
+  se_results[2,6] <- coeftest(m1)[3,2]
+  se_results
+```
+
+The estimates are identical. However the critical assumption here of $u$ being "iid", can often be wrong in empirical research. In the following, I broadly define these concepts.
+
+## Heteroskedascity  
+*Heteroskedascity* in this context refers to a random variable where a given subset of a sample will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
+
+```{r testdataHomo, include=T}
+#Generate Data  
+  x <- runif(500)
+  yHomo <- 2*x + rnorm(500)
+  yHetero <- 2*x + x*rnorm(500)
+  df2 <- as.data.frame(cbind(x, yHomo, yHetero))
+
+#Scatter and Fitted Line 
+ggplot(data=df2, aes(x=x, y=yHomo)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
+```  
+  
+**Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* of the points constant across the range of X variable.
+
+```{r testdataHetero, include=T}
+#Scatter and Fitted Line 
+ggplot(data=df2, aes(x=x, y=yHetero)) + 
+  geom_point() +
+  geom_smooth(method='lm', se=F) + 
+  xlab("X variable") +
+  theme_bw()
+```
+
+**Figure 2.** Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.  
+
+Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).  
+
+### Heteroskedascity in income data
+
+```{r realdataHetero, include=T}
+#Scatter and Fitted Line 
+ggplot(data=df, aes(x=Income, y=Expenditure)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula=y ~ x + poly(x,2), se=F) + 
+  geom_smooth(method='lm', linetype=2, se=F) +
+  xlab("Income") +
+  theme_bw()
+```
+
+
+In our "real-world" small sample of data a visual representation of data can be challenging to draw conclusions from. We see there is an outlier ("Alaska"). However, it is difficult to judge overall dispersion with either a squared term [solid line] or a linear term [dashed line]. 
+
+## "White" heteroskedastic consistent errors 
+
+  In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).[@white1980] The assumption of the residuals $u$ being *identically* distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.[@white1980]  
+
+  With the "robust" approach proposed by White et al., you assume  the variance of the residual is estimated as a diagonal matrix of each squared residual (vs. average above with $s^2$). Each j-th row-column element is $\hat{u}_{j}^{2}$ in the diagonal terms of ${\Sigma_{u}}$. 
+
+The full equation is:  
+
+### Manual estimator  
+```{r manWhite}
+u <- matrix(resid(m1)) # residuals from model object
+meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
+dfc <- n/(n-k) # degrees of freedom adjust  
+se <- sqrt(dfc*diag(solve(crossprod(X)) %*% meat1 %*% solve(crossprod(X))))
+se_results[3,4] <- se[2]
+se_results[3,6] <- se[3]
+se_results
+```
+
+  You will find these "White" or robust standard errors are consistent with the second Peterson table.[@peterson2009]  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.  
+  
+### R standard function   
+
+Using the already written commands you can specify "White" standard errors with the vcovHC function in the sandwich package.[@Zeileis2006] You can report correct standard errors like below with vcovHC option in function coeftest.  
+
+vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' Omega X (X'X)^{-1}$.  
+
+The specification of $Omega$ is determined by the `type=` option.  
+
+`type="cons"` $\omega_i = \sigma^2$ Constant variance  
+`type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix   
+`type=HC1`    $\omega_i = \frac{n}{n-k}\mu^2_i$ Small sample correction (STATA).  
+`type=HC2`    $\omega_i = \frac{\mu^2_i}{1-h_i}$  
+`type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$  
+`type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$  
+
+Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC4 based on recent literature.[@Cribari2004]  
+
+```{r funcWhite, echo=F}
+cat("Different variance-covariance options with vcovHC")
+cat("")
+cat("type = cons")
+coeftest(m1, vcovHC(m1, type="cons")) #Standard
+
+cat("type = HC0")
+coeftest(m1, vcovHC(m1, type="HC0")) #White
+
+cat("type = HC1")
+coeftest(m1, vcovHC(m1, type="HC1"))
+
+cat("type = HC2, ")
+coeftest(m1, vcovHC(m1, type="HC2"))
+
+cat("type = HC3, ")
+coeftest(m1, vcovHC(m1, type="HC3"))
+
+cat("type = HC4, ")
+coeftest(m1, vcovHC(m1, type="HC4"))
+
+```
+
+Lifehack: Rather than use the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
+
+```{r modOLS}
+s <- summary(m1)
+s$coefficients[, 2] <- sqrt(diag(vcovHC(m1, type="HC1")))
+s
+```
+
+
+## Acknowledgements  
+This chapter is heavily adapted from several StackExchange and other blog posts.
+See:  
+http://www.richard-bluhm.com/clustered-ses-in-r-and-stata-2/  
+https://sites.google.com/site/waynelinchang/r-code  
+https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/  
+
+## Bibliography  
+@R-base  
+@angrist2008mostly  

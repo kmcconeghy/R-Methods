@@ -1,23 +1,29 @@
 # Heteroskedastic & Cluster Robust Standard Errors  
 
-```{r packages, include=F, echo=F}
-require("tidyverse", quietly=T, warn.conflicts = F)
-require("Hmisc", quietly=T, warn.conflicts = F)
-require("devtools", quietly=T, warn.conflicts = F)
-require("Scotty", quietly=T, warn.conflicts = F)
-mu <- markupSpecs$html  
-require("sandwich", quietly=T, warn.conflicts = F)
-require("lmtest", quietly=T, warn.conflicts = F)
-require("boot", quietly=T, warn.conflicts = F)
-require("knitr", quietly=T, warn.conflicts = F)
-```
+
 
 ## Introduction  
 
 In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
-`r mu$session(cite=F)`  
+<!--html_preserve--><pre>
+ R version 3.3.2 (2016-10-31)
+ Platform: x86_64-w64-mingw32/x64 (64-bit)
+ Running under: Windows 10 x64 (build 14393)
+ 
+ attached base packages:
+ [1] stats     graphics  grDevices utils     datasets  base     
+ 
+ other attached packages:
+  [1] knitr_1.15.17     boot_1.3-18       lmtest_0.9-35    
+  [4] zoo_1.7-14        sandwich_2.3-4    Scotty_0.0.0.9000
+  [7] devtools_1.12.0   Hmisc_4.0-2       Formula_1.2-1    
+ [10] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
+ [13] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
+ [16] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+ </pre>
+<!--/html_preserve-->  
 
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
 
@@ -25,14 +31,28 @@ In this chapter we are evaluating R's capability to compute different kinds of s
 
  To test and demonstrate code and assumptions are correct. I utilize the "PublicSchools" dataset in the "sandwich" package. This dataset is well-described in peer-reviewed research, and standard text books (Table 14.1 in Green [1993]).[@CIS-6161, @Zeileis2004, @Zeileis2006, @Cribari2004] The data comes originally from a 1979 report on per capita public school expenditures and per capita income by state from the U.S. Dept. of Commerce. 
 
-```{r getData}
+
+```r
 ## Load public schools data, omit NA in Wisconsin, scale income and make squared Income term:
 data(PublicSchools)
 df <- as_tibble(PublicSchools %>% na.omit() %>% mutate(Income = Income*1e-04)) %>% mutate(Income2 = Income^2)
 head(df)
 ```
 
-```{r SetTab}
+```
+## # A tibble: 6 × 3
+##   Expenditure Income   Income2
+##         <int>  <dbl>     <dbl>
+## 1         275 0.6247 0.3902501
+## 2         821 1.0851 1.1774420
+## 3         339 0.7374 0.5437588
+## 4         275 0.6183 0.3822949
+## 5         387 0.8850 0.7832250
+## 6         452 0.8001 0.6401600
+```
+
+
+```r
 se_results <- as_tibble(matrix(nrow=4,ncol=6))
 names(se_results) <- c("method","vcov Matrix", "Income_Beta","Income_SE","Income2_Beta","Income2_SE")
 
@@ -69,7 +89,8 @@ First, I demonstrate how to estimate your parameter coefficient, $\beta_1$ the c
 R basically computes the regression coefficients with the standard $(\textbf{X}'\textbf{X})^{-1}\textbf{X}'\textbf{y}$ i.e. the coefficient is a function of X and y.
 
 You can do this manually like so:  
-```{r manBeta}
+
+```r
 Y = as.matrix(df$Expenditure)
 X = as.matrix(cbind(1,df$Income, df$Income2)) #Add one for intercept
 beta = solve(t(X) %*% X) %*% (t(X) %*% Y) 
@@ -78,6 +99,16 @@ colnames(beta) <- c("Beta")
 se_results[1,3] <- beta[2,1]
 se_results[1,5] <- beta[3,1]
 se_results  
+```
+
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <lgl>        <dbl>      <lgl>
+## 1 manual           iid   -1834.203        NA     1587.042         NA
+## 2     lm           iid          NA        NA           NA         NA
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
 ```
 
 ### Manually computed standard errors  
@@ -105,7 +136,8 @@ $$s^2 = \frac{\sum_{i=1}^n e_i^2}{n-k}$$
 Where $e$ are the squared residuals, $n$ is the sample size, and $k$ are the number of regressors. 
 
 With this information the standard errors above can be replicated manually like so:
-```{r manualSE}
+
+```r
 Y = as.matrix(df$Expenditure) #Dependent variable
 X = as.matrix(cbind(1,df$Income, df$Income2)) #Design matrix, add one for intercept
 beta = solve(t(X) %*% X) %*% (t(X) %*% Y) #Solve for beta as above
@@ -121,10 +153,21 @@ se_results[1,6] <- StdErr[3]
 se_results
 ```
 
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid          NA        NA           NA         NA
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
+```
+
 ### R lm function
 
 To confirm the above we can compute the same with the the lm function
-```{r lm}
+
+```r
   m1 <- lm(Expenditure ~ Income + Income2, data = df)
   se_results[2,3] <- coeftest(m1)[2,1]
   se_results[2,4] <- coeftest(m1)[2,2]
@@ -133,12 +176,23 @@ To confirm the above we can compute the same with the the lm function
   se_results
 ```
 
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
+## 3 manual         White          NA        NA           NA         NA
+## 4    HC0   White (dfc)          NA        NA           NA         NA
+```
+
 The estimates are identical. However the critical assumption here of $u$ being "iid", can often be wrong in empirical research. In the following, I broadly define these concepts.
 
 ## Heteroskedascity  
 *Heteroskedascity* in this context refers to a random variable where a given subset of a sample will have different variability compared with others. Variability being variance or some other measure of dispersion. In constrast *homoskedascity* is when variance is constant across these subpopulations (Figure 1). 
 
-```{r testdataHomo, include=T}
+
+```r
 #Generate Data  
   x <- runif(500)
   yHomo <- 2*x + rnorm(500)
@@ -151,11 +205,14 @@ ggplot(data=df2, aes(x=x, y=yHomo)) +
   geom_smooth(method='lm', se=F) + 
   xlab("X variable") +
   theme_bw()
-```  
+```
+
+<img src="02-vcovHC_files/figure-html/testdataHomo-1.png" width="672" />
   
 **Figure 1.** Example of homoskedascity. Note how data points appear to be randomly scattered around line of best fit, and that the dispersion *appears* of the points constant across the range of X variable.
 
-```{r testdataHetero, include=T}
+
+```r
 #Scatter and Fitted Line 
 ggplot(data=df2, aes(x=x, y=yHetero)) + 
   geom_point() +
@@ -164,13 +221,16 @@ ggplot(data=df2, aes(x=x, y=yHetero)) +
   theme_bw()
 ```
 
+<img src="02-vcovHC_files/figure-html/testdataHetero-1.png" width="672" />
+
 **Figure 2.** Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.  
 
 Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).  
 
 ### Heteroskedascity in income data
 
-```{r realdataHetero, include=T}
+
+```r
 #Scatter and Fitted Line 
 ggplot(data=df, aes(x=Income, y=Expenditure)) + 
   geom_point() +
@@ -179,6 +239,13 @@ ggplot(data=df, aes(x=Income, y=Expenditure)) +
   xlab("Income") +
   theme_bw()
 ```
+
+```
+## Warning in predict.lm(model, newdata = data.frame(x = xseq), se.fit = se, :
+## prediction from a rank-deficient fit may be misleading
+```
+
+<img src="02-vcovHC_files/figure-html/realdataHetero-1.png" width="672" />
 
 
 In our "real-world" small sample of data a visual representation of data can be challenging to draw conclusions from. We see there is an outlier ("Alaska"). However, it is difficult to judge overall dispersion with either a squared term [solid line] or a linear term [dashed line]. 
@@ -192,7 +259,8 @@ In our "real-world" small sample of data a visual representation of data can be 
 The full equation is:  
 
 ### Manual estimator  
-```{r manWhite}
+
+```r
 u <- matrix(resid(m1)) # residuals from model object
 meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
 dfc <- n/(n-k) # degrees of freedom adjust  
@@ -200,6 +268,16 @@ se <- sqrt(dfc*diag(solve(crossprod(X)) %*% meat1 %*% solve(crossprod(X))))
 se_results[3,4] <- se[2]
 se_results[3,6] <- se[3]
 se_results
+```
+
+```
+## # A tibble: 4 × 6
+##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
+##    <chr>         <chr>       <dbl>     <dbl>        <dbl>      <dbl>
+## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
+## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
+## 3 manual         White          NA 1282.1010           NA   856.0721
+## 4    HC0   White (dfc)          NA        NA           NA         NA
 ```
 
   You will find these "White" or robust standard errors are consistent with the second Peterson table.[@peterson2009]  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.  
@@ -221,217 +299,132 @@ The specification of $Omega$ is determined by the `type=` option.
 
 Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC4 based on recent literature.[@Cribari2004]  
 
-```{r funcWhite, echo=F}
-cat("Different variance-covariance options with vcovHC")
-cat("")
-cat("type = cons")
-coeftest(m1, vcovHC(m1, type="cons")) #Standard
 
-cat("type = HC0")
-coeftest(m1, vcovHC(m1, type="HC0")) #White
+```
+## Different variance-covariance options with vcovHC
+```
 
-cat("type = HC1")
-coeftest(m1, vcovHC(m1, type="HC1"))
+```
+## type = cons
+```
 
-cat("type = HC2, ")
-coeftest(m1, vcovHC(m1, type="HC2"))
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)   
+## (Intercept)   832.91     327.29  2.5449 0.014275 * 
+## Income      -1834.20     828.99 -2.2126 0.031820 * 
+## Income2      1587.04     519.08  3.0574 0.003677 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
 
-cat("type = HC3, ")
-coeftest(m1, vcovHC(m1, type="HC3"))
+```
+## type = HC0
+```
 
-cat("type = HC4, ")
-coeftest(m1, vcovHC(m1, type="HC4"))
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)   832.91     460.89  1.8072  0.07714 .
+## Income      -1834.20    1243.04 -1.4756  0.14673  
+## Income2      1587.04     829.99  1.9121  0.06197 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
 
+```
+## type = HC1
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)   832.91     475.37  1.7521  0.08627 .
+## Income      -1834.20    1282.10 -1.4306  0.15915  
+## Income2      1587.04     856.07  1.8539  0.07004 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```
+## type = HC2,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91     688.48  1.2098   0.2324
+## Income      -1834.20    1866.41 -0.9827   0.3308
+## Income2      1587.04    1250.15  1.2695   0.2105
+```
+
+```
+## type = HC3,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91    1095.00  0.7607   0.4507
+## Income      -1834.20    2975.41 -0.6165   0.5406
+## Income2      1587.04    1995.24  0.7954   0.4304
+```
+
+```
+## type = HC4,
+```
+
+```
+## 
+## t test of coefficients:
+## 
+##             Estimate Std. Error t value Pr(>|t|)
+## (Intercept)   832.91    3008.01  0.2769   0.7831
+## Income      -1834.20    8183.19 -0.2241   0.8236
+## Income2      1587.04    5488.93  0.2891   0.7737
 ```
 
 Lifehack: Rather than use the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
 
-```{r modOLS}
+
+```r
 s <- summary(m1)
 s$coefficients[, 2] <- sqrt(diag(vcovHC(m1, type="HC1")))
 s
 ```
 
-## Clustering  
-
-## Cluster robust errors in R  
-
-## Block bootstrapping  
-
-  An alternative to computing a special variance-covariance matrix is using a non-parametric "brute-force" method termed block bootstrapping. To do this, you the sample the dataset with replacement by group or "block" instead of individual observation. The parameters are estimated for each sample instance and stored in a new table. Then, you can either compute the parameter moments (mean, variance etc.) using the stored coefficients or if a 95% parameter interval is the ultimate goal one can simply report the ordered percentiles (e.g., 2.5% - 97.5%). Other methods for computing the intervals exist, such as bias-corrected. Whichever you pick, bootstraps are about as unbiased as the above sandwich estimators, and may be advantageous when the number of clusters is small.
-  
-## Permutation or "Randomization" Test
-
-(@Bertrand04howmuch) 
-
-### Bootstrap Program  
-
-```{r BootProg}
-Boot.ATE <- function (model, treat, R = 250, block = "", df) 
-{
-  require(boot)
-  require(dplyr)
-  family <- model$family
-  if (block == "") {
-    boot.mod <- function(x, i, model, treat) {
-      samp.df <- x[i, ]
-      samp.glm <- try(glm(model, data = samp.df, family = family))
-      if (inherits(samp.glm, "try-error")) {
-        coef <- NA
-        ate <- NA
-        rr <- NA
-        c(coef, ate, rr)
-      }
-      else {
-        df2 <- samp.df
-        df2[, paste(treat)] = 1
-        pred1. <- predict.glm(samp.glm, newdata = df2, 
-          type = "response")
-        df2[, paste(treat)] = 0
-        pred0. <- predict.glm(samp.glm, newdata = df2, 
-          type = "response")
-        coef <- samp.glm$coefficients[paste0(treat)]
-        ate <- mean(pred1.) - mean(pred0.)
-        rr <- mean(pred1.)/mean(pred0.)
-        c(coef, ate, rr)
-      }
-    }
-    boot.m <- boot(data = df, statistic = boot.mod, R = R, 
-      model = model, treat = treat)
-  }
-  else {
-    Groups = unique(df[, paste(block)])
-    boot.mod <- function(x, i, model, treat, df, block, 
-      iter = 0) {
-      block.df <- data.frame(group = x[i])
-      names(block.df) = block
-      samp.df <- left_join(block.df, df, by = block)
-      samp.glm <- try(glm(model, data = samp.df, family = family))
-      if (inherits(samp.glm, "try-error")) {
-        coef <- NA
-        ate <- NA
-        rr <- NA
-        c(coef, ate, rr)
-      }
-      else {
-        df2 <- samp.df
-        df2[, paste(treat)] = 1
-        pred1. <- predict.glm(samp.glm, newdata = df2, 
-          type = "response")
-        df2[, paste(treat)] = 0
-        pred0. <- predict.glm(samp.glm, newdata = df2, 
-          type = "response")
-        coef <- samp.glm$coefficients[paste0(treat)]
-        ate <- mean(pred1.) - mean(pred0.)
-        rr <- mean(pred1.)/mean(pred0.)
-        c(coef, ate, rr)
-      }
-    }
-    boot.m <- boot(data = Groups, statistic = boot.mod, 
-      R = R, model = model, treat = treat, df = df, block = block)
-  }
-  m1.confint <- c(model$coefficients[paste0(treat)], confint(model, 
-    treat, level = 0.95))
-  coeff = boot.ci(boot.m, index = 1, type = "perc")
-  coeff = c(median(boot.m$t[, 1]), coeff$percent[, 4], coeff$percent[, 
-    5])
-  names(coeff) <- c("Coeff.", "2.5%", "97.5%")
-  ate = boot.ci(boot.m, index = 2, type = "perc")
-  ate = c(median(boot.m$t[, 2]), ate$percent[, 4], ate$percent[, 
-    5])
-  names(ate) <- c("ATE", "2.5%", "97.5%")
-  rr = boot.ci(boot.m, index = 3, type = "perc")
-  rr = c(median(boot.m$t[, 3]), rr$percent[, 4], rr$percent[, 
-    5])
-  names(rr) <- c("Rr", "2.5%", "97.5%")
-  boot.iter = boot.m$t
-  res = list(level = 0.95, model_ci = m1.confint, coeff = coeff, 
-    ate = ate, rr = rr, boots = boot.iter)
-  return(res)
-  ##############################################
-## Testing coefficients in time-series data ##
-##############################################
-
-## Load investment equation data:
-data(Investment)
-
-# Fit regression model:
-fm.inv <- lm(RealInv ~ RealGNP + RealInt, data = Investment)
-
-## Test coefficients using Newey-West HAC estimator with
-## user-defined and data-driven bandwidth and with Parzen kernel:
-coeftest(fm.inv, df = Inf, vcov = NeweyWest(fm.inv, lag = 4, prewhite = FALSE))
-coeftest(fm.inv, df = Inf, vcov = NeweyWest)
-
-parzenHAC <- function(x, ...) kernHAC(x, kernel = "Parzen", prewhite = 2,
-  adjust = FALSE, bw = bwNeweyWest, ...)
-coeftest(fm.inv, df = Inf, vcov = parzenHAC)
-
-## Time-series visualization:
-plot(Investment[, "RealInv"], type = "b", pch = 19, ylab = "Real investment")
-lines(ts(fitted(fm.inv), start = 1964), col = 4)
-
-## 3-dimensional visualization:
-library(scatterplot3d)
-s3d <- scatterplot3d(Investment[,c(5,7,6)],
-  type = "b", angle = 65, scale.y = 1, pch = 16)
-s3d$plane3d(fm.inv, lty.box = "solid", col = 4)
-
-
-
-###########################################################
-## Testing and dating structural changes in the presence ##
-## of heteroskedasticity and autocorrelation             ##
-###########################################################
-
-## Load real interest series:
-data(RealInt)
-
-## OLS-based CUSUM test with quadratic spectral kernel HAC estimate:
-ocus <- gefp(RealInt ~ 1, fit = lm, vcov = kernHAC)
-plot(ocus, aggregate = FALSE)
-sctest(ocus)
-
-## supF test with quadratic spectral kernel HAC estimate:
-fs <- Fstats(RealInt ~ 1, vcov = kernHAC)
-plot(fs)
-sctest(fs)
-
-## Breakpoint estimation and confidence intervals
-## with quadratic spectral kernel HAC estimate:
-bp <- breakpoints(RealInt ~ 1)
-confint(bp, vcov = kernHAC)
-plot(bp)
-
-## Visualization:
-plot(RealInt, ylab = "Real interest rate")
-lines(ts(fitted(bp), start = start(RealInt), freq = 4), col = 4)
-lines(confint(bp, vcov = kernHAC))
-}
+```
+## 
+## Call:
+## lm(formula = Expenditure ~ Income + Income2, data = df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -160.709  -36.896   -4.551   37.290  109.729 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)   
+## (Intercept)    832.9      475.4   2.545  0.01428 * 
+## Income       -1834.2     1282.1  -2.213  0.03182 * 
+## Income2       1587.0      856.1   3.057  0.00368 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 56.68 on 47 degrees of freedom
+## Multiple R-squared:  0.6553,	Adjusted R-squared:  0.6407 
+## F-statistic: 44.68 on 2 and 47 DF,  p-value: 1.345e-11
 ```
 
-## Stata comparison  
-A full discussion of STATA programming can be seen here:   http://www.kellogg.northwestern.edu/faculty/petersen/htm/papers/se/se_programming.htm  
-STATA blog:  
-http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
-
-Briefly: In Stata one can specify a variance-covariance matrix that is heteroskedastic consistent with the *vce(robust)* option in regression models.  
-
-
-e.g. robust option in STATA    
-```{}
-regress y x, vce(robust)
-```
-
-A Huber-White variance-covariance matrix can also be computed by some group with the **vce(cluster *group*)** option in regression models.  
-
-e.g. cluster option in STATA  
-```{}
-regress y x, vce(cluster group)
-```
-
-See:  
-http://www.stata.com/support/faqs/statistics/standard-errors-and-vce-cluster-option/  
 
 ## Acknowledgements  
 This chapter is heavily adapted from several StackExchange and other blog posts.
