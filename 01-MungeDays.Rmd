@@ -18,11 +18,11 @@ require("grid", quietly=T, warn.conflicts = F)
 
 I often come across the following issue in my work:  
 
-  I am provided with a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, I need to reshape and summarize these individual records into counts in a panel dataset. In this new dataset structure I want each row to be a unique time- group- summary of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).  
+  Sometimes you are working with a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, perhaps you are more interesting in analyzing group-level changes over time. In order to do this, you need to reshape and summarize these individual records into counts in a "panel" dataset. In this new dataset structure I want each row to be a unique time- group- summary of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).  
 
 ## Construct dataset  
 
-First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because hypothetically you stop collecting info at this point). Each entry will then have a random group classification (state), and event (0 or 1).    
+First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).    
 ```{r TestData}
 df <- data.frame(id=1:10000,
                  CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, 10000))
@@ -35,7 +35,7 @@ df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/1
 ```
 
 ## Show Data
-```{r Entry Date, warnings=F}
+```{r EntryDate, warnings=F}
 #Scatter and Fitted Line 
 p1 <- ggplot(data=df, aes(x=CohortEntry)) + 
   geom_histogram(aes(y = ..density..), binwidth = 5, fill=I("blue"), alpha=I(0.4)) +
@@ -53,6 +53,34 @@ grid.arrange(p1, p2, nrow=1)
   A simple, even distribution to work with (cohort exit is even except censored at study end date).  
   
 ## Reshape Process
+
+If you simply seek to count the total no. of records by groups this is simple. 
+
+### Simple group counts
+```{r ByGroup}
+  dfGroup <- df %>%
+    group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
+      summarize(Records = n()) #count individuals
+  cat("Counts of Records by State")
+  head(dfGroup, n=10)
+```
+If you wish to count records this is about as simple, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
+
+### Cohort entries by year count
+```{r ByYear}
+#First make year var
+df <- df %>%
+  mutate(EntryYear = year(CohortEntry)) #year function from lubridate
+  
+#Second group by this var
+dfGroup <- df %>%    
+  group_by(EntryYear) %>%       
+  summarize(Records = n()) #count individuals  
+  cat("Counts of Records by Cohort Entry Year")  
+  head(dfGroup, n=10)
+```
+
+
 
 ### Calculate time distance  
 ```{r newVars}
