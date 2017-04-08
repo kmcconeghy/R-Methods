@@ -8,13 +8,13 @@ require("Scotty", quietly=T, warn.conflicts = F)
 mu <- markupSpecs$html  
 require("knitr", quietly=T, warn.conflicts = F)
 require("lubridate", quietly=T, warn.conflicts = F)
-require("grid", quietly=T, warn.conflicts = F)
+require("gridExtra", quietly=T, warn.conflicts = F)
 ```
+
+## Introduction  
 
 ### Packages to use  
 `r mu$session(cite=F)`  
-
-## Introduction  
 
 I often come across the following issue in my work:  
 
@@ -28,43 +28,68 @@ df <- data.frame(id=1:10000,
                  CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, 10000))
 df <- df %>%
     mutate(CohortExit = CohortEntry+sample(0:365,10000, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
-    mutate(Group = sample(state.name, 10000, replace=T)) %>% #Random state for each group
-    mutate(Event = sample(0:1, 10000, replace=T))
+    mutate(State = sample(state.name, 10000, replace=T)) %>% #Random state for each group
+    mutate(Event = as.integer(rbernoulli(10000,p=0.1))) #randomly assign 10% to event
+  
+  df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
 
-df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
+  #For more complicated procedures below, reassign event=1 to a random date between cohort start and end, and event=0 to NA
+  randomDate <- function(TimeIn, TimeOut, Event) {
+    RDate <- sample(TimeIn:TimeOut, 1, replace=T)
+    RDate <- ifelse(Event==0,NA,RDate)
+    return(RDate)
+  }
+  
+  df$EventDate = sapply(df$id, function(x) randomDate(df$CohortEntry[x], df$CohortExit[x], df$Event[x]))
+  df$EventDate = as.Date(df$EventDate, origin=origin)
+kable(head(df, n=10), align=c('c'))
 ```
 
 ## Show Data
-```{r EntryDate, warnings=F}
+```{r EntryDate, fig.width=8, warnings=F}
 #Scatter and Fitted Line 
 p1 <- ggplot(data=df, aes(x=CohortEntry)) + 
-  geom_histogram(aes(y = ..density..), binwidth = 5, fill=I("blue"), alpha=I(0.4)) +
+  geom_histogram(aes(y = ..density..), binwidth = 4, fill=I("blue"), alpha=I(0.4)) +
   geom_density(col=2) +
   xlab("Cohort Entry") +
   theme_bw()
 
 p2 <- ggplot(data=df, aes(x=CohortExit)) + 
-  geom_histogram(aes(y = ..density..), binwidth = 5, fill=I("blue"), alpha=I(0.4)) +
+  geom_histogram(aes(y = ..density..), binwidth = 4, fill=I("blue"), alpha=I(0.4)) +
   geom_density(col=2) +
   xlab("Cohort Exit") +
   theme_bw()
 grid.arrange(p1, p2, nrow=1)
 ```
-  A simple, even distribution to work with (cohort exit is even except censored at study end date).  
+  A simple, even distribution to work with (cohort exit is even except for censored at study end date).  
   
-## Reshape Process
+## Reshape Process  
 
-If you simply seek to count the total no. of records by groups this is simple. 
+If you simply seek to count the total no. of records by groups this is simple.  
 
-### Simple group counts
+### Simple group counts  
 ```{r ByGroup}
-  dfGroup <- df %>%
+  dfState <- df %>%
     group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
-      summarize(Records = n()) #count individuals
+      summarise(Records = n()) #count individuals
+  
   cat("Counts of Records by State")
-  head(dfGroup, n=10)
+  kable(head(dfState, n=10), align=c('c'))
 ```
-If you wish to count records this is about as simple, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
+
+Also, if you wish to see the quantity of some event, this is easy also:  
+
+#### Simple Event Counts  
+```{r ByGroup}
+  dfState <- df %>%
+    group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
+      summarise(Events = sum(Event)) #count no of events
+  
+  cat("Counts of Events by State")
+  kable(head(dfState, n=10), align=c('c'))
+```
+
+If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
 
 ### Cohort entries by year counts
 ```{r ByYear}
@@ -73,16 +98,64 @@ df <- df %>%
   mutate(EntryYear = year(CohortEntry)) #year function from lubridate
   
 #Second group by this var
-dfGroup <- df %>%    
-  group_by(EntryYear) %>%       
-  summarize(Records = n()) #count individuals  
-  cat("Counts of Records by Cohort Entry Year")  
-  head(dfGroup, n=10)
+dfGroup <- df %>% 
+  group_by(EntryYear) %>%  
+  summarise(Records = n(), Events = sum(Event)) #count individuals
+  cat("Counts of Records by Cohort Entry Year")
+  kable(head(dfGroup, n=10), align=c('c'))
 ```
 
+### Cohort prevalence by time
 
+The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many total patients are in the cohort during a specified period of time (e.g. year). This is like "point prevalence", in the sense that we are measuring the number of cohort individuals in a given time interval (point prevalence is usually the no. of diseased / total population). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case).  
 
-### Calculate time distance  
+Here is one method where I compute the "prevalent"" cohort, no. events and event rate:  
+```{r cohortprev}
+  #Create New Dataframe by Time Unit
+  TimeMin <- min(year(df$CohortEntry)) #lowest time unit observed
+  TimeMax <- max(year(df$CohortExit)) #highest time unit observed
+  
+  #This following sequence step is good, in case a certain year was skipped (i.e. no admits that year)
+  dfTime <- TimeMin:TimeMax %>% #Sequence years
+    as_tibble() %>%
+    mutate(x2 = NA, x3 = NA)
+    names(dfTime) <- c("Year", "Residents", "Events")
+    
+  
+  #Write a time-interval program (assuming x is year)
+  InCohort <-  function(x, TimeIn, TimeOut) {
+    #Note that the following line works because of R vectorization
+    count <- if_else(x>=year(TimeIn) & x<=year(TimeOut),1,0) #Test if x is TimeIn<=x<=TimeOut
+    InCohortN <- sum(count) #Add up total people
+    return(InCohortN) #return
+  }
+  InEvent <-  function(x, Event, EventDate) {
+    #Note that the following line works because of R vectorization
+    events <- if_else(Event==1 & x==year(EventDate),1,0) #Added condition of event==1
+    InCohortEvents <- sum(events) #Add up total events in that year
+    return(InCohortEvents) #return
+  }
+  dfTime$Residents <- sapply(dfTime$Year, function(x) InCohort(x, df$CohortEntry,df$CohortExit))
+  dfTime$Events <- sapply(dfTime$Year, function(x) InEvent(x, df$Event, df$EventDate))
+  dfTime$'Event Rate' <- dfTime$Events / dfTime$Residents
+  #Calculate events
+  #eventnum <- df %?%
+  
+  cat("No. of individuals in the cohort by year")
+  kable(head(dfTime, n=10), align=c('c'), digits=3)
+```
+
+We can double-check this worked with the following specific code:  
+```{r checkprev}
+  #Logic
+  # IF 2004 is less than or equal to EntryDate (i.e. they entered before or during 2004)
+  # AND 2004 is less than or equal to Exit (i.e. they exited after or during 2004)
+  Check <- ifelse(2004>=year(df$CohortEntry) & 2004<=year(df$CohortExit),1,0)
+  cat("2004 people :", sum(Check))
+```
+
+### Incidence Density  
+
 ```{r newVars}
 df <- df %>%
     mutate(TimeDiff = as.integer(CohortExit - CohortEntry)) #timeDiff
