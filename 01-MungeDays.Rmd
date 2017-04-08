@@ -68,6 +68,7 @@ grid.arrange(p1, p2, nrow=1)
 If you simply seek to count the total no. of records by groups this is simple.  
 
 ### Simple group counts  
+
 ```{r ByGroup}
   dfState <- df %>%
     group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
