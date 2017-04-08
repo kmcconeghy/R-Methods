@@ -109,6 +109,7 @@ grid.arrange(p1, p2, nrow=1)
 ```
 
 <img src="01-MungeDays_files/figure-html/EntryDate-1.png" width="768" />
+  
   A simple, even distribution to work with (cohort exit is even except for censored at study end date).  
 
 ## Simple group counts  
@@ -179,7 +180,7 @@ Also, if you wish to see the quantity of some event, this is easy also:
    Florida       113   
    Georgia        59   
 
-Note how the number of events is quite different by group, because we specified this above. If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
+Note how the number of events is quite different by group, because we specified this above. If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of cohort entries by year, this is how:
 
 ## Cohort entries by year counts  
 
@@ -223,7 +224,7 @@ Here you can see the number who enter the cohort by year, and among those how ma
 
 ## Incidence
 
-The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)) So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
+The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
 
 Here is one method where I compute the no. of persons in the cohort in a given year, "incident" events and event rate:  
 
@@ -233,7 +234,8 @@ Here is one method where I compute the no. of persons in the cohort in a given y
   TimeMin <- min(year(df$CohortEntry)) #lowest time unit observed
   TimeMax <- max(year(df$CohortExit)) #highest time unit observed
   
-  #This following sequence step is good, in case a certain year was skipped (i.e. no admits that year)
+  #This following sequence step is good, in case a certain year was skipped 
+  #(i.e. no admits that year)
   dfTime <- TimeMin:TimeMax %>% #Sequence years
     as_tibble() %>%
     mutate(x2 = NA, x3 = NA)
@@ -317,8 +319,8 @@ Here's how:
   
   #Write a time-interval program for Event
   PrevEvent <-  function(x, TimeIn, TimeOut, Event, EventDate) {
-    #Note that the following line works because of R vectorization
-    events <- if_else(x>=year(TimeIn) & x<=year(TimeOut) & Event==1 & x>=year(EventDate),1,0) 
+    #Key difference follows: 
+    events <- if_else(x>=year(TimeIn) & x<=year(TimeOut) & Event==1 & x>=year(EventDate),1,0)
     InCohortEvents <- sum(events) #Add up total events in that year
     return(InCohortEvents) #return
   }
@@ -348,7 +350,7 @@ Note how the prevalence rate is higher, because you are counting events which ha
 
 ## Incidence Density  
 
-The next goal is to report not the number of events per total population in a given time interval, but rather the number of events per person time. This is sometimes called [incidence density](https://en.wikipedia.org/wiki/Incidence_(epidemiology)), for example reported as "x events per 100-person years". Conceptually you are saying you would on average expect x events in 1 person followed for 100 years, or x events in 100 person followed for one year. This can be very useful when there is differing time accrued by the unit of observation (person, admission etc.). However, the relevance and interpretability of this measure is very specific to the thing being studied, i.e. it may not be a reasonable assumption that the event rate is constant over 100 years!  
+The next goal is to report not the number of events per total population in a given time interval, but rather the number of events per person time. This is sometimes called [incidence density](https://en.wikipedia.org/wiki/Incidence_(epidemiology)), often reported as "x events per 100-person years". Conceptually you are saying you would on average expect x events in 1 person followed for 100 years, or x events in 100 persons followed for one year. This can be very useful when there is differing time accrued by the unit of observation (person, admission etc.). However, the relevance and interpretability of this measure is very specific to the thing being studied, i.e. it may not be a reasonable assumption that the event rate is constant over 100 years!  
 
 The key new measure here is person-time, heres how to compute it:
 
@@ -378,7 +380,7 @@ dfGroup <- df %>%
    2008        1974          364829     
    2009        1956          236663     
 
-That was easy! person- or unit-time accrued is simply `TimeOut - TimeIn`. However, note we are reporting person-time by the year individuals entered the cohort, not an actual interval of time. It gets more complicated if you want to report aggregated person-time by some time interval. Because our individuals cross years, some of their person time accrues to one or more years.  
+That was easy! person- or unit-time accrued is simply `CohortExit - CohortEntry`. However, note we are reporting person-time by the year individuals entered the cohort, not an actual interval of time. It gets more complicated if you want to report aggregated person-time by some time interval. Because our individuals cross years, some of their person time accrues to one or more years.  
 
 Here is how to do this:  
 
@@ -398,7 +400,8 @@ Here is how to do this:
     return(InCohortN) 
   }
 
-  dfTime$Residents <- sapply(dfTime$Year, function(x) InCohort(x, df$CohortEntry,df$CohortExit)) #Number of residents
+  dfTime$Residents <- sapply(dfTime$Year, function(x) 
+    InCohort(x, df$CohortEntry,df$CohortExit)) #Number of residents
   
   IncEvent <-  function(x, Event, EventDate) {
     #Note that the following line works because of R vectorization
@@ -407,16 +410,29 @@ Here is how to do this:
     return(InCohortEvents) #return
   }
   
-  dfTime$'Inc. Events' <- sapply(dfTime$Year, function(x) IncEvent(x, df$Event, df$EventDate))
+  dfTime$'Inc. Events' <- sapply(dfTime$Year, function(x) 
+    IncEvent(x, df$Event, df$EventDate))
 
   #Function to compute person time
   TimeInCohort <- function(x, TimeIn, TimeOut) {
-    DaysInYear <- ifelse(x>=year(TimeIn) & x<=year(TimeOut), 
-                         as.Date(paste0('12/31/',x), format='%m/%d/%Y', origin=origin) - TimeIn,0) 
-    InCohortN <- sum(DaysInYear) 
-    return(InCohortN)
+    
+    #Key steps here:
+    FirstDay <- as.Date(paste0('01/01/',x), format='%m/%d/%Y', origin=origin)
+    LastDay <- as.Date(paste0('12/31/',x), format='%m/%d/%Y', origin=origin)
+    
+    #Compute starting point as either first day of year or TimeIn 
+    #if TimeIn is > FirstDay
+    #'' opposite for Year Stop
+    YearStart <- sapply(TimeIn, function(x) max(x, FirstDay))
+    YearStop <- sapply(TimeOut, function(x) min(x, LastDay))
+    
+    #Compute DaysInYear, if present in that year
+    DaysInYear  <- ifelse(x>=year(TimeIn) & x<=year(TimeOut), YearStop - YearStart, 0)
+    InCohortDays <- sum(DaysInYear) 
+    return(InCohortDays)
   }  
-  dfTime$'Person Time' <- sapply(dfTime$Year, function(x) TimeInCohort(x, df$CohortEntry,df$CohortExit)) #Person time per year
+  dfTime$'Person Time' <- sapply(dfTime$Year, function(x) 
+    TimeInCohort(x, df$CohortEntry,df$CohortExit)) #Person time per year
   
 
   kable(head(dfTime, n=10), align=c('c'))
@@ -426,16 +442,16 @@ Here is how to do this:
 
  Year    Residents    Inc. Events    Person Time 
 ------  -----------  -------------  -------------
- 2000      2015           200          367878    
- 2001      2981           271          843416    
- 2002      3040           284          853309    
- 2003      2951           291          846012    
- 2004      3034           283          854106    
- 2005      3063           299          861300    
- 2006      2956           295          837608    
- 2007      2986           301          836904    
- 2008      2972           294          845422    
- 2009      2945           373          832564    
+ 2000      2015           200          242146    
+ 2001      2981           271          363133    
+ 2002      3040           284          364779    
+ 2003      2951           291          357520    
+ 2004      3034           283          360320    
+ 2005      3063           299          369744    
+ 2006      2956           295          353797    
+ 2007      2986           301          365960    
+ 2008      2972           294          362423    
+ 2009      2945           373          358655    
 
 Then from this computing the incidence density rate is trivial, and you can report as some arbitrary quantity (i.e. per 100 years).  
 
@@ -455,15 +471,15 @@ Then from this computing the incidence density rate is trivial, and you can repo
 
  Year    Residents    Inc. Events    Person Time    Incidence Density    Event rate per 100 person years 
 ------  -----------  -------------  -------------  -------------------  ---------------------------------
- 2000      2015           200          367878             5e-04                      19.8435             
- 2001      2981           271          843416             3e-04                      11.7279             
- 2002      3040           284          853309             3e-04                      12.1480             
- 2003      2951           291          846012             3e-04                      12.5548             
- 2004      3034           283          854106             3e-04                      12.0939             
- 2005      3063           299          861300             3e-04                      12.6710             
- 2006      2956           295          837608             4e-04                      12.8551             
- 2007      2986           301          836904             4e-04                      13.1276             
- 2008      2972           294          845422             3e-04                      12.6931             
- 2009      2945           373          832564             4e-04                      16.3525             
+ 2000      2015           200          242146             8e-04                      30.1471             
+ 2001      2981           271          363133             7e-04                      27.2393             
+ 2002      3040           284          364779             8e-04                      28.4172             
+ 2003      2951           291          357520             8e-04                      29.7088             
+ 2004      3034           283          360320             8e-04                      28.6676             
+ 2005      3063           299          369744             8e-04                      29.5164             
+ 2006      2956           295          353797             8e-04                      30.4341             
+ 2007      2986           301          365960             8e-04                      30.0210             
+ 2008      2972           294          362423             8e-04                      29.6090             
+ 2009      2945           373          358655             1e-03                      37.9599             
 
 The intepretation "In 2003, the event rate per 100 person-years was 12.1" or "In 2003, the 1-year risk of an event is 12.1 per 100 persons".  

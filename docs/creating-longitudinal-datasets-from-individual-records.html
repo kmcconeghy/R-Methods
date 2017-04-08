@@ -350,7 +350,8 @@ p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cohort Exit&quot;</span>) +
 <span class="st">  </span><span class="kw">theme_bw</span>()
 <span class="kw">grid.arrange</span>(p1, p2, <span class="dt">nrow=</span><span class="dv">1</span>)</code></pre></div>
-<p><img src="01-MungeDays_files/figure-html/EntryDate-1.png" width="768" /> A simple, even distribution to work with (cohort exit is even except for censored at study end date).</p>
+<p><img src="01-MungeDays_files/figure-html/EntryDate-1.png" width="768" /></p>
+<p>A simple, even distribution to work with (cohort exit is even except for censored at study end date).</p>
 </div>
 <div id="simple-group-counts" class="section level2">
 <h2><span class="header-section-number">2.4</span> Simple group counts</h2>
@@ -472,7 +473,7 @@ p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </tr>
 </tbody>
 </table>
-<p>Note how the number of events is quite different by group, because we specified this above. If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:</p>
+<p>Note how the number of events is quite different by group, because we specified this above. If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of cohort entries by year, this is how:</p>
 </div>
 </div>
 <div id="cohort-entries-by-year-counts" class="section level2">
@@ -553,13 +554,14 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 </div>
 <div id="incidence" class="section level2">
 <h2><span class="header-section-number">2.6</span> Incidence</h2>
-<p>The next step will get a little trickier. Let’s say we aren’t interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the “population at risk”. We wish to estimate the the number of events / population at risk. This is <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence</a> So we need to take the “CohortEntry”, “CohortExit” date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don’t start and stop at the same time and cross multiple time units (years in this case).</p>
+<p>The next step will get a little trickier. Let’s say we aren’t interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the “population at risk”. We wish to estimate the the number of events / population at risk. This is <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence</a>. So we need to take the “CohortEntry”, “CohortExit” date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don’t start and stop at the same time and cross multiple time units (years in this case).</p>
 <p>Here is one method where I compute the no. of persons in the cohort in a given year, “incident” events and event rate:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Create New Dataframe by Time Unit</span>
   TimeMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) <span class="co">#lowest time unit observed</span>
   TimeMax &lt;-<span class="st"> </span><span class="kw">max</span>(<span class="kw">year</span>(df$CohortExit)) <span class="co">#highest time unit observed</span>
   
-  <span class="co">#This following sequence step is good, in case a certain year was skipped (i.e. no admits that year)</span>
+  <span class="co">#This following sequence step is good, in case a certain year was skipped </span>
+  <span class="co">#(i.e. no admits that year)</span>
   dfTime &lt;-<span class="st"> </span>TimeMin:TimeMax %&gt;%<span class="st"> </span><span class="co">#Sequence years</span>
 <span class="st">    </span><span class="kw">as_tibble</span>() %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">x2 =</span> <span class="ot">NA</span>, <span class="dt">x3 =</span> <span class="ot">NA</span>)
@@ -686,8 +688,8 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
   
   <span class="co">#Write a time-interval program for Event</span>
   PrevEvent &lt;-<span class="st">  </span>function(x, TimeIn, TimeOut, Event, EventDate) {
-    <span class="co">#Note that the following line works because of R vectorization</span>
-    events &lt;-<span class="st"> </span><span class="kw">if_else</span>(x&gt;=<span class="kw">year</span>(TimeIn) &amp;<span class="st"> </span>x&lt;=<span class="kw">year</span>(TimeOut) &amp;<span class="st"> </span>Event==<span class="dv">1</span> &amp;<span class="st"> </span>x&gt;=<span class="kw">year</span>(EventDate),<span class="dv">1</span>,<span class="dv">0</span>) 
+    <span class="co">#Key difference follows: </span>
+    events &lt;-<span class="st"> </span><span class="kw">if_else</span>(x&gt;=<span class="kw">year</span>(TimeIn) &amp;<span class="st"> </span>x&lt;=<span class="kw">year</span>(TimeOut) &amp;<span class="st"> </span>Event==<span class="dv">1</span> &amp;<span class="st"> </span>x&gt;=<span class="kw">year</span>(EventDate),<span class="dv">1</span>,<span class="dv">0</span>)
     InCohortEvents &lt;-<span class="st"> </span><span class="kw">sum</span>(events) <span class="co">#Add up total events in that year</span>
     <span class="kw">return</span>(InCohortEvents) <span class="co">#return</span>
   }
@@ -772,7 +774,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 </div>
 <div id="incidence-density" class="section level2">
 <h2><span class="header-section-number">2.8</span> Incidence Density</h2>
-<p>The next goal is to report not the number of events per total population in a given time interval, but rather the number of events per person time. This is sometimes called <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence density</a>, for example reported as “x events per 100-person years”. Conceptually you are saying you would on average expect x events in 1 person followed for 100 years, or x events in 100 person followed for one year. This can be very useful when there is differing time accrued by the unit of observation (person, admission etc.). However, the relevance and interpretability of this measure is very specific to the thing being studied, i.e. it may not be a reasonable assumption that the event rate is constant over 100 years!</p>
+<p>The next goal is to report not the number of events per total population in a given time interval, but rather the number of events per person time. This is sometimes called <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence density</a>, often reported as “x events per 100-person years”. Conceptually you are saying you would on average expect x events in 1 person followed for 100 years, or x events in 100 persons followed for one year. This can be very useful when there is differing time accrued by the unit of observation (person, admission etc.). However, the relevance and interpretability of this measure is very specific to the thing being studied, i.e. it may not be a reasonable assumption that the event rate is constant over 100 years!</p>
 <p>The key new measure here is person-time, heres how to compute it:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">PerTime =</span> <span class="kw">as.integer</span>(CohortExit -<span class="st"> </span>CohortEntry)) <span class="co">#timeDiff</span>
@@ -842,7 +844,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 </tr>
 </tbody>
 </table>
-<p>That was easy! person- or unit-time accrued is simply <code>TimeOut - TimeIn</code>. However, note we are reporting person-time by the year individuals entered the cohort, not an actual interval of time. It gets more complicated if you want to report aggregated person-time by some time interval. Because our individuals cross years, some of their person time accrues to one or more years.</p>
+<p>That was easy! person- or unit-time accrued is simply <code>CohortExit - CohortEntry</code>. However, note we are reporting person-time by the year individuals entered the cohort, not an actual interval of time. It gets more complicated if you want to report aggregated person-time by some time interval. Because our individuals cross years, some of their person time accrues to one or more years.</p>
 <p>Here is how to do this:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Code same as above</span>
   TimeMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) 
@@ -858,7 +860,8 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
     <span class="kw">return</span>(InCohortN) 
   }
 
-  dfTime$Residents &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) <span class="kw">InCohort</span>(x, df$CohortEntry,df$CohortExit)) <span class="co">#Number of residents</span>
+  dfTime$Residents &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) 
+    <span class="kw">InCohort</span>(x, df$CohortEntry,df$CohortExit)) <span class="co">#Number of residents</span>
   
   IncEvent &lt;-<span class="st">  </span>function(x, Event, EventDate) {
     <span class="co">#Note that the following line works because of R vectorization</span>
@@ -867,16 +870,29 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
     <span class="kw">return</span>(InCohortEvents) <span class="co">#return</span>
   }
   
-  dfTime$<span class="st">&#39;Inc. Events&#39;</span> &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) <span class="kw">IncEvent</span>(x, df$Event, df$EventDate))
+  dfTime$<span class="st">&#39;Inc. Events&#39;</span> &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) 
+    <span class="kw">IncEvent</span>(x, df$Event, df$EventDate))
 
   <span class="co">#Function to compute person time</span>
   TimeInCohort &lt;-<span class="st"> </span>function(x, TimeIn, TimeOut) {
-    DaysInYear &lt;-<span class="st"> </span><span class="kw">ifelse</span>(x&gt;=<span class="kw">year</span>(TimeIn) &amp;<span class="st"> </span>x&lt;=<span class="kw">year</span>(TimeOut), 
-                         <span class="kw">as.Date</span>(<span class="kw">paste0</span>(<span class="st">&#39;12/31/&#39;</span>,x), <span class="dt">format=</span><span class="st">&#39;%m/%d/%Y&#39;</span>, <span class="dt">origin=</span>origin) -<span class="st"> </span>TimeIn,<span class="dv">0</span>) 
-    InCohortN &lt;-<span class="st"> </span><span class="kw">sum</span>(DaysInYear) 
-    <span class="kw">return</span>(InCohortN)
+    
+    <span class="co">#Key steps here:</span>
+    FirstDay &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">paste0</span>(<span class="st">&#39;01/01/&#39;</span>,x), <span class="dt">format=</span><span class="st">&#39;%m/%d/%Y&#39;</span>, <span class="dt">origin=</span>origin)
+    LastDay &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">paste0</span>(<span class="st">&#39;12/31/&#39;</span>,x), <span class="dt">format=</span><span class="st">&#39;%m/%d/%Y&#39;</span>, <span class="dt">origin=</span>origin)
+    
+    <span class="co">#Compute starting point as either first day of year or TimeIn </span>
+    <span class="co">#if TimeIn is &gt; FirstDay</span>
+    <span class="co">#&#39;&#39; opposite for Year Stop</span>
+    YearStart &lt;-<span class="st"> </span><span class="kw">sapply</span>(TimeIn, function(x) <span class="kw">max</span>(x, FirstDay))
+    YearStop &lt;-<span class="st"> </span><span class="kw">sapply</span>(TimeOut, function(x) <span class="kw">min</span>(x, LastDay))
+    
+    <span class="co">#Compute DaysInYear, if present in that year</span>
+    DaysInYear  &lt;-<span class="st"> </span><span class="kw">ifelse</span>(x&gt;=<span class="kw">year</span>(TimeIn) &amp;<span class="st"> </span>x&lt;=<span class="kw">year</span>(TimeOut), YearStop -<span class="st"> </span>YearStart, <span class="dv">0</span>)
+    InCohortDays &lt;-<span class="st"> </span><span class="kw">sum</span>(DaysInYear) 
+    <span class="kw">return</span>(InCohortDays)
   }  
-  dfTime$<span class="st">&#39;Person Time&#39;</span> &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) <span class="kw">TimeInCohort</span>(x, df$CohortEntry,df$CohortExit)) <span class="co">#Person time per year</span>
+  dfTime$<span class="st">&#39;Person Time&#39;</span> &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) 
+    <span class="kw">TimeInCohort</span>(x, df$CohortEntry,df$CohortExit)) <span class="co">#Person time per year</span>
   
 
   <span class="kw">kable</span>(<span class="kw">head</span>(dfTime, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>))</code></pre></div>
@@ -894,61 +910,61 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">2000</td>
 <td align="center">2015</td>
 <td align="center">200</td>
-<td align="center">367878</td>
+<td align="center">242146</td>
 </tr>
 <tr class="even">
 <td align="center">2001</td>
 <td align="center">2981</td>
 <td align="center">271</td>
-<td align="center">843416</td>
+<td align="center">363133</td>
 </tr>
 <tr class="odd">
 <td align="center">2002</td>
 <td align="center">3040</td>
 <td align="center">284</td>
-<td align="center">853309</td>
+<td align="center">364779</td>
 </tr>
 <tr class="even">
 <td align="center">2003</td>
 <td align="center">2951</td>
 <td align="center">291</td>
-<td align="center">846012</td>
+<td align="center">357520</td>
 </tr>
 <tr class="odd">
 <td align="center">2004</td>
 <td align="center">3034</td>
 <td align="center">283</td>
-<td align="center">854106</td>
+<td align="center">360320</td>
 </tr>
 <tr class="even">
 <td align="center">2005</td>
 <td align="center">3063</td>
 <td align="center">299</td>
-<td align="center">861300</td>
+<td align="center">369744</td>
 </tr>
 <tr class="odd">
 <td align="center">2006</td>
 <td align="center">2956</td>
 <td align="center">295</td>
-<td align="center">837608</td>
+<td align="center">353797</td>
 </tr>
 <tr class="even">
 <td align="center">2007</td>
 <td align="center">2986</td>
 <td align="center">301</td>
-<td align="center">836904</td>
+<td align="center">365960</td>
 </tr>
 <tr class="odd">
 <td align="center">2008</td>
 <td align="center">2972</td>
 <td align="center">294</td>
-<td align="center">845422</td>
+<td align="center">362423</td>
 </tr>
 <tr class="even">
 <td align="center">2009</td>
 <td align="center">2945</td>
 <td align="center">373</td>
-<td align="center">832564</td>
+<td align="center">358655</td>
 </tr>
 </tbody>
 </table>
@@ -977,81 +993,81 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">2000</td>
 <td align="center">2015</td>
 <td align="center">200</td>
-<td align="center">367878</td>
-<td align="center">5e-04</td>
-<td align="center">19.8435</td>
+<td align="center">242146</td>
+<td align="center">8e-04</td>
+<td align="center">30.1471</td>
 </tr>
 <tr class="even">
 <td align="center">2001</td>
 <td align="center">2981</td>
 <td align="center">271</td>
-<td align="center">843416</td>
-<td align="center">3e-04</td>
-<td align="center">11.7279</td>
+<td align="center">363133</td>
+<td align="center">7e-04</td>
+<td align="center">27.2393</td>
 </tr>
 <tr class="odd">
 <td align="center">2002</td>
 <td align="center">3040</td>
 <td align="center">284</td>
-<td align="center">853309</td>
-<td align="center">3e-04</td>
-<td align="center">12.1480</td>
+<td align="center">364779</td>
+<td align="center">8e-04</td>
+<td align="center">28.4172</td>
 </tr>
 <tr class="even">
 <td align="center">2003</td>
 <td align="center">2951</td>
 <td align="center">291</td>
-<td align="center">846012</td>
-<td align="center">3e-04</td>
-<td align="center">12.5548</td>
+<td align="center">357520</td>
+<td align="center">8e-04</td>
+<td align="center">29.7088</td>
 </tr>
 <tr class="odd">
 <td align="center">2004</td>
 <td align="center">3034</td>
 <td align="center">283</td>
-<td align="center">854106</td>
-<td align="center">3e-04</td>
-<td align="center">12.0939</td>
+<td align="center">360320</td>
+<td align="center">8e-04</td>
+<td align="center">28.6676</td>
 </tr>
 <tr class="even">
 <td align="center">2005</td>
 <td align="center">3063</td>
 <td align="center">299</td>
-<td align="center">861300</td>
-<td align="center">3e-04</td>
-<td align="center">12.6710</td>
+<td align="center">369744</td>
+<td align="center">8e-04</td>
+<td align="center">29.5164</td>
 </tr>
 <tr class="odd">
 <td align="center">2006</td>
 <td align="center">2956</td>
 <td align="center">295</td>
-<td align="center">837608</td>
-<td align="center">4e-04</td>
-<td align="center">12.8551</td>
+<td align="center">353797</td>
+<td align="center">8e-04</td>
+<td align="center">30.4341</td>
 </tr>
 <tr class="even">
 <td align="center">2007</td>
 <td align="center">2986</td>
 <td align="center">301</td>
-<td align="center">836904</td>
-<td align="center">4e-04</td>
-<td align="center">13.1276</td>
+<td align="center">365960</td>
+<td align="center">8e-04</td>
+<td align="center">30.0210</td>
 </tr>
 <tr class="odd">
 <td align="center">2008</td>
 <td align="center">2972</td>
 <td align="center">294</td>
-<td align="center">845422</td>
-<td align="center">3e-04</td>
-<td align="center">12.6931</td>
+<td align="center">362423</td>
+<td align="center">8e-04</td>
+<td align="center">29.6090</td>
 </tr>
 <tr class="even">
 <td align="center">2009</td>
 <td align="center">2945</td>
 <td align="center">373</td>
-<td align="center">832564</td>
-<td align="center">4e-04</td>
-<td align="center">16.3525</td>
+<td align="center">358655</td>
+<td align="center">1e-03</td>
+<td align="center">37.9599</td>
 </tr>
 </tbody>
 </table>
