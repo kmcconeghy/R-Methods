@@ -306,4 +306,4 @@ Then from this computing the incidence density rate is trivial, and you can repo
   kable(head(dfTime, n=10), align=c('c'), digits = 4)
 ```
 
-The intepretation "In 2003, the event rate per 100 person-years was 12.1" or "In 2003, the 1-year risk of an event is 12.1 per 100 persons".  
+The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 2003, the 1-year risk of an event is 29.7 per 100 persons".  
