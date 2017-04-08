@@ -5,6 +5,7 @@
 ## Introduction  
 
 ### Packages to use  
+
 <!--html_preserve--><pre>
  R version 3.3.2 (2016-10-31)
  Platform: x86_64-w64-mingw32/x64 (64-bit)
@@ -29,19 +30,39 @@ I often come across the following issue in my work:
 
 ## Construct dataset  
 
-First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).    
+First I will construct a test dataset to use in this chapter and subsequent ones.  
+
+In this hypothetical I take a group of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).  
+
+The event will be assumed one per admission (E.g. death..). I didn't allow for multiple admissions by person. I then generate the event as drawn from a random bernoulli distribution with probability $p_g$ Where $g$ is a group-specific effect randomly generated from a uniform distribution between 0 and 0.3.       
+
 
 ```r
-df <- data.frame(id=1:10000,
-                 CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, 10000))
+set.seed(12345) #So you get same result
+sampsize = 20000
+df <- data.frame(id=1:sampsize,
+                 CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, sampsize))
+#CohortIn, CohortOut, Group
 df <- df %>%
-    mutate(CohortExit = CohortEntry+sample(0:365,10000, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
-    mutate(State = sample(state.name, 10000, replace=T)) %>% #Random state for each group
-    mutate(Event = as.integer(rbernoulli(10000,p=0.1))) #randomly assign 10% to event
-  
-  df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
+    mutate(CohortExit = CohortEntry+sample(0:365,sampsize, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
+    mutate(State = sample(state.name, sampsize, replace=T)) #Random state for each group
+df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
 
-  #For more complicated procedures below, reassign event=1 to a random date between cohort start and end, and event=0 to NA
+#Group Effect
+  State <- as.data.frame(state.name)
+  State$Effect <- runif(50, min=0, max=0.3) #Random effect by group
+
+#Generate random event by group effect
+  getReffect <- function(df, group) {
+    p <- df[df$'state.name'==group,"Effect"]
+    event = as.integer(rbernoulli(1, p = p))
+    return(event)
+  }
+  
+df$Event <- sapply(df$id, function(x) getReffect(State, df$State[x])) #Generate random event
+
+
+#For more complicated procedures below, assign random event date between cohort start with event=0 to NA
   randomDate <- function(TimeIn, TimeOut, Event) {
     RDate <- sample(TimeIn:TimeOut, 1, replace=T)
     RDate <- ifelse(Event==0,NA,RDate)
@@ -57,16 +78,16 @@ kable(head(df, n=10), align=c('c'))
 
  id    CohortEntry    CohortExit        State         Event    EventDate  
 ----  -------------  ------------  ----------------  -------  ------------
- 1     2003-02-20     2003-07-06       Georgia          0          NA     
- 2     2004-06-10     2004-07-13     South Dakota       0          NA     
- 3     2000-10-10     2001-06-09       Wyoming          1      2001-04-28 
- 4     2006-12-07     2006-12-18       Florida          0          NA     
- 5     2001-01-11     2001-10-28       Illinois         1      2001-09-25 
- 6     2004-12-22     2005-02-11    North Carolina      0          NA     
- 7     2005-11-24     2006-05-22       Maryland         1      2006-01-12 
- 8     2008-09-25     2009-03-03       Nebraska         0          NA     
- 9     2006-01-08     2006-09-28       Oklahoma         0          NA     
- 10    2001-02-15     2001-11-08       Michigan         0          NA     
+ 1     2007-03-18     2007-10-10         Ohio           0          NA     
+ 2     2008-10-04     2009-10-04     Rhode Island       0          NA     
+ 3     2007-08-11     2008-04-24         Ohio           0          NA     
+ 4     2008-11-11     2009-10-26        Nevada          0          NA     
+ 5     2004-07-25     2004-08-29       New York         0          NA     
+ 6     2001-08-30     2002-05-29        Alaska          1      2002-03-23 
+ 7     2003-04-02     2004-02-23    North Carolina      0          NA     
+ 8     2005-02-03     2005-10-02        Maine           0          NA     
+ 9     2007-04-12     2007-06-09       Nebraska         0          NA     
+ 10    2009-11-24     2009-12-31        Maine           0          NA     
 
 ## Show Data
 
@@ -95,6 +116,7 @@ If you simply seek to count the total no. of records by groups this is simple.
 
 ### Simple group counts  
 
+
 ```r
   dfState <- df %>%
     group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
@@ -113,16 +135,16 @@ If you simply seek to count the total no. of records by groups this is simple.
 
     State       Records 
 -------------  ---------
-   Alabama        196   
-   Alaska         213   
-   Arizona        212   
-  Arkansas        188   
- California       204   
-  Colorado        206   
- Connecticut      229   
-  Delaware        212   
-   Florida        187   
-   Georgia        198   
+   Alabama        396   
+   Alaska         393   
+   Arizona        393   
+  Arkansas        385   
+ California       372   
+  Colorado        375   
+ Connecticut      401   
+  Delaware        399   
+   Florida        376   
+   Georgia        401   
 
 Also, if you wish to see the quantity of some event, this is easy also:  
 
@@ -146,16 +168,16 @@ Also, if you wish to see the quantity of some event, this is easy also:
 
     State       Events 
 -------------  --------
-   Alabama        17   
-   Alaska         18   
-   Arizona        21   
-  Arkansas        28   
- California       23   
-  Colorado        17   
- Connecticut      20   
-  Delaware        27   
-   Florida        21   
-   Georgia        20   
+   Alabama        46   
+   Alaska         26   
+   Arizona        19   
+  Arkansas        3    
+ California       5    
+  Colorado        84   
+ Connecticut      61   
+  Delaware       120   
+   Florida       113   
+   Georgia        59   
 
 If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:
 
@@ -185,16 +207,16 @@ dfGroup <- df %>%
 
  EntryYear    Records    Events 
 -----------  ---------  --------
-   2000        1002        97   
-   2001        1011        91   
-   2002         993        86   
-   2003         995       118   
-   2004        1004       100   
-   2005         993       113   
-   2006        1003        89   
-   2007        1008       110   
-   2008         999        96   
-   2009         992       108   
+   2000        2015       274   
+   2001        1987       273   
+   2002        2041       288   
+   2003        1933       295   
+   2004        2043       269   
+   2005        2068       313   
+   2006        1964       285   
+   2007        2019       308   
+   2008        1974       297   
+   2009        1956       293   
 
 ### Cohort prevalence by time
 
@@ -214,13 +236,15 @@ Here is one method where I compute the "prevalent"" cohort, no. events and event
     names(dfTime) <- c("Year", "Residents", "Events")
     
   
-  #Write a time-interval program (assuming x is year)
+  #Write a time-interval program for Residence (assuming x is year)
   InCohort <-  function(x, TimeIn, TimeOut) {
     #Note that the following line works because of R vectorization
     count <- if_else(x>=year(TimeIn) & x<=year(TimeOut),1,0) #Test if x is TimeIn<=x<=TimeOut
     InCohortN <- sum(count) #Add up total people
     return(InCohortN) #return
   }
+  
+  #Write a time-interval program for Event
   InEvent <-  function(x, Event, EventDate) {
     #Note that the following line works because of R vectorization
     events <- if_else(Event==1 & x==year(EventDate),1,0) #Added condition of event==1
@@ -248,18 +272,20 @@ Here is one method where I compute the "prevalent"" cohort, no. events and event
 
  Year    Residents    Events    Event Rate 
 ------  -----------  --------  ------------
- 2000      1002         72        0.072    
- 2001      1498         89        0.059    
- 2002      1481         98        0.066    
- 2003      1486        103        0.069    
- 2004      1516        104        0.069    
- 2005      1497        115        0.077    
- 2006      1495         94        0.063    
- 2007      1516         98        0.065    
- 2008      1499        104        0.069    
- 2009      1496        130        0.087    
+ 2000      2015        200        0.099    
+ 2001      2981        271        0.091    
+ 2002      3040        284        0.093    
+ 2003      2951        291        0.099    
+ 2004      3034        283        0.093    
+ 2005      3063        299        0.098    
+ 2006      2956        295        0.100    
+ 2007      2986        301        0.101    
+ 2008      2972        294        0.099    
+ 2009      2945        373        0.127    
 
+So because I didn't specify a time-trend in my sample generation, it makes sense that the event rate is relatively constant over time.  
 We can double-check this worked with the following specific code:  
+
 
 ```r
   #Logic
@@ -270,7 +296,7 @@ We can double-check this worked with the following specific code:
 ```
 
 ```
-## 2004 people : 1516
+## 2004 people : 3034
 ```
 
 ### Incidence Density  

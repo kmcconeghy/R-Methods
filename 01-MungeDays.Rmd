@@ -14,6 +14,7 @@ require("gridExtra", quietly=T, warn.conflicts = F)
 ## Introduction  
 
 ### Packages to use  
+
 `r mu$session(cite=F)`  
 
 I often come across the following issue in my work:  
@@ -22,18 +23,38 @@ I often come across the following issue in my work:
 
 ## Construct dataset  
 
-First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).    
-```{r TestData}
-df <- data.frame(id=1:10000,
-                 CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, 10000))
-df <- df %>%
-    mutate(CohortExit = CohortEntry+sample(0:365,10000, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
-    mutate(State = sample(state.name, 10000, replace=T)) %>% #Random state for each group
-    mutate(Event = as.integer(rbernoulli(10000,p=0.1))) #randomly assign 10% to event
-  
-  df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
+First I will construct a test dataset to use in this chapter and subsequent ones.  
 
-  #For more complicated procedures below, reassign event=1 to a random date between cohort start and end, and event=0 to NA
+In this hypothetical I take a group of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).  
+
+The event will be assumed one per admission (E.g. death..). I didn't allow for multiple admissions by person. I then generate the event as drawn from a random bernoulli distribution with probability $p_g$ Where $g$ is a group-specific effect randomly generated from a uniform distribution between 0 and 0.3.       
+
+```{r TestData}
+set.seed(12345) #So you get same result
+sampsize = 20000
+df <- data.frame(id=1:sampsize,
+                 CohortEntry = sample(seq(as.Date('2000/01/01'), as.Date('2009/12/31'), by='day'), replace=T, sampsize))
+#CohortIn, CohortOut, Group
+df <- df %>%
+    mutate(CohortExit = CohortEntry+sample(0:365,sampsize, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
+    mutate(State = sample(state.name, sampsize, replace=T)) #Random state for each group
+df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
+
+#Group Effect
+  State <- as.data.frame(state.name)
+  State$Effect <- runif(50, min=0, max=0.3) #Random effect by group
+
+#Generate random event by group effect
+  getReffect <- function(df, group) {
+    p <- df[df$'state.name'==group,"Effect"]
+    event = as.integer(rbernoulli(1, p = p))
+    return(event)
+  }
+  
+df$Event <- sapply(df$id, function(x) getReffect(State, df$State[x])) #Generate random event
+
+
+#For more complicated procedures below, assign random event date between cohort start with event=0 to NA
   randomDate <- function(TimeIn, TimeOut, Event) {
     RDate <- sample(TimeIn:TimeOut, 1, replace=T)
     RDate <- ifelse(Event==0,NA,RDate)
@@ -123,13 +144,15 @@ Here is one method where I compute the "prevalent"" cohort, no. events and event
     names(dfTime) <- c("Year", "Residents", "Events")
     
   
-  #Write a time-interval program (assuming x is year)
+  #Write a time-interval program for Residence (assuming x is year)
   InCohort <-  function(x, TimeIn, TimeOut) {
     #Note that the following line works because of R vectorization
     count <- if_else(x>=year(TimeIn) & x<=year(TimeOut),1,0) #Test if x is TimeIn<=x<=TimeOut
     InCohortN <- sum(count) #Add up total people
     return(InCohortN) #return
   }
+  
+  #Write a time-interval program for Event
   InEvent <-  function(x, Event, EventDate) {
     #Note that the following line works because of R vectorization
     events <- if_else(Event==1 & x==year(EventDate),1,0) #Added condition of event==1
@@ -146,7 +169,9 @@ Here is one method where I compute the "prevalent"" cohort, no. events and event
   kable(head(dfTime, n=10), align=c('c'), digits=3)
 ```
 
+So because I didn't specify a time-trend in my sample generation, it makes sense that the event rate is relatively constant over time.  
 We can double-check this worked with the following specific code:  
+
 ```{r checkprev}
   #Logic
   # IF 2004 is less than or equal to EntryDate (i.e. they entered before or during 2004)
