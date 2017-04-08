@@ -25,7 +25,7 @@
 <meta name="author" content="Kevin W. McConeghy">
 
 
-<meta name="date" content="2017-04-05">
+<meta name="date" content="2017-04-07">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -106,13 +106,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a><ul>
 <li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#introduction"><i class="fa fa-check"></i><b>1.1</b> Introduction</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html"><i class="fa fa-check"></i><b>2</b> Creating Longitudinal DataSets From Individual Records</a><ul>
-<li class="chapter" data-level="2.0.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#packages-to-use"><i class="fa fa-check"></i><b>2.0.1</b> Packages to use</a></li>
-<li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction-1"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
+<li class="chapter" data-level="2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html"><i class="fa fa-check"></i><b>2</b> Creating Longitudinal Datasets From Individual Records</a><ul>
+<li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction-1"><i class="fa fa-check"></i><b>2.1</b> Introduction</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#packages-to-use"><i class="fa fa-check"></i><b>2.1.1</b> Packages to use</a></li>
+</ul></li>
 <li class="chapter" data-level="2.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#construct-dataset"><i class="fa fa-check"></i><b>2.2</b> Construct dataset</a></li>
 <li class="chapter" data-level="2.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#show-data"><i class="fa fa-check"></i><b>2.3</b> Show Data</a></li>
 <li class="chapter" data-level="2.4" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#reshape-process"><i class="fa fa-check"></i><b>2.4</b> Reshape Process</a><ul>
-<li class="chapter" data-level="2.4.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#calculate-time-distance"><i class="fa fa-check"></i><b>2.4.1</b> Calculate time distance</a></li>
+<li class="chapter" data-level="2.4.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#simple-group-counts"><i class="fa fa-check"></i><b>2.4.1</b> Simple group counts</a></li>
+<li class="chapter" data-level="2.4.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#cohort-entries-by-year-counts"><i class="fa fa-check"></i><b>2.4.2</b> Cohort entries by year counts</a></li>
+<li class="chapter" data-level="2.4.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#cohort-prevalence-by-time"><i class="fa fa-check"></i><b>2.4.3</b> Cohort prevalence by time</a></li>
+<li class="chapter" data-level="2.4.4" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence-density"><i class="fa fa-check"></i><b>2.4.4</b> Incidence Density</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>3</b> Heteroskedastic &amp; Cluster Robust Standard Errors</a><ul>
@@ -170,9 +174,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
             <section class="normal" id="section-">
 <div id="creating-longitudinal-datasets-from-individual-records" class="section level1">
-<h1><span class="header-section-number">Chapter 2</span> Creating Longitudinal DataSets From Individual Records</h1>
+<h1><span class="header-section-number">Chapter 2</span> Creating Longitudinal Datasets From Individual Records</h1>
+<div id="introduction-1" class="section level2">
+<h2><span class="header-section-number">2.1</span> Introduction</h2>
 <div id="packages-to-use" class="section level3">
-<h3><span class="header-section-number">2.0.1</span> Packages to use</h3>
+<h3><span class="header-section-number">2.1.1</span> Packages to use</h3>
 <pre>
  R version 3.3.2 (2016-10-31)
  Platform: x86_64-w64-mingw32/x64 (64-bit)
@@ -182,54 +188,471 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  [1] methods   stats     graphics  grDevices utils     datasets  base     
  
  other attached packages:
-  [1] lubridate_1.6.0   knitr_1.15.17     Scotty_0.0.0.9000
-  [4] devtools_1.12.0   Hmisc_4.0-2       Formula_1.2-1    
-  [7] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
- [10] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
- [13] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+  [1] gridExtra_2.2.1   lubridate_1.6.0   knitr_1.15.17    
+  [4] Scotty_0.0.0.9000 devtools_1.12.0   Hmisc_4.0-2      
+  [7] Formula_1.2-1     survival_2.41-2   lattice_0.20-35  
+ [10] dplyr_0.5.0       purrr_0.2.2       readr_1.1.0      
+ [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
+ [16] tidyverse_1.1.1  
  </pre>
 
-</div>
-<div id="introduction-1" class="section level2">
-<h2><span class="header-section-number">2.1</span> Introduction</h2>
 <p>I often come across the following issue in my work:</p>
-<p>I am provided with a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, I need to reshape and summarize these individual records into counts in a panel dataset. In this new dataset structure I want each row to be a unique time- group- summary of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).</p>
+<p>Sometimes you are working with a dataset where each row is a nursing home assessment, admission record or some other per person observation. However, perhaps you are more interesting in analyzing group-level changes over time. In order to do this, you need to reshape and summarize these individual records into counts in a “panel” dataset. In this new dataset structure I want each row to be a unique time- group- summary of the data. Some extensions of this include computing incidence (no. events per 1000 persons) and incidence density (no. events per 1000 person-years) measures. I will go through some examples and show how these datasets and measures can be constructed from person or observation unit-level data, assuming you had cohort entry-dates (i.e. admission), event dates (the date of some thing you wish to quantify) and stop-dates (i.e. discharge).</p>
+</div>
 </div>
 <div id="construct-dataset" class="section level2">
 <h2><span class="header-section-number">2.2</span> Construct dataset</h2>
-<p>First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because hypothetically you stop collecting info at this point). Each entry will then have a random group classification (state), and event (0 or 1).</p>
+<p>First I will construct a dataset of admissions that starts counting on 2000/01/01. Each entry will have a random exit up to 1000 days from entry, but censored at 2009/12/31 (because in my hypothetical example this is my study endpoint). Each entry will then have a random group classification (state), and event (0 or 1).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id=</span><span class="dv">1</span>:<span class="dv">10000</span>,
                  <span class="dt">CohortEntry =</span> <span class="kw">sample</span>(<span class="kw">seq</span>(<span class="kw">as.Date</span>(<span class="st">&#39;2000/01/01&#39;</span>), <span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>), <span class="dt">by=</span><span class="st">&#39;day&#39;</span>), <span class="dt">replace=</span>T, <span class="dv">10000</span>))
 df &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">CohortExit =</span> CohortEntry+<span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">365</span>,<span class="dv">10000</span>, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#CohortExit Date (up to 1000 days from start)</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Group =</span> <span class="kw">sample</span>(state.name, <span class="dv">10000</span>, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#Random state for each group</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Event =</span> <span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">1</span>, <span class="dv">10000</span>, <span class="dt">replace=</span>T))
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">State =</span> <span class="kw">sample</span>(state.name, <span class="dv">10000</span>, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#Random state for each group</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">Event =</span> <span class="kw">as.integer</span>(<span class="kw">rbernoulli</span>(<span class="dv">10000</span>,<span class="dt">p=</span><span class="fl">0.1</span>))) <span class="co">#randomly assign 10% to event</span>
+  
+  df$CohortExit &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">sapply</span>(df$CohortExit, function(x) <span class="kw">min</span>(x,<span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>))), <span class="dt">origin=</span>origin) <span class="co">#Censor at &#39;study end&#39;</span>
 
-df$CohortExit &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">sapply</span>(df$CohortExit, function(x) <span class="kw">min</span>(x,<span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>))), <span class="dt">origin=</span>origin) <span class="co">#Censor at &#39;study end&#39;</span></code></pre></div>
+  <span class="co">#For more complicated procedures below, reassign event=1 to a random date between cohort start and end, and event=0 to NA</span>
+  randomDate &lt;-<span class="st"> </span>function(TimeIn, TimeOut, Event) {
+    RDate &lt;-<span class="st"> </span><span class="kw">sample</span>(TimeIn:TimeOut, <span class="dv">1</span>, <span class="dt">replace=</span>T)
+    RDate &lt;-<span class="st"> </span><span class="kw">ifelse</span>(Event==<span class="dv">0</span>,<span class="ot">NA</span>,RDate)
+    <span class="kw">return</span>(RDate)
+  }
+  
+  df$EventDate =<span class="st"> </span><span class="kw">sapply</span>(df$id, function(x) <span class="kw">randomDate</span>(df$CohortEntry[x], df$CohortExit[x], df$Event[x]))
+  df$EventDate =<span class="st"> </span><span class="kw">as.Date</span>(df$EventDate, <span class="dt">origin=</span>origin)
+<span class="kw">kable</span>(<span class="kw">head</span>(df, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">id</th>
+<th align="center">CohortEntry</th>
+<th align="center">CohortExit</th>
+<th align="center">State</th>
+<th align="center">Event</th>
+<th align="center">EventDate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">2003-02-20</td>
+<td align="center">2003-07-06</td>
+<td align="center">Georgia</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">2004-06-10</td>
+<td align="center">2004-07-13</td>
+<td align="center">South Dakota</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">2000-10-10</td>
+<td align="center">2001-06-09</td>
+<td align="center">Wyoming</td>
+<td align="center">1</td>
+<td align="center">2001-04-28</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">2006-12-07</td>
+<td align="center">2006-12-18</td>
+<td align="center">Florida</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">5</td>
+<td align="center">2001-01-11</td>
+<td align="center">2001-10-28</td>
+<td align="center">Illinois</td>
+<td align="center">1</td>
+<td align="center">2001-09-25</td>
+</tr>
+<tr class="even">
+<td align="center">6</td>
+<td align="center">2004-12-22</td>
+<td align="center">2005-02-11</td>
+<td align="center">North Carolina</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">7</td>
+<td align="center">2005-11-24</td>
+<td align="center">2006-05-22</td>
+<td align="center">Maryland</td>
+<td align="center">1</td>
+<td align="center">2006-01-12</td>
+</tr>
+<tr class="even">
+<td align="center">8</td>
+<td align="center">2008-09-25</td>
+<td align="center">2009-03-03</td>
+<td align="center">Nebraska</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">9</td>
+<td align="center">2006-01-08</td>
+<td align="center">2006-09-28</td>
+<td align="center">Oklahoma</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">10</td>
+<td align="center">2001-02-15</td>
+<td align="center">2001-11-08</td>
+<td align="center">Michigan</td>
+<td align="center">0</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="show-data" class="section level2">
 <h2><span class="header-section-number">2.3</span> Show Data</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Scatter and Fitted Line </span>
-p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortEntry)) +<span class="st"> </span>
-<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">5</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
+p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortEntry)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">4</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
 <span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">col=</span><span class="dv">2</span>) +
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cohort Entry&quot;</span>) +
 <span class="st">  </span><span class="kw">theme_bw</span>()
-<span class="kw">suppressMessages</span>(<span class="kw">print</span>(p))</code></pre></div>
-<p><img src="01-MungeDays_files/figure-html/Entry%20Date-1.png" width="672" /></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortExit)) +<span class="st"> </span>
-<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">5</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
+
+p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortExit)) +<span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">4</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
 <span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">col=</span><span class="dv">2</span>) +
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cohort Exit&quot;</span>) +
 <span class="st">  </span><span class="kw">theme_bw</span>()
-<span class="kw">suppressMessages</span>(<span class="kw">print</span>(p))</code></pre></div>
-<p><img src="01-MungeDays_files/figure-html/Entry%20Date-2.png" width="672" /></p>
-<p>A simple, even distribution to work with (cohort exit is even except censored at study end date).</p>
+<span class="kw">grid.arrange</span>(p1, p2, <span class="dt">nrow=</span><span class="dv">1</span>)</code></pre></div>
+<p><img src="01-MungeDays_files/figure-html/EntryDate-1.png" width="768" /> A simple, even distribution to work with (cohort exit is even except for censored at study end date).</p>
 </div>
 <div id="reshape-process" class="section level2">
 <h2><span class="header-section-number">2.4</span> Reshape Process</h2>
-<div id="calculate-time-distance" class="section level3">
-<h3><span class="header-section-number">2.4.1</span> Calculate time distance</h3>
+<p>If you simply seek to count the total no. of records by groups this is simple.</p>
+<div id="simple-group-counts" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Simple group counts</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  dfState &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">    </span><span class="kw">group_by</span>(State) %&gt;%<span class="st"> </span><span class="co">#Tells dplyr to create grouped object, and then execute following at that unit</span>
+<span class="st">      </span><span class="kw">summarise</span>(<span class="dt">Records =</span> <span class="kw">n</span>()) <span class="co">#count individuals</span>
+  
+  <span class="kw">cat</span>(<span class="st">&quot;Counts of Records by State&quot;</span>)</code></pre></div>
+<pre><code>## Counts of Records by State</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">kable</span>(<span class="kw">head</span>(dfState, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">State</th>
+<th align="center">Records</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">196</td>
+</tr>
+<tr class="even">
+<td align="center">Alaska</td>
+<td align="center">213</td>
+</tr>
+<tr class="odd">
+<td align="center">Arizona</td>
+<td align="center">212</td>
+</tr>
+<tr class="even">
+<td align="center">Arkansas</td>
+<td align="center">188</td>
+</tr>
+<tr class="odd">
+<td align="center">California</td>
+<td align="center">204</td>
+</tr>
+<tr class="even">
+<td align="center">Colorado</td>
+<td align="center">206</td>
+</tr>
+<tr class="odd">
+<td align="center">Connecticut</td>
+<td align="center">229</td>
+</tr>
+<tr class="even">
+<td align="center">Delaware</td>
+<td align="center">212</td>
+</tr>
+<tr class="odd">
+<td align="center">Florida</td>
+<td align="center">187</td>
+</tr>
+<tr class="even">
+<td align="center">Georgia</td>
+<td align="center">198</td>
+</tr>
+</tbody>
+</table>
+<p>Also, if you wish to see the quantity of some event, this is easy also:</p>
+<div id="simple-event-counts" class="section level4">
+<h4><span class="header-section-number">2.4.1.1</span> Simple Event Counts</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  dfState &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">    </span><span class="kw">group_by</span>(State) %&gt;%<span class="st"> </span><span class="co">#Tells dplyr to create grouped object, and then execute following at that unit</span>
+<span class="st">      </span><span class="kw">summarise</span>(<span class="dt">Events =</span> <span class="kw">sum</span>(Event)) <span class="co">#count no of events</span>
+  
+  <span class="kw">cat</span>(<span class="st">&quot;Counts of Events by State&quot;</span>)</code></pre></div>
+<pre><code>## Counts of Events by State</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">kable</span>(<span class="kw">head</span>(dfState, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">State</th>
+<th align="center">Events</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">17</td>
+</tr>
+<tr class="even">
+<td align="center">Alaska</td>
+<td align="center">18</td>
+</tr>
+<tr class="odd">
+<td align="center">Arizona</td>
+<td align="center">21</td>
+</tr>
+<tr class="even">
+<td align="center">Arkansas</td>
+<td align="center">28</td>
+</tr>
+<tr class="odd">
+<td align="center">California</td>
+<td align="center">23</td>
+</tr>
+<tr class="even">
+<td align="center">Colorado</td>
+<td align="center">17</td>
+</tr>
+<tr class="odd">
+<td align="center">Connecticut</td>
+<td align="center">20</td>
+</tr>
+<tr class="even">
+<td align="center">Delaware</td>
+<td align="center">27</td>
+</tr>
+<tr class="odd">
+<td align="center">Florida</td>
+<td align="center">21</td>
+</tr>
+<tr class="even">
+<td align="center">Georgia</td>
+<td align="center">20</td>
+</tr>
+</tbody>
+</table>
+<p>If you wish to count records by time, this is still pretty easy, but you have to be more specific. For example, if I want to count the number of Cohort entries by year, this is how:</p>
+</div>
+</div>
+<div id="cohort-entries-by-year-counts" class="section level3">
+<h3><span class="header-section-number">2.4.2</span> Cohort entries by year counts</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#First make year var</span>
+df &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">EntryYear =</span> <span class="kw">year</span>(CohortEntry)) <span class="co">#year function from lubridate</span>
+  
+<span class="co">#Second group by this var</span>
+dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">group_by</span>(EntryYear) %&gt;%<span class="st">  </span>
+<span class="st">  </span><span class="kw">summarise</span>(<span class="dt">Records =</span> <span class="kw">n</span>(), <span class="dt">Events =</span> <span class="kw">sum</span>(Event)) <span class="co">#count individuals</span>
+  <span class="kw">cat</span>(<span class="st">&quot;Counts of Records by Cohort Entry Year&quot;</span>)</code></pre></div>
+<pre><code>## Counts of Records by Cohort Entry Year</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">kable</span>(<span class="kw">head</span>(dfGroup, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">EntryYear</th>
+<th align="center">Records</th>
+<th align="center">Events</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2000</td>
+<td align="center">1002</td>
+<td align="center">97</td>
+</tr>
+<tr class="even">
+<td align="center">2001</td>
+<td align="center">1011</td>
+<td align="center">91</td>
+</tr>
+<tr class="odd">
+<td align="center">2002</td>
+<td align="center">993</td>
+<td align="center">86</td>
+</tr>
+<tr class="even">
+<td align="center">2003</td>
+<td align="center">995</td>
+<td align="center">118</td>
+</tr>
+<tr class="odd">
+<td align="center">2004</td>
+<td align="center">1004</td>
+<td align="center">100</td>
+</tr>
+<tr class="even">
+<td align="center">2005</td>
+<td align="center">993</td>
+<td align="center">113</td>
+</tr>
+<tr class="odd">
+<td align="center">2006</td>
+<td align="center">1003</td>
+<td align="center">89</td>
+</tr>
+<tr class="even">
+<td align="center">2007</td>
+<td align="center">1008</td>
+<td align="center">110</td>
+</tr>
+<tr class="odd">
+<td align="center">2008</td>
+<td align="center">999</td>
+<td align="center">96</td>
+</tr>
+<tr class="even">
+<td align="center">2009</td>
+<td align="center">992</td>
+<td align="center">108</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cohort-prevalence-by-time" class="section level3">
+<h3><span class="header-section-number">2.4.3</span> Cohort prevalence by time</h3>
+<p>The next step will get a little trickier. Let’s say we aren’t interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many total patients are in the cohort during a specified period of time (e.g. year). This is like “point prevalence”, in the sense that we are measuring the number of cohort individuals in a given time interval (point prevalence is usually the no. of diseased / total population). So we need to take the “CohortEntry”, “CohortExit” date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don’t start and stop at the same time and cross multiple time units (years in this case).</p>
+<p>Here is one method where I compute the “prevalent”&quot; cohort, no. events and event rate:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Create New Dataframe by Time Unit</span>
+  TimeMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) <span class="co">#lowest time unit observed</span>
+  TimeMax &lt;-<span class="st"> </span><span class="kw">max</span>(<span class="kw">year</span>(df$CohortExit)) <span class="co">#highest time unit observed</span>
+  
+  <span class="co">#This following sequence step is good, in case a certain year was skipped (i.e. no admits that year)</span>
+  dfTime &lt;-<span class="st"> </span>TimeMin:TimeMax %&gt;%<span class="st"> </span><span class="co">#Sequence years</span>
+<span class="st">    </span><span class="kw">as_tibble</span>() %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">x2 =</span> <span class="ot">NA</span>, <span class="dt">x3 =</span> <span class="ot">NA</span>)
+    <span class="kw">names</span>(dfTime) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Year&quot;</span>, <span class="st">&quot;Residents&quot;</span>, <span class="st">&quot;Events&quot;</span>)
+    
+  
+  <span class="co">#Write a time-interval program (assuming x is year)</span>
+  InCohort &lt;-<span class="st">  </span>function(x, TimeIn, TimeOut) {
+    <span class="co">#Note that the following line works because of R vectorization</span>
+    count &lt;-<span class="st"> </span><span class="kw">if_else</span>(x&gt;=<span class="kw">year</span>(TimeIn) &amp;<span class="st"> </span>x&lt;=<span class="kw">year</span>(TimeOut),<span class="dv">1</span>,<span class="dv">0</span>) <span class="co">#Test if x is TimeIn&lt;=x&lt;=TimeOut</span>
+    InCohortN &lt;-<span class="st"> </span><span class="kw">sum</span>(count) <span class="co">#Add up total people</span>
+    <span class="kw">return</span>(InCohortN) <span class="co">#return</span>
+  }
+  InEvent &lt;-<span class="st">  </span>function(x, Event, EventDate) {
+    <span class="co">#Note that the following line works because of R vectorization</span>
+    events &lt;-<span class="st"> </span><span class="kw">if_else</span>(Event==<span class="dv">1</span> &amp;<span class="st"> </span>x==<span class="kw">year</span>(EventDate),<span class="dv">1</span>,<span class="dv">0</span>) <span class="co">#Added condition of event==1</span>
+    InCohortEvents &lt;-<span class="st"> </span><span class="kw">sum</span>(events) <span class="co">#Add up total events in that year</span>
+    <span class="kw">return</span>(InCohortEvents) <span class="co">#return</span>
+  }
+  dfTime$Residents &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) <span class="kw">InCohort</span>(x, df$CohortEntry,df$CohortExit))
+  dfTime$Events &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfTime$Year, function(x) <span class="kw">InEvent</span>(x, df$Event, df$EventDate))
+  dfTime$<span class="st">&#39;Event Rate&#39;</span> &lt;-<span class="st"> </span>dfTime$Events /<span class="st"> </span>dfTime$Residents
+  <span class="co">#Calculate events</span>
+  <span class="co">#eventnum &lt;- df %?%</span>
+  
+  <span class="kw">cat</span>(<span class="st">&quot;No. of individuals in the cohort by year&quot;</span>)</code></pre></div>
+<pre><code>## No. of individuals in the cohort by year</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">kable</span>(<span class="kw">head</span>(dfTime, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">3</span>)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Year</th>
+<th align="center">Residents</th>
+<th align="center">Events</th>
+<th align="center">Event Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2000</td>
+<td align="center">1002</td>
+<td align="center">72</td>
+<td align="center">0.072</td>
+</tr>
+<tr class="even">
+<td align="center">2001</td>
+<td align="center">1498</td>
+<td align="center">89</td>
+<td align="center">0.059</td>
+</tr>
+<tr class="odd">
+<td align="center">2002</td>
+<td align="center">1481</td>
+<td align="center">98</td>
+<td align="center">0.066</td>
+</tr>
+<tr class="even">
+<td align="center">2003</td>
+<td align="center">1486</td>
+<td align="center">103</td>
+<td align="center">0.069</td>
+</tr>
+<tr class="odd">
+<td align="center">2004</td>
+<td align="center">1516</td>
+<td align="center">104</td>
+<td align="center">0.069</td>
+</tr>
+<tr class="even">
+<td align="center">2005</td>
+<td align="center">1497</td>
+<td align="center">115</td>
+<td align="center">0.077</td>
+</tr>
+<tr class="odd">
+<td align="center">2006</td>
+<td align="center">1495</td>
+<td align="center">94</td>
+<td align="center">0.063</td>
+</tr>
+<tr class="even">
+<td align="center">2007</td>
+<td align="center">1516</td>
+<td align="center">98</td>
+<td align="center">0.065</td>
+</tr>
+<tr class="odd">
+<td align="center">2008</td>
+<td align="center">1499</td>
+<td align="center">104</td>
+<td align="center">0.069</td>
+</tr>
+<tr class="even">
+<td align="center">2009</td>
+<td align="center">1496</td>
+<td align="center">130</td>
+<td align="center">0.087</td>
+</tr>
+</tbody>
+</table>
+<p>We can double-check this worked with the following specific code:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Logic</span>
+  <span class="co"># IF 2004 is less than or equal to EntryDate (i.e. they entered before or during 2004)</span>
+  <span class="co"># AND 2004 is less than or equal to Exit (i.e. they exited after or during 2004)</span>
+  Check &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="dv">2004</span>&gt;=<span class="kw">year</span>(df$CohortEntry) &amp;<span class="st"> </span><span class="dv">2004</span>&lt;=<span class="kw">year</span>(df$CohortExit),<span class="dv">1</span>,<span class="dv">0</span>)
+  <span class="kw">cat</span>(<span class="st">&quot;2004 people :&quot;</span>, <span class="kw">sum</span>(Check))</code></pre></div>
+<pre><code>## 2004 people : 1516</code></pre>
+</div>
+<div id="incidence-density" class="section level3">
+<h3><span class="header-section-number">2.4.4</span> Incidence Density</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">TimeDiff =</span> <span class="kw">as.integer</span>(CohortExit -<span class="st"> </span>CohortEntry)) <span class="co">#timeDiff</span></code></pre></div>
 

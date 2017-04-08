@@ -80,7 +80,7 @@ If you simply seek to count the total no. of records by groups this is simple.
 Also, if you wish to see the quantity of some event, this is easy also:  
 
 #### Simple Event Counts  
-```{r ByGroup}
+```{r ByGroupEv}
   dfState <- df %>%
     group_by(State) %>% #Tells dplyr to create grouped object, and then execute following at that unit
       summarise(Events = sum(Event)) #count no of events
