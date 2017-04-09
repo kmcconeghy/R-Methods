@@ -37,7 +37,7 @@ df <- data.frame(id=1:sampsize,
 #CohortIn, CohortOut, Group
 df <- df %>%
     mutate(CohortExit = CohortEntry+sample(0:365,sampsize, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
-    mutate(State = sample(state.name, sampsize, replace=T)) #Random state for each group
+    mutate(State = factor(sample(state.name, sampsize, replace=T))) #Random state for each group
   df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) X = min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
 
 #Group Effect
@@ -306,7 +306,7 @@ Then from this computing the incidence density rate is trivial, and you can repo
   kable(head(dfTime, n=10), align=c('c'), digits = 4)
 ```
 
-The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 2003, the 1-year risk of an event is 29.7 per 100 persons".  
+The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 person-years" or "In 2003, the 1-year risk of an event is `r round(dfTime[4,6],1)` per 100 persons".  
 
 ## Tie everything together  
 
@@ -321,11 +321,33 @@ The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 200
     groups <- df$State
   
   #Build Panel
-    dfPanel <- unique(expand.grid(groups,years,months))
+    dfPanel <- unique(as_tibble(expand.grid(groups,years,months)))
     names(dfPanel) <- c("Group","Year","Month")
     dfPanel <- dfPanel %>% arrange(Group, Year, Month)
   
+  #Build Matching TimeVars
+   df <- df %>%  
+     mutate(YearIn = year(CohortEntry)) %>%
+     mutate(YearOut = year(CohortExit)) %>%
+     mutate(MonthIn = month(CohortEntry)) %>%
+     mutate(MonthOut = month(CohortExit))
+       
   #A full function that incorporates all steps
-  
-  kable(head(dfPanel, n=10), align=c('c'), digits=4)  
+    MakePanel <- function(Panel, dfid) {
+      Panel <- c(Panel[[1]],as.integer(Panel[[2]]), as.integer(Panel[[3]]))
+      dfidpanel <- df %>%
+        filter(State == Panel[[1]],
+               YearIn <= Panel[[2]], YearOut >=Panel[[2]],
+               MonthIn<= Panel[[3]], MonthOut>=Panel[[3]])
+      CountRes <- nrow(dfidpanel)
+      return(CountRes)
+    }
+  dfPanel$Residents <- apply(dfPanel, 1, function(x) MakePanel(x, df))
+
+    
+    #This step could take a while
+    #The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row
+    #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
+    
+  kable(head(dfPanel, n=12), align=c('c'), digits=4)  
 ```
