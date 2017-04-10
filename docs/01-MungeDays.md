@@ -539,27 +539,27 @@ The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 200
     }
   dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
   names(dfPanel)[3:5] <- c("Residents", "Events", "Resident-Days")
-  dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
+  dfPanel$`Events per 100 person-years` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
     #The apply function pulls each panel one at a time, 
     #MakePanel fills in extra values and returns row
     #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
     
-  kable(head(dfPanel, n=10), align=c('c'), digits=4)  
+  kable(head(dfPanel, n=10), align=c('c'), digits=2)  
 ```
 
 
 
-  Group     Year    Residents    Events    Resident-Days    Event Rate 
----------  ------  -----------  --------  ---------------  ------------
- Alabama    2000       39          3           5227          20.9489   
- Alabama    2001       54          7           5331          47.9272   
- Alabama    2002       60          6           7736          28.3092   
- Alabama    2003       58          5           6631          27.5222   
- Alabama    2004       71          6           8628          25.3825   
- Alabama    2005       67          4           7151          20.4167   
- Alabama    2006       62          2           8243           8.8560   
- Alabama    2007       58          1           6893           5.2952   
- Alabama    2008       57          7           7027          36.3598   
- Alabama    2009       55          5           7149          25.5280   
+  Group     Year    Residents    Events    Resident-Days    Events per 100 person-years 
+---------  ------  -----------  --------  ---------------  -----------------------------
+ Alabama    2000       39          3           5227                    20.95            
+ Alabama    2001       54          7           5331                    47.93            
+ Alabama    2002       60          6           7736                    28.31            
+ Alabama    2003       58          5           6631                    27.52            
+ Alabama    2004       71          6           8628                    25.38            
+ Alabama    2005       67          4           7151                    20.42            
+ Alabama    2006       62          2           8243                    8.86             
+ Alabama    2007       58          1           6893                    5.30             
+ Alabama    2008       57          7           7027                    36.36            
+ Alabama    2009       55          5           7149                    25.53            

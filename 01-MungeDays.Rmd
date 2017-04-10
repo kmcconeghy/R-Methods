@@ -362,12 +362,12 @@ The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 pers
     }
   dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
   names(dfPanel)[3:5] <- c("Residents", "Events", "Resident-Days")
-  dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
+  dfPanel$`Events per 100 person-years` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
     #The apply function pulls each panel one at a time, 
     #MakePanel fills in extra values and returns row
     #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
     
-  kable(head(dfPanel, n=10), align=c('c'), digits=4)  
+  kable(head(dfPanel, n=10), align=c('c'), digits=2)  
 ```

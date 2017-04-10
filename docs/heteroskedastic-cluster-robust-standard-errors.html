@@ -180,7 +180,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">Chapter 3</span> Heteroskedastic &amp; Cluster Robust Standard Errors</h1>
 <div id="introduction-2" class="section level2">
 <h2><span class="header-section-number">3.1</span> Introduction</h2>
-<p>In this chapter we are evaluating R’s capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.</p>
+<p>In this chapter I evaluate R’s capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.</p>
 <div id="packages-to-use-1" class="section level3">
 <h3><span class="header-section-number">3.1.1</span> Packages to use</h3>
 <pre>
@@ -205,28 +205,58 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="test-data" class="section level2">
 <h2><span class="header-section-number">3.2</span> Test data</h2>
-<p>To test and demonstrate code and assumptions are correct. I utilize the “PublicSchools” dataset in the “sandwich” package. This dataset is well-described in peer-reviewed research, and standard text books (Table 14.1 in Green [1993]).<span class="citation">(Greene <a href="#ref-CIS-6161">1993</a>, <span class="citation">Zeileis (<a href="#ref-Zeileis2004">2004</a>)</span>, <span class="citation">Zeileis (<a href="#ref-Zeileis2006">2006</a>)</span>, <span class="citation">(“Cribari-Neto F” <a href="#ref-Cribari2004">2004</a>)</span>)</span> The data comes originally from a 1979 report on per capita public school expenditures and per capita income by state from the U.S. Dept. of Commerce.</p>
+<p>To test and demonstrate code and assumptions are correct. I utilize the “PublicSchools” dataset in the “sandwich” package. This dataset is well-described in peer-reviewed research, and standard text books (Table 14.1 in Green [1993]).<span class="citation">(Greene <a href="#ref-CIS-6161">1993</a>, <span class="citation">Zeileis (<a href="#ref-Zeileis2004">2004</a>)</span>, <span class="citation">Zeileis (<a href="#ref-Zeileis2006">2006</a>)</span>, <span class="citation">F (<a href="#ref-Cribari2004">2004</a>)</span>)</span> The data comes originally from a 1979 report on per capita public school expenditures and per capita income by state from the U.S. Dept. of Commerce.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Load public schools data, omit NA in Wisconsin, scale income and make squared Income term:
 <span class="kw">data</span>(PublicSchools)
-df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(PublicSchools %&gt;%<span class="st"> </span><span class="kw">na.omit</span>() %&gt;%<span class="st"> </span><span class="kw">mutate</span>(<span class="dt">Income =</span> Income*<span class="fl">1e-04</span>)) %&gt;%<span class="st"> </span><span class="kw">mutate</span>(<span class="dt">Income2 =</span> Income^<span class="dv">2</span>)
-<span class="kw">head</span>(df)</code></pre></div>
-<pre><code>## # A tibble: 6 × 3
-##   Expenditure Income   Income2
-##         &lt;int&gt;  &lt;dbl&gt;     &lt;dbl&gt;
-## 1         275 0.6247 0.3902501
-## 2         821 1.0851 1.1774420
-## 3         339 0.7374 0.5437588
-## 4         275 0.6183 0.3822949
-## 5         387 0.8850 0.7832250
-## 6         452 0.8001 0.6401600</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">se_results &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">matrix</span>(<span class="dt">nrow=</span><span class="dv">4</span>,<span class="dt">ncol=</span><span class="dv">6</span>))
-<span class="kw">names</span>(se_results) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;method&quot;</span>,<span class="st">&quot;vcov Matrix&quot;</span>, <span class="st">&quot;Income_Beta&quot;</span>,<span class="st">&quot;Income_SE&quot;</span>,<span class="st">&quot;Income2_Beta&quot;</span>,<span class="st">&quot;Income2_SE&quot;</span>)
+df &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(PublicSchools %&gt;%<span class="st"> </span><span class="kw">na.omit</span>() %&gt;%<span class="st"> </span><span class="kw">mutate</span>(<span class="dt">Income =</span> Income*<span class="fl">1e-04</span>)) %&gt;%<span class="st"> </span><span class="kw">mutate</span>(<span class="st">`</span><span class="dt">Income^2</span><span class="st">`</span> =<span class="st"> </span>Income^<span class="dv">2</span>)
+<span class="kw">kable</span>(<span class="kw">head</span>(df), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits =</span> <span class="dv">2</span>)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Expenditure</th>
+<th align="center">Income</th>
+<th align="center">Income^2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">275</td>
+<td align="center">0.62</td>
+<td align="center">0.39</td>
+</tr>
+<tr class="even">
+<td align="center">821</td>
+<td align="center">1.09</td>
+<td align="center">1.18</td>
+</tr>
+<tr class="odd">
+<td align="center">339</td>
+<td align="center">0.74</td>
+<td align="center">0.54</td>
+</tr>
+<tr class="even">
+<td align="center">275</td>
+<td align="center">0.62</td>
+<td align="center">0.38</td>
+</tr>
+<tr class="odd">
+<td align="center">387</td>
+<td align="center">0.88</td>
+<td align="center">0.78</td>
+</tr>
+<tr class="even">
+<td align="center">452</td>
+<td align="center">0.80</td>
+<td align="center">0.64</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">se_results &lt;-<span class="st"> </span><span class="kw">as_tibble</span>(<span class="kw">matrix</span>(<span class="dt">nrow=</span><span class="dv">8</span>,<span class="dt">ncol=</span><span class="dv">6</span>))
+<span class="kw">names</span>(se_results) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Program&quot;</span>,<span class="st">&quot;VCE&quot;</span>, <span class="st">&quot;Income (Beta)&quot;</span>,<span class="st">&quot;Income (SE)&quot;</span>,<span class="st">&quot;Income^2 (Beta)&quot;</span>,<span class="st">&quot;Income^2 (SE)&quot;</span>)
 
-method &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;lm&quot;</span>,<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;HC0&quot;</span>)
+method &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;lm&quot;</span>,<span class="st">&quot;manual&quot;</span>,<span class="st">&quot;HC0&quot;</span>, <span class="st">&quot;HC1&quot;</span>,<span class="st">&quot;HC2&quot;</span>,<span class="st">&quot;HC3&quot;</span>,<span class="st">&quot;HC4&quot;</span>)
 
-<span class="co">#,&quot;HC1&quot;,&quot;HC2&quot;,&quot;HC3&quot;,&quot;HC4&quot;)</span>
-
-type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;iid&quot;</span>,<span class="st">&quot;iid&quot;</span>,<span class="st">&quot;White&quot;</span>,<span class="st">&quot;White (dfc)&quot;</span>)
+type &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;iid&quot;</span>, <span class="st">&quot;iid&quot;</span>, <span class="st">&quot;White (dfc)&quot;</span>, <span class="st">&quot;White (orig.)&quot;</span>, <span class="st">&quot;White (STATA)&quot;</span>, <span class="st">&quot;White&quot;</span>, <span class="st">&quot;White&quot;</span>, <span class="st">&quot;Cribari 2004&quot;</span>)
 
 for (i in <span class="dv">1</span>:<span class="kw">nrow</span>(se_results)) {
   se_results[i,<span class="dv">1</span>] &lt;-<span class="st"> </span>method[i]
@@ -236,33 +266,104 @@ for (i in <span class="dv">1</span>:<span class="kw">nrow</span>(se_results)) {
 <div id="linear-regression-model" class="section level2">
 <h2><span class="header-section-number">3.3</span> Linear Regression Model</h2>
 <p>First, I start with the classical ordinary least squares framework. <span class="math display">\[y_i = X_i\beta + u_{i} \quad \textrm{where} \quad i = 1,..,n\]</span></p>
-<p>Where <span class="math inline">\(y\)</span> is a dependent variable, <span class="math inline">\(X\)</span> is a vector of regressors (i.e. independent variables) with <span class="math inline">\(k\)</span>-dimensions,<span class="math inline">\(\beta\)</span> is a vector of the coefficients for <span class="math inline">\(X\)</span>, and <span class="math inline">\(u\)</span> is the residual error term. In matrix notation often simply as: <span class="math inline">\(y= X\beta+u\)</span>.</p>
+<p>Where <span class="math inline">\(y\)</span> is a dependent variable, <span class="math inline">\(X\)</span> is a vector of regressors (i.e. independent variables) with <span class="math inline">\(k\)</span>-dimensions, <span class="math inline">\(\beta\)</span> is a vector of the coefficients for <span class="math inline">\(X\)</span>, and <span class="math inline">\(u\)</span> is the residual error term. In matrix notation often simply as: <span class="math inline">\(y= X\beta+u\)</span>.</p>
 <p>Under normal assumptions, the mean of <span class="math inline">\(u_i\)</span> (that is the residual of a given observation <span class="math inline">\(i\)</span>) should be zero and possess a constant variance across all subsets of <span class="math inline">\(i\)</span>. The second assumption is my focus here, which is often incorrect in empirical research.</p>
 </div>
 <div id="estimation-of-regression-parameters-and-variance" class="section level2">
 <h2><span class="header-section-number">3.4</span> Estimation of regression parameters and variance</h2>
-<p>Typically in empirical research you are interested in estimating some or all parameter coefficients, and a measure of variance or precision on that parameter. With this most empiricists will make statement along the lines of “A 1-unit change in <span class="math inline">\(x\)</span> produces a <span class="math inline">\(\beta\)</span>-unit change in <span class="math inline">\(y\)</span>, and a null hypothesis of <span class="math inline">\(\beta\)</span>=0 is rejected with 95% confidence”.</p>
+<p>Typically in empirical research you are interested in estimating some or all parameter coefficients, and a measure of variance or precision on that parameter. Most researchers will ultimately make a statement along the lines of “A 1-unit change in <span class="math inline">\(x\)</span> produces a <span class="math inline">\(\beta\)</span>-unit change in <span class="math inline">\(y\)</span>, and a null hypothesis of <span class="math inline">\(\beta\)</span>=0 is rejected with 95% confidence”.</p>
 <p>In our example, assume we want to model per capita expenditures regressed on income.</p>
 <p>First, I demonstrate how to estimate your parameter coefficient, <span class="math inline">\(\beta_1\)</span> the coefficient on income and the square root of the variance, <span class="math inline">\(\sigma\)</span>.</p>
 <div id="manually-computed-beta-parameters" class="section level3">
 <h3><span class="header-section-number">3.4.1</span> Manually computed beta parameters</h3>
-<p>R basically computes the regression coefficients with the standard <span class="math inline">\((\textbf{X}&#39;\textbf{X})^{-1}\textbf{X}&#39;\textbf{y}\)</span> i.e. the coefficient is a function of X and y.</p>
-<p>You can do this manually like so:</p>
+<p>R basically computes the regression coefficients with the standard <span class="math inline">\((\textbf{X}&#39;\textbf{X})^{-1}\textbf{X}&#39;\textbf{y}\)</span></p>
+<p>I can do this manually like so:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Y =<span class="st"> </span><span class="kw">as.matrix</span>(df$Expenditure)
-X =<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">cbind</span>(<span class="dv">1</span>,df$Income, df$Income2)) <span class="co">#Add one for intercept</span>
+X =<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">cbind</span>(<span class="dv">1</span>,df$Income, df$<span class="st">`</span><span class="dt">Income^2</span><span class="st">`</span>)) <span class="co">#Add one for intercept</span>
 beta =<span class="st"> </span><span class="kw">solve</span>(<span class="kw">t</span>(X) %*%<span class="st"> </span>X) %*%<span class="st"> </span>(<span class="kw">t</span>(X) %*%<span class="st"> </span>Y) 
-<span class="kw">rownames</span>(beta) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Int&quot;</span>,<span class="st">&quot;Income&quot;</span>,<span class="st">&quot;Income2&quot;</span>) 
+<span class="kw">rownames</span>(beta) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Int&quot;</span>,<span class="st">&quot;Income&quot;</span>,<span class="st">&#39;Income^2&#39;</span>) 
 <span class="kw">colnames</span>(beta) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Beta&quot;</span>)
 se_results[<span class="dv">1</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span>beta[<span class="dv">2</span>,<span class="dv">1</span>]
 se_results[<span class="dv">1</span>,<span class="dv">5</span>] &lt;-<span class="st"> </span>beta[<span class="dv">3</span>,<span class="dv">1</span>]
-se_results  </code></pre></div>
-<pre><code>## # A tibble: 4 × 6
-##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
-##    &lt;chr&gt;         &lt;chr&gt;       &lt;dbl&gt;     &lt;lgl&gt;        &lt;dbl&gt;      &lt;lgl&gt;
-## 1 manual           iid   -1834.203        NA     1587.042         NA
-## 2     lm           iid          NA        NA           NA         NA
-## 3 manual         White          NA        NA           NA         NA
-## 4    HC0   White (dfc)          NA        NA           NA         NA</code></pre>
+<span class="kw">kable</span>(se_results, <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">3</span>)  </code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Program</th>
+<th align="center">VCE</th>
+<th align="center">Income (Beta)</th>
+<th align="center">Income (SE)</th>
+<th align="center">Income^2 (Beta)</th>
+<th align="center">Income^2 (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">NA</td>
+<td align="center">1587.042</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">lm</td>
+<td align="center">iid</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">White (dfc)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC0</td>
+<td align="center">White (orig.)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC1</td>
+<td align="center">White (STATA)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC2</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC3</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC4</td>
+<td align="center">Cribari 2004</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="manually-computed-standard-errors" class="section level3">
 <h3><span class="header-section-number">3.4.2</span> Manually computed standard errors</h3>
@@ -277,7 +378,7 @@ se_results  </code></pre></div>
 <p>Where <span class="math inline">\(e\)</span> are the squared residuals, <span class="math inline">\(n\)</span> is the sample size, and <span class="math inline">\(k\)</span> are the number of regressors.</p>
 <p>With this information the standard errors above can be replicated manually like so:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Y =<span class="st"> </span><span class="kw">as.matrix</span>(df$Expenditure) <span class="co">#Dependent variable</span>
-X =<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">cbind</span>(<span class="dv">1</span>,df$Income, df$Income2)) <span class="co">#Design matrix, add one for intercept</span>
+X =<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">cbind</span>(<span class="dv">1</span>,df$Income, df$<span class="st">`</span><span class="dt">Income^2</span><span class="st">`</span>)) <span class="co">#Design matrix, add one for intercept</span>
 beta =<span class="st"> </span><span class="kw">solve</span>(<span class="kw">t</span>(X) %*%<span class="st"> </span>X) %*%<span class="st"> </span>(<span class="kw">t</span>(X) %*%<span class="st"> </span>Y) <span class="co">#Solve for beta as above</span>
 n &lt;-<span class="st"> </span><span class="kw">dim</span>(X)[<span class="dv">1</span>] <span class="co"># number of obs</span>
 k &lt;-<span class="st"> </span><span class="kw">dim</span>(X)[<span class="dv">2</span>] <span class="co"># n of predictors</span>
@@ -288,32 +389,174 @@ vcovMat &lt;-<span class="st"> </span>SigmaSq*<span class="kw">chol2inv</span>(<
 StdErr &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">diag</span>(vcovMat)) <span class="co">#sq root of diagonal</span>
 se_results[<span class="dv">1</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span>StdErr[<span class="dv">2</span>]
 se_results[<span class="dv">1</span>,<span class="dv">6</span>] &lt;-<span class="st"> </span>StdErr[<span class="dv">3</span>]
-se_results</code></pre></div>
-<pre><code>## # A tibble: 4 × 6
-##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
-##    &lt;chr&gt;         &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
-## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
-## 2     lm           iid          NA        NA           NA         NA
-## 3 manual         White          NA        NA           NA         NA
-## 4    HC0   White (dfc)          NA        NA           NA         NA</code></pre>
+<span class="kw">kable</span>(se_results, <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">3</span>)  </code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Program</th>
+<th align="center">VCE</th>
+<th align="center">Income (Beta)</th>
+<th align="center">Income (SE)</th>
+<th align="center">Income^2 (Beta)</th>
+<th align="center">Income^2 (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="even">
+<td align="center">lm</td>
+<td align="center">iid</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">White (dfc)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC0</td>
+<td align="center">White (orig.)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC1</td>
+<td align="center">White (STATA)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC2</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC3</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC4</td>
+<td align="center">Cribari 2004</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="r-lm-function" class="section level3">
 <h3><span class="header-section-number">3.4.3</span> R lm function</h3>
 <p>To confirm the above we can compute the same with the the lm function</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(Expenditure ~<span class="st"> </span>Income +<span class="st"> </span>Income2, <span class="dt">data =</span> df)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(Expenditure ~<span class="st"> </span>Income +<span class="st"> `</span><span class="dt">Income^2</span><span class="st">`</span>, <span class="dt">data =</span> df)
   se_results[<span class="dv">2</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">2</span>,<span class="dv">1</span>]
   se_results[<span class="dv">2</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">2</span>,<span class="dv">2</span>]
   se_results[<span class="dv">2</span>,<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">3</span>,<span class="dv">1</span>]
   se_results[<span class="dv">2</span>,<span class="dv">6</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">3</span>,<span class="dv">2</span>]
-  se_results</code></pre></div>
-<pre><code>## # A tibble: 4 × 6
-##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
-##    &lt;chr&gt;         &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
-## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
-## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
-## 3 manual         White          NA        NA           NA         NA
-## 4    HC0   White (dfc)          NA        NA           NA         NA</code></pre>
-<p>The estimates are identical. However the critical assumption here of <span class="math inline">\(u\)</span> being “iid”, can often be wrong in empirical research. In the following, I broadly define these concepts.</p>
+  <span class="kw">kable</span>(se_results, <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">3</span>)  </code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Program</th>
+<th align="center">VCE</th>
+<th align="center">Income (Beta)</th>
+<th align="center">Income (SE)</th>
+<th align="center">Income^2 (Beta)</th>
+<th align="center">Income^2 (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="even">
+<td align="center">lm</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">White (dfc)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC0</td>
+<td align="center">White (orig.)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC1</td>
+<td align="center">White (STATA)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC2</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC3</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC4</td>
+<td align="center">Cribari 2004</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
+<p>The estimates are identical. However the critical assumption here of <span class="math inline">\(u\)</span> being “iid”, can often be wrong in the “real-world”. In the following, I broadly define these concepts.</p>
 </div>
 </div>
 <div id="heteroskedascity" class="section level2">
@@ -341,25 +584,23 @@ se_results</code></pre></div>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="02-vcovHC_files/figure-html/testdataHetero-1.png" width="672" /></p>
 <p><strong>Figure 2.</strong> Example of heteroskedascity. See how the dispersion of the points appears greater as X increases.</p>
-<p>Under the assumption of independent and identically distributed errors (homoskedascity), Eq. 3 is simplified to eq. 4 (transpose matrix, using diagonal elements).</p>
 <div id="heteroskedascity-in-income-data" class="section level3">
 <h3><span class="header-section-number">3.5.1</span> Heteroskedascity in income data</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Scatter and Fitted Line </span>
-<span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>Income, <span class="dt">y=</span>Expenditure)) +<span class="st"> </span>
+p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>Income, <span class="dt">y=</span>Expenditure)) +<span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_point</span>() +
 <span class="st">  </span><span class="kw">geom_smooth</span>(<span class="dt">method=</span><span class="st">&#39;lm&#39;</span>, <span class="dt">formula=</span>y ~<span class="st"> </span>x +<span class="st"> </span><span class="kw">poly</span>(x,<span class="dv">2</span>), <span class="dt">se=</span>F) +<span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_smooth</span>(<span class="dt">method=</span><span class="st">&#39;lm&#39;</span>, <span class="dt">linetype=</span><span class="dv">2</span>, <span class="dt">se=</span>F) +
 <span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Income&quot;</span>) +
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
-<pre><code>## Warning in predict.lm(model, newdata = data.frame(x = xseq), se.fit = se, :
-## prediction from a rank-deficient fit may be misleading</code></pre>
+<span class="st">  </span><span class="kw">theme_bw</span>()
+<span class="kw">suppressWarnings</span>(<span class="kw">print</span>(p))</code></pre></div>
 <p><img src="02-vcovHC_files/figure-html/realdataHetero-1.png" width="672" /></p>
 <p>In our “real-world” small sample of data a visual representation of data can be challenging to draw conclusions from. We see there is an outlier (“Alaska”). However, it is difficult to judge overall dispersion with either a squared term [solid line] or a linear term [dashed line].</p>
 </div>
 </div>
 <div id="white-heteroskedastic-consistent-errors" class="section level2">
 <h2><span class="header-section-number">3.6</span> “White” heteroskedastic consistent errors</h2>
-<p>In the setting of heteroskedascity, the parameters are consistent but inefficient and also the variance-covariance matrix is inconsistent (i.e. biased).<span class="citation">(White <a href="#ref-white1980">1980</a>)</span> The assumption of the residuals <span class="math inline">\(u\)</span> being <em>identically</em> distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.<span class="citation">(White <a href="#ref-white1980">1980</a>)</span></p>
+<p>In the setting of heteroskedascity, the parameters themselves are consistent but inefficient and the variance-covariance matrix is inconsistent (i.e. biased).<span class="citation">(White <a href="#ref-white1980">1980</a>)</span> The assumption of the residuals <span class="math inline">\(u\)</span> being <em>identically</em> distributed does not hold, and the diagonal matrix is invalid. However, an alternative variance-covariance matrix can be computed which is heteroskedastic consistent.<span class="citation">(White <a href="#ref-white1980">1980</a>)</span></p>
 <p>With the “robust” approach proposed by White et al., you assume the variance of the residual is estimated as a diagonal matrix of each squared residual (vs. average above with <span class="math inline">\(s^2\)</span>). Each j-th row-column element is <span class="math inline">\(\hat{u}_{j}^{2}\)</span> in the diagonal terms of <span class="math inline">\({\Sigma_{u}}\)</span>.</p>
 <p>The full equation is:</p>
 <div id="manual-estimator" class="section level3">
@@ -368,16 +609,89 @@ se_results</code></pre></div>
 meat1 &lt;-<span class="st"> </span><span class="kw">t</span>(X) %*%<span class="st"> </span><span class="kw">diag</span>(<span class="kw">diag</span>(<span class="kw">crossprod</span>(<span class="kw">t</span>(u)))) %*%<span class="st"> </span>X <span class="co"># Sigma is a diagonal with u^2 as elements</span>
 dfc &lt;-<span class="st"> </span>n/(n-k) <span class="co"># degrees of freedom adjust  </span>
 se &lt;-<span class="st"> </span><span class="kw">sqrt</span>(dfc*<span class="kw">diag</span>(<span class="kw">solve</span>(<span class="kw">crossprod</span>(X)) %*%<span class="st"> </span>meat1 %*%<span class="st"> </span><span class="kw">solve</span>(<span class="kw">crossprod</span>(X))))
+se_results[<span class="dv">3</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">2</span>,<span class="dv">1</span>]
+se_results[<span class="dv">3</span>,<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">coeftest</span>(m1)[<span class="dv">3</span>,<span class="dv">1</span>]
 se_results[<span class="dv">3</span>,<span class="dv">4</span>] &lt;-<span class="st"> </span>se[<span class="dv">2</span>]
 se_results[<span class="dv">3</span>,<span class="dv">6</span>] &lt;-<span class="st"> </span>se[<span class="dv">3</span>]
-se_results</code></pre></div>
-<pre><code>## # A tibble: 4 × 6
-##   method `vcov Matrix` Income_Beta Income_SE Income2_Beta Income2_SE
-##    &lt;chr&gt;         &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
-## 1 manual           iid   -1834.203  828.9855     1587.042   519.0768
-## 2     lm           iid   -1834.203  828.9855     1587.042   519.0768
-## 3 manual         White          NA 1282.1010           NA   856.0721
-## 4    HC0   White (dfc)          NA        NA           NA         NA</code></pre>
+<span class="kw">kable</span>(se_results, <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">3</span>)  </code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Program</th>
+<th align="center">VCE</th>
+<th align="center">Income (Beta)</th>
+<th align="center">Income (SE)</th>
+<th align="center">Income^2 (Beta)</th>
+<th align="center">Income^2 (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="even">
+<td align="center">lm</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">White (dfc)</td>
+<td align="center">-1834.203</td>
+<td align="center">1282.101</td>
+<td align="center">1587.042</td>
+<td align="center">856.072</td>
+</tr>
+<tr class="even">
+<td align="center">HC0</td>
+<td align="center">White (orig.)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC1</td>
+<td align="center">White (STATA)</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC2</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">HC3</td>
+<td align="center">White</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">HC4</td>
+<td align="center">Cribari 2004</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
 <p>You will find these “White” or robust standard errors are consistent with the second Peterson table.<span class="citation">(Petersen <a href="#ref-peterson2009">2009</a>)</span> They are also consistent with STATA’s <em>robust</em> option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.</p>
 </div>
 <div id="r-standard-function" class="section level3">
@@ -391,69 +705,93 @@ se_results</code></pre></div>
 <code>type=HC2</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{1-h_i}\)</span><br />
 <code>type=HC3</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}\)</span><br />
 <code>type=HC4</code> <span class="math inline">\(\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}\)</span></p>
-<p>Where <span class="math inline">\(h_i = H_{ii}\)</span> are the diagonal elements of the hat matrix and <span class="math inline">\(\delta_i = min({4 }, {h_i}{h¯})\)</span>. The documentation for the sandwich package recommends HC4 based on recent literature.<span class="citation">(“Cribari-Neto F” <a href="#ref-Cribari2004">2004</a>)</span></p>
-<pre><code>## Different variance-covariance options with vcovHC</code></pre>
-<pre><code>## type = cons</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)   
-## (Intercept)   832.91     327.29  2.5449 0.014275 * 
-## Income      -1834.20     828.99 -2.2126 0.031820 * 
-## Income2      1587.04     519.08  3.0574 0.003677 **
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre><code>## type = HC0</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)   832.91     460.89  1.8072  0.07714 .
-## Income      -1834.20    1243.04 -1.4756  0.14673  
-## Income2      1587.04     829.99  1.9121  0.06197 .
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre><code>## type = HC1</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)   832.91     475.37  1.7521  0.08627 .
-## Income      -1834.20    1282.10 -1.4306  0.15915  
-## Income2      1587.04     856.07  1.8539  0.07004 .
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre><code>## type = HC2,</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)   832.91     688.48  1.2098   0.2324
-## Income      -1834.20    1866.41 -0.9827   0.3308
-## Income2      1587.04    1250.15  1.2695   0.2105</code></pre>
-<pre><code>## type = HC3,</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)   832.91    1095.00  0.7607   0.4507
-## Income      -1834.20    2975.41 -0.6165   0.5406
-## Income2      1587.04    1995.24  0.7954   0.4304</code></pre>
-<pre><code>## type = HC4,</code></pre>
-<pre><code>## 
-## t test of coefficients:
-## 
-##             Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)   832.91    3008.01  0.2769   0.7831
-## Income      -1834.20    8183.19 -0.2241   0.8236
-## Income2      1587.04    5488.93  0.2891   0.7737</code></pre>
-<p>Lifehack: Rather than use the <code>coeftest</code> function you can also directly modify the standard errors in the regression summary object.</p>
+<p>Where <span class="math inline">\(h_i = H_{ii}\)</span> are the diagonal elements of the hat matrix and <span class="math inline">\(\delta_i = min({4 }, {h_i}{h¯})\)</span>. The documentation for the sandwich package recommends HC4 based on recent literature.<span class="citation">(F <a href="#ref-Cribari2004">2004</a>)</span></p>
+<p>The general variance-covariance specification is sometimes called a “Sandwich” estimator because <span class="math inline">\((X&#39;X)^{-1}\)</span> sandwiches the “meat” <span class="math inline">\(\Omega\)</span>.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Program</th>
+<th align="center">VCE</th>
+<th align="center">Income (Beta)</th>
+<th align="center">Income (SE)</th>
+<th align="center">Income^2 (Beta)</th>
+<th align="center">Income^2 (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="even">
+<td align="center">lm</td>
+<td align="center">iid</td>
+<td align="center">-1834.203</td>
+<td align="center">828.985</td>
+<td align="center">1587.042</td>
+<td align="center">519.077</td>
+</tr>
+<tr class="odd">
+<td align="center">manual</td>
+<td align="center">White (dfc)</td>
+<td align="center">-1834.203</td>
+<td align="center">1282.101</td>
+<td align="center">1587.042</td>
+<td align="center">856.072</td>
+</tr>
+<tr class="even">
+<td align="center">HC0</td>
+<td align="center">White (orig.)</td>
+<td align="center">-1834.203</td>
+<td align="center">1243.043</td>
+<td align="center">1587.042</td>
+<td align="center">829.993</td>
+</tr>
+<tr class="odd">
+<td align="center">HC1</td>
+<td align="center">White (STATA)</td>
+<td align="center">-1834.203</td>
+<td align="center">1282.101</td>
+<td align="center">1587.042</td>
+<td align="center">856.072</td>
+</tr>
+<tr class="even">
+<td align="center">HC2</td>
+<td align="center">White</td>
+<td align="center">-1834.203</td>
+<td align="center">1866.406</td>
+<td align="center">1587.042</td>
+<td align="center">1250.147</td>
+</tr>
+<tr class="odd">
+<td align="center">HC3</td>
+<td align="center">White</td>
+<td align="center">-1834.203</td>
+<td align="center">2975.411</td>
+<td align="center">1587.042</td>
+<td align="center">1995.242</td>
+</tr>
+<tr class="even">
+<td align="center">HC4</td>
+<td align="center">Cribari 2004</td>
+<td align="center">-1834.203</td>
+<td align="center">8183.191</td>
+<td align="center">1587.042</td>
+<td align="center">5488.929</td>
+</tr>
+</tbody>
+</table>
+<p>Alternative to the <code>coeftest</code> function you can also directly modify the standard errors in the regression summary object.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">s &lt;-<span class="st"> </span><span class="kw">summary</span>(m1)
 s$coefficients[, <span class="dv">2</span>] &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">diag</span>(<span class="kw">vcovHC</span>(m1, <span class="dt">type=</span><span class="st">&quot;HC1&quot;</span>)))
 s</code></pre></div>
 <pre><code>## 
 ## Call:
-## lm(formula = Expenditure ~ Income + Income2, data = df)
+## lm(formula = Expenditure ~ Income + `Income^2`, data = df)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
@@ -463,7 +801,7 @@ s</code></pre></div>
 ##             Estimate Std. Error t value Pr(&gt;|t|)   
 ## (Intercept)    832.9      475.4   2.545  0.01428 * 
 ## Income       -1834.2     1282.1  -2.213  0.03182 * 
-## Income2       1587.0      856.1   3.057  0.00368 **
+## `Income^2`    1587.0      856.1   3.057  0.00368 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -496,7 +834,7 @@ s</code></pre></div>
 <p>Zeileis, Achim. 2006. “Object-Oriented Computation of Sandwich Estimators.” <em>Journal of Statistical Software</em> 16 (9): 1–16. <a href="http://www.jstatsoft.org/v16/i09/." class="uri">http://www.jstatsoft.org/v16/i09/.</a></p>
 </div>
 <div id="ref-Cribari2004">
-<p>“Cribari-Neto F.” 2004. <em>Computational Statistics &amp; Data Analysis</em> 45.</p>
+<p>F, Cribari-Neto. 2004. “Asymptotic Inference Under Heteroskedasticity of Unknown Form.” <em>Computational Statistics &amp; Data Analysis</em> 45.</p>
 </div>
 <div id="ref-white1980">
 <p>White, Halbert. 1980. “A Heteroskedasticity-Consistent Covariance Matrix Estimator and a Direct Test for Heteroskedasticity.” <em>Econometrika</em> 48 (4): 817–88.</p>
