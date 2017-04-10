@@ -1,4 +1,4 @@
-# Heteroskedastic & Cluster Robust Standard Errors  
+# Heteroskedastic Robust Standard Errors  
 
 ```{r packages, include=F, echo=F}
 require("tidyverse", quietly=T, warn.conflicts = F)
