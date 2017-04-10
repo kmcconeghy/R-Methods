@@ -310,44 +310,63 @@ The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 pers
 
 ## Tie everything together  
 
-  Now that the methods are established, a panel dataset can be constructed where each row is a unique group, year, month. The primary measure will be the incidence density.  
+  Now that the methods are established, a panel dataset can be constructed where each row is a unique group, year. The primary measure will be the incidence density.  
   
 ```{r MakePanel}
   #Panel parameters
     YearMin <- min(year(df$CohortEntry)) 
     YearMax <- max(year(df$CohortExit))
     years <- seq(YearMin, YearMax)
-    months <- c(1:12)
     groups <- df$State
   
   #Build Panel
-    dfPanel <- unique(as_tibble(expand.grid(groups,years,months)))
-    names(dfPanel) <- c("Group","Year","Month")
-    dfPanel <- dfPanel %>% arrange(Group, Year, Month)
+    dfPanel <- unique(as_tibble(expand.grid(groups,years)))
+    names(dfPanel) <- c("Group","Year")
+    dfPanel <- dfPanel %>% arrange(Group, Year)
   
   #Build Matching TimeVars
    df <- df %>%  
      mutate(YearIn = year(CohortEntry)) %>%
-     mutate(YearOut = year(CohortExit)) %>%
-     mutate(MonthIn = month(CohortEntry)) %>%
-     mutate(MonthOut = month(CohortExit))
-       
+     mutate(YearOut = year(CohortExit)) 
+
   #A full function that incorporates all steps
     MakePanel <- function(Panel, dfid) {
-      Panel <- c(Panel[[1]],as.integer(Panel[[2]]), as.integer(Panel[[3]]))
+      Panel <- c(Panel[[1]],as.integer(Panel[[2]]))
+      #Build Panel data
       dfidpanel <- df %>%
         filter(State == Panel[[1]],
-               YearIn <= Panel[[2]], YearOut >=Panel[[2]],
-               MonthIn<= Panel[[3]], MonthOut>=Panel[[3]])
-      CountRes <- nrow(dfidpanel)
-      return(CountRes)
-    }
-  dfPanel$Residents <- apply(dfPanel, 1, function(x) MakePanel(x, df))
+               YearIn <= Panel[[2]], YearOut >=Panel[[2]])
+      #Count Events
+      dfevents<- dfidpanel %>%
+        filter(dfidpanel$State== Panel[[1]] & 
+                          year(dfidpanel$EventDate)==Panel[[2]])
+      #Count up days
+      FirstDay <- as.Date(paste0('01/01/',Panel[[2]]), format='%m/%d/%Y', origin=origin)
+      LastDay <- as.Date(paste0('12/31/',Panel[[2]]), format='%m/%d/%Y', origin=origin)
+    
+    #Compute starting point as either first day of year or TimeIn 
+    #if TimeIn is > FirstDay
+    #'' opposite for Year Stop
+      YearStart <- sapply(dfidpanel$CohortEntry, function(x) max(x, FirstDay))
+      YearStop <- sapply(dfidpanel$CohortExit, function(x) min(x, LastDay))
+    
+    #Compute DaysInYear, if present in that year
+    DaysInYear  <- ifelse(Panel[[2]]>=year(dfidpanel$CohortEntry) & Panel[[2]]<=year(dfidpanel$CohortExit), YearStop - YearStart, 0)
 
+    #Build Array
+      NRes <- nrow(dfidpanel)
+      NEvents <- sum(dfevents$Event) #Add up total events in that year
+      NDays <- sum(DaysInYear)
+      PanelAdd <-  cbind(NRes, NEvents, NDays)
+      return(PanelAdd)
+    }
+  dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
+  names(dfPanel) <- c("Residents", "Events", "Resident-Days")
+  dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
     #The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row
     #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
     
-  kable(head(dfPanel, n=12), align=c('c'), digits=4)  
+  kable(head(dfPanel, n=10), align=c('c'), digits=4)  
 ```

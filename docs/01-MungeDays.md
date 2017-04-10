@@ -17,9 +17,9 @@
  other attached packages:
   [1] gridExtra_2.2.1   lubridate_1.6.0   knitr_1.15.17    
   [4] Scotty_0.0.0.9000 devtools_1.12.0   Hmisc_4.0-2      
-  [7] Formula_1.2-1     survival_2.41-2   lattice_0.20-35  
+  [7] Formula_1.2-1     survival_2.41-3   lattice_0.20-34  
  [10] dplyr_0.5.0       purrr_0.2.2       readr_1.1.0      
- [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
+ [13] tidyr_0.6.1       tibble_1.3.0      ggplot2_2.2.1    
  [16] tidyverse_1.1.1  
  </pre>
 <!--/html_preserve-->  
@@ -45,8 +45,8 @@ df <- data.frame(id=1:sampsize,
 #CohortIn, CohortOut, Group
 df <- df %>%
     mutate(CohortExit = CohortEntry+sample(0:365,sampsize, replace=T)) %>% #CohortExit Date (up to 1000 days from start)
-    mutate(State = sample(state.name, sampsize, replace=T)) #Random state for each group
-df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
+    mutate(State = factor(sample(state.name, sampsize, replace=T))) #Random state for each group
+  df$CohortExit <- as.Date(sapply(df$CohortExit, function(x) X = min(x,as.Date('2009/12/31'))), origin=origin) #Censor at 'study end'
 
 #Group Effect
   State <- as.data.frame(state.name)
@@ -482,4 +482,83 @@ Then from this computing the incidence density rate is trivial, and you can repo
  2008      2972           294          362423             8e-04                      29.6090             
  2009      2945           373          358655             1e-03                      37.9599             
 
-The intepretation "In 2003, the event rate per 100 person-years was 12.1" or "In 2003, the 1-year risk of an event is 12.1 per 100 persons".  
+The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 2003, the 1-year risk of an event is 29.7 per 100 persons".  
+
+## Tie everything together  
+
+  Now that the methods are established, a panel dataset can be constructed where each row is a unique group, year. The primary measure will be the incidence density.  
+  
+
+```r
+  #Panel parameters
+    YearMin <- min(year(df$CohortEntry)) 
+    YearMax <- max(year(df$CohortExit))
+    years <- seq(YearMin, YearMax)
+    groups <- df$State
+  
+  #Build Panel
+    dfPanel <- unique(as_tibble(expand.grid(groups,years)))
+    names(dfPanel) <- c("Group","Year")
+    dfPanel <- dfPanel %>% arrange(Group, Year)
+  
+  #Build Matching TimeVars
+   df <- df %>%  
+     mutate(YearIn = year(CohortEntry)) %>%
+     mutate(YearOut = year(CohortExit)) 
+
+  #A full function that incorporates all steps
+    MakePanel <- function(Panel, dfid) {
+      Panel <- c(Panel[[1]],as.integer(Panel[[2]]))
+      #Build Panel data
+      dfidpanel <- df %>%
+        filter(State == Panel[[1]],
+               YearIn <= Panel[[2]], YearOut >=Panel[[2]])
+      #Count Events
+      dfevents<- dfidpanel %>%
+        filter(dfidpanel$State== Panel[[1]] & 
+                          year(dfidpanel$EventDate)==Panel[[2]])
+      #Count up days
+      FirstDay <- as.Date(paste0('01/01/',Panel[[2]]), format='%m/%d/%Y', origin=origin)
+      LastDay <- as.Date(paste0('12/31/',Panel[[2]]), format='%m/%d/%Y', origin=origin)
+    
+    #Compute starting point as either first day of year or TimeIn 
+    #if TimeIn is > FirstDay
+    #'' opposite for Year Stop
+      YearStart <- sapply(dfidpanel$CohortEntry, function(x) max(x, FirstDay))
+      YearStop <- sapply(dfidpanel$CohortExit, function(x) min(x, LastDay))
+    
+    #Compute DaysInYear, if present in that year
+    DaysInYear  <- ifelse(Panel[[2]]>=year(dfidpanel$CohortEntry) & Panel[[2]]<=year(dfidpanel$CohortExit), YearStop - YearStart, 0)
+
+    #Build Array
+      NRes <- nrow(dfidpanel)
+      NEvents <- sum(dfevents$Event) #Add up total events in that year
+      NDays <- sum(DaysInYear)
+      PanelAdd <-  cbind(NRes, NEvents, NDays)
+      return(PanelAdd)
+    }
+  dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
+  names(dfPanel) <- c("Residents", "Events", "Resident-Days")
+  dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
+    
+    #This step could take a while
+    #The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row
+    #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
+    
+  kable(head(dfPanel, n=10), align=c('c'), digits=4)  
+```
+
+
+
+ Residents    Events    Resident-Days    NA     NA     Event Rate 
+-----------  --------  ---------------  ----  ------  ------------
+  Alabama      2000          39          3     5227     1871795   
+  Alabama      2001          54          7     5331     1352528   
+  Alabama      2002          60          6     7736     1217883   
+  Alabama      2003          58          5     6631     1260509   
+  Alabama      2004          71          6     8628     1030225   
+  Alabama      2005          67          4     7151     1092276   
+  Alabama      2006          62          2     8243     1180952   
+  Alabama      2007          58          1     6893     1263026   
+  Alabama      2008          57          7     7027     1285825   
+  Alabama      2009          55          5     7149     1333245   

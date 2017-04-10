@@ -17,9 +17,9 @@ In this chapter we are evaluating R's capability to compute different kinds of s
  
  other attached packages:
   [1] Scotty_0.0.0.9000 Hmisc_4.0-2       Formula_1.2-1    
-  [4] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
+  [4] survival_2.41-3   lattice_0.20-34   dplyr_0.5.0      
   [7] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
- [10] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+ [10] tibble_1.3.0      ggplot2_2.2.1     tidyverse_1.1.1  
  </pre>
 <!--/html_preserve-->  
 

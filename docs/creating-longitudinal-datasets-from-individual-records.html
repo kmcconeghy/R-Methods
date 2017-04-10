@@ -25,7 +25,7 @@
 <meta name="author" content="Kevin W. McConeghy">
 
 
-<meta name="date" content="2017-04-08">
+<meta name="date" content="2017-04-09">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -119,6 +119,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="2.6" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence"><i class="fa fa-check"></i><b>2.6</b> Incidence</a></li>
 <li class="chapter" data-level="2.7" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#prevalence"><i class="fa fa-check"></i><b>2.7</b> Prevalence</a></li>
 <li class="chapter" data-level="2.8" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence-density"><i class="fa fa-check"></i><b>2.8</b> Incidence Density</a></li>
+<li class="chapter" data-level="2.9" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#tie-everything-together"><i class="fa fa-check"></i><b>2.9</b> Tie everything together</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>3</b> Heteroskedastic &amp; Cluster Robust Standard Errors</a><ul>
 <li class="chapter" data-level="3.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#introduction-2"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
@@ -191,9 +192,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
  other attached packages:
   [1] gridExtra_2.2.1   lubridate_1.6.0   knitr_1.15.17    
   [4] Scotty_0.0.0.9000 devtools_1.12.0   Hmisc_4.0-2      
-  [7] Formula_1.2-1     survival_2.41-2   lattice_0.20-35  
+  [7] Formula_1.2-1     survival_2.41-3   lattice_0.20-34  
  [10] dplyr_0.5.0       purrr_0.2.2       readr_1.1.0      
- [13] tidyr_0.6.1       tibble_1.2        ggplot2_2.2.1    
+ [13] tidyr_0.6.1       tibble_1.3.0      ggplot2_2.2.1    
  [16] tidyverse_1.1.1  
  </pre>
 
@@ -213,8 +214,8 @@ df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class=
 <span class="co">#CohortIn, CohortOut, Group</span>
 df &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">CohortExit =</span> CohortEntry+<span class="kw">sample</span>(<span class="dv">0</span>:<span class="dv">365</span>,sampsize, <span class="dt">replace=</span>T)) %&gt;%<span class="st"> </span><span class="co">#CohortExit Date (up to 1000 days from start)</span>
-<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">State =</span> <span class="kw">sample</span>(state.name, sampsize, <span class="dt">replace=</span>T)) <span class="co">#Random state for each group</span>
-df$CohortExit &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">sapply</span>(df$CohortExit, function(x) <span class="kw">min</span>(x,<span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>))), <span class="dt">origin=</span>origin) <span class="co">#Censor at &#39;study end&#39;</span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">State =</span> <span class="kw">factor</span>(<span class="kw">sample</span>(state.name, sampsize, <span class="dt">replace=</span>T))) <span class="co">#Random state for each group</span>
+  df$CohortExit &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">sapply</span>(df$CohortExit, function(x) <span class="dt">X =</span> <span class="kw">min</span>(x,<span class="kw">as.Date</span>(<span class="st">&#39;2009/12/31&#39;</span>))), <span class="dt">origin=</span>origin) <span class="co">#Censor at &#39;study end&#39;</span>
 
 <span class="co">#Group Effect</span>
   State &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(state.name)
@@ -1071,7 +1072,161 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 </tr>
 </tbody>
 </table>
-<p>The intepretation “In 2003, the event rate per 100 person-years was 12.1” or “In 2003, the 1-year risk of an event is 12.1 per 100 persons”.</p>
+<p>The intepretation “In 2003, the event rate 29.7 per 100 person-years” or “In 2003, the 1-year risk of an event is 29.7 per 100 persons”.</p>
+</div>
+<div id="tie-everything-together" class="section level2">
+<h2><span class="header-section-number">2.9</span> Tie everything together</h2>
+<p>Now that the methods are established, a panel dataset can be constructed where each row is a unique group, year. The primary measure will be the incidence density.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Panel parameters</span>
+    YearMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) 
+    YearMax &lt;-<span class="st"> </span><span class="kw">max</span>(<span class="kw">year</span>(df$CohortExit))
+    years &lt;-<span class="st"> </span><span class="kw">seq</span>(YearMin, YearMax)
+    groups &lt;-<span class="st"> </span>df$State
+  
+  <span class="co">#Build Panel</span>
+    dfPanel &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">as_tibble</span>(<span class="kw">expand.grid</span>(groups,years)))
+    <span class="kw">names</span>(dfPanel) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Group&quot;</span>,<span class="st">&quot;Year&quot;</span>)
+    dfPanel &lt;-<span class="st"> </span>dfPanel %&gt;%<span class="st"> </span><span class="kw">arrange</span>(Group, Year)
+  
+  <span class="co">#Build Matching TimeVars</span>
+   df &lt;-<span class="st"> </span>df %&gt;%<span class="st">  </span>
+<span class="st">     </span><span class="kw">mutate</span>(<span class="dt">YearIn =</span> <span class="kw">year</span>(CohortEntry)) %&gt;%
+<span class="st">     </span><span class="kw">mutate</span>(<span class="dt">YearOut =</span> <span class="kw">year</span>(CohortExit)) 
+
+  <span class="co">#A full function that incorporates all steps</span>
+    MakePanel &lt;-<span class="st"> </span>function(Panel, dfid) {
+      Panel &lt;-<span class="st"> </span><span class="kw">c</span>(Panel[[<span class="dv">1</span>]],<span class="kw">as.integer</span>(Panel[[<span class="dv">2</span>]]))
+      <span class="co">#Build Panel data</span>
+      dfidpanel &lt;-<span class="st"> </span>df %&gt;%
+<span class="st">        </span><span class="kw">filter</span>(State ==<span class="st"> </span>Panel[[<span class="dv">1</span>]],
+               YearIn &lt;=<span class="st"> </span>Panel[[<span class="dv">2</span>]], YearOut &gt;=Panel[[<span class="dv">2</span>]])
+      <span class="co">#Count Events</span>
+      dfevents&lt;-<span class="st"> </span>dfidpanel %&gt;%
+<span class="st">        </span><span class="kw">filter</span>(dfidpanel$State==<span class="st"> </span>Panel[[<span class="dv">1</span>]] &amp;<span class="st"> </span>
+<span class="st">                          </span><span class="kw">year</span>(dfidpanel$EventDate)==Panel[[<span class="dv">2</span>]])
+      <span class="co">#Count up days</span>
+      FirstDay &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">paste0</span>(<span class="st">&#39;01/01/&#39;</span>,Panel[[<span class="dv">2</span>]]), <span class="dt">format=</span><span class="st">&#39;%m/%d/%Y&#39;</span>, <span class="dt">origin=</span>origin)
+      LastDay &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">paste0</span>(<span class="st">&#39;12/31/&#39;</span>,Panel[[<span class="dv">2</span>]]), <span class="dt">format=</span><span class="st">&#39;%m/%d/%Y&#39;</span>, <span class="dt">origin=</span>origin)
+    
+    <span class="co">#Compute starting point as either first day of year or TimeIn </span>
+    <span class="co">#if TimeIn is &gt; FirstDay</span>
+    <span class="co">#&#39;&#39; opposite for Year Stop</span>
+      YearStart &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfidpanel$CohortEntry, function(x) <span class="kw">max</span>(x, FirstDay))
+      YearStop &lt;-<span class="st"> </span><span class="kw">sapply</span>(dfidpanel$CohortExit, function(x) <span class="kw">min</span>(x, LastDay))
+    
+    <span class="co">#Compute DaysInYear, if present in that year</span>
+    DaysInYear  &lt;-<span class="st"> </span><span class="kw">ifelse</span>(Panel[[<span class="dv">2</span>]]&gt;=<span class="kw">year</span>(dfidpanel$CohortEntry) &amp;<span class="st"> </span>Panel[[<span class="dv">2</span>]]&lt;=<span class="kw">year</span>(dfidpanel$CohortExit), YearStop -<span class="st"> </span>YearStart, <span class="dv">0</span>)
+
+    <span class="co">#Build Array</span>
+      NRes &lt;-<span class="st"> </span><span class="kw">nrow</span>(dfidpanel)
+      NEvents &lt;-<span class="st"> </span><span class="kw">sum</span>(dfevents$Event) <span class="co">#Add up total events in that year</span>
+      NDays &lt;-<span class="st"> </span><span class="kw">sum</span>(DaysInYear)
+      PanelAdd &lt;-<span class="st">  </span><span class="kw">cbind</span>(NRes, NEvents, NDays)
+      <span class="kw">return</span>(PanelAdd)
+    }
+  dfPanel[,<span class="dv">3</span>:<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">apply</span>(dfPanel, <span class="dv">1</span>, function(x) <span class="kw">MakePanel</span>(x, df)))
+  <span class="kw">names</span>(dfPanel) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Residents&quot;</span>, <span class="st">&quot;Events&quot;</span>, <span class="st">&quot;Resident-Days&quot;</span>)
+  dfPanel$<span class="st">`</span><span class="dt">Event Rate</span><span class="st">`</span> &lt;-<span class="st"> </span>dfPanel$Events /<span class="st"> </span>dfPanel$<span class="st">`</span><span class="dt">Resident-Days</span><span class="st">`</span> *<span class="st"> </span><span class="dv">365</span> *<span class="st"> </span><span class="dv">100</span>
+    
+    <span class="co">#This step could take a while</span>
+    <span class="co">#The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row</span>
+    <span class="co">#dfPanel &lt;- sapply(dfPanel, function(x) MakePanel(x, df))</span>
+    
+  <span class="kw">kable</span>(<span class="kw">head</span>(dfPanel, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">4</span>)  </code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">Residents</th>
+<th align="center">Events</th>
+<th align="center">Resident-Days</th>
+<th align="center">NA</th>
+<th align="center">NA</th>
+<th align="center">Event Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">2000</td>
+<td align="center">39</td>
+<td align="center">3</td>
+<td align="center">5227</td>
+<td align="center">1871795</td>
+</tr>
+<tr class="even">
+<td align="center">Alabama</td>
+<td align="center">2001</td>
+<td align="center">54</td>
+<td align="center">7</td>
+<td align="center">5331</td>
+<td align="center">1352528</td>
+</tr>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">2002</td>
+<td align="center">60</td>
+<td align="center">6</td>
+<td align="center">7736</td>
+<td align="center">1217883</td>
+</tr>
+<tr class="even">
+<td align="center">Alabama</td>
+<td align="center">2003</td>
+<td align="center">58</td>
+<td align="center">5</td>
+<td align="center">6631</td>
+<td align="center">1260509</td>
+</tr>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">2004</td>
+<td align="center">71</td>
+<td align="center">6</td>
+<td align="center">8628</td>
+<td align="center">1030225</td>
+</tr>
+<tr class="even">
+<td align="center">Alabama</td>
+<td align="center">2005</td>
+<td align="center">67</td>
+<td align="center">4</td>
+<td align="center">7151</td>
+<td align="center">1092276</td>
+</tr>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">2006</td>
+<td align="center">62</td>
+<td align="center">2</td>
+<td align="center">8243</td>
+<td align="center">1180952</td>
+</tr>
+<tr class="even">
+<td align="center">Alabama</td>
+<td align="center">2007</td>
+<td align="center">58</td>
+<td align="center">1</td>
+<td align="center">6893</td>
+<td align="center">1263026</td>
+</tr>
+<tr class="odd">
+<td align="center">Alabama</td>
+<td align="center">2008</td>
+<td align="center">57</td>
+<td align="center">7</td>
+<td align="center">7027</td>
+<td align="center">1285825</td>
+</tr>
+<tr class="even">
+<td align="center">Alabama</td>
+<td align="center">2009</td>
+<td align="center">55</td>
+<td align="center">5</td>
+<td align="center">7149</td>
+<td align="center">1333245</td>
+</tr>
+</tbody>
+</table>
 
 </div>
 </div>

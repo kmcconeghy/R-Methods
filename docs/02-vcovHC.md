@@ -19,9 +19,9 @@ In this chapter we are evaluating R's capability to compute different kinds of s
   [1] knitr_1.15.17     boot_1.3-18       lmtest_0.9-35    
   [4] zoo_1.7-14        sandwich_2.3-4    Scotty_0.0.0.9000
   [7] devtools_1.12.0   Hmisc_4.0-2       Formula_1.2-1    
- [10] survival_2.41-2   lattice_0.20-35   dplyr_0.5.0      
+ [10] survival_2.41-3   lattice_0.20-34   dplyr_0.5.0      
  [13] purrr_0.2.2       readr_1.1.0       tidyr_0.6.1      
- [16] tibble_1.2        ggplot2_2.2.1     tidyverse_1.1.1  
+ [16] tibble_1.3.0      ggplot2_2.2.1     tidyverse_1.1.1  
  </pre>
 <!--/html_preserve-->  
 
