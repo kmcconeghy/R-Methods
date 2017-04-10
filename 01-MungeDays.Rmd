@@ -66,7 +66,7 @@ df$Event <- sapply(df$id, function(x) getReffect(State, df$State[x])) #Generate 
 kable(head(df, n=10), align=c('c'))
 ```
 
-## Show Data  
+### Show Data  
 
 ```{r EntryDate, fig.width=8, warnings=F}
 #Scatter and Fitted Line 
@@ -133,7 +133,7 @@ Here you can see the number who enter the cohort by year, and among those how ma
 
 ## Incidence
 
-The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
+The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
 
 Here is one method where I compute the no. of persons in the cohort in a given year, "incident" events and event rate:  
 
@@ -365,7 +365,8 @@ The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 pers
   dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
-    #The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row
+    #The apply function pulls each panel one at a time, 
+    #MakePanel fills in extra values and returns row
     #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
     
   kable(head(dfPanel, n=10), align=c('c'), digits=4)  

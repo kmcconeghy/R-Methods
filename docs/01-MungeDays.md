@@ -89,7 +89,7 @@ kable(head(df, n=10), align=c('c'))
  9     2007-04-12     2007-06-09       Nebraska         0          NA     
  10    2009-11-24     2009-12-31        Maine           0          NA     
 
-## Show Data  
+### Show Data  
 
 
 ```r
@@ -224,7 +224,7 @@ Here you can see the number who enter the cohort by year, and among those how ma
 
 ## Incidence
 
-The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
+The next step will get a little trickier. Let's say we aren't interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the "population at risk". We wish to estimate the number of events / population at risk. This is  [incidence](https://en.wikipedia.org/wiki/Incidence_(epidemiology)). So we need to take the "CohortEntry", "CohortExit" date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don't start and stop at the same time and cross multiple time units (years in this case). 
 
 Here is one method where I compute the no. of persons in the cohort in a given year, "incident" events and event rate:  
 
@@ -538,11 +538,12 @@ The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 200
       return(PanelAdd)
     }
   dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
-  names(dfPanel) <- c("Residents", "Events", "Resident-Days")
+  names(dfPanel)[3:5] <- c("Residents", "Events", "Resident-Days")
   dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
-    #The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row
+    #The apply function pulls each panel one at a time, 
+    #MakePanel fills in extra values and returns row
     #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
     
   kable(head(dfPanel, n=10), align=c('c'), digits=4)  
@@ -550,15 +551,15 @@ The intepretation "In 2003, the event rate 29.7 per 100 person-years" or "In 200
 
 
 
- Residents    Events    Resident-Days    NA     NA     Event Rate 
------------  --------  ---------------  ----  ------  ------------
-  Alabama      2000          39          3     5227     1871795   
-  Alabama      2001          54          7     5331     1352528   
-  Alabama      2002          60          6     7736     1217883   
-  Alabama      2003          58          5     6631     1260509   
-  Alabama      2004          71          6     8628     1030225   
-  Alabama      2005          67          4     7151     1092276   
-  Alabama      2006          62          2     8243     1180952   
-  Alabama      2007          58          1     6893     1263026   
-  Alabama      2008          57          7     7027     1285825   
-  Alabama      2009          55          5     7149     1333245   
+  Group     Year    Residents    Events    Resident-Days    Event Rate 
+---------  ------  -----------  --------  ---------------  ------------
+ Alabama    2000       39          3           5227          20.9489   
+ Alabama    2001       54          7           5331          47.9272   
+ Alabama    2002       60          6           7736          28.3092   
+ Alabama    2003       58          5           6631          27.5222   
+ Alabama    2004       71          6           8628          25.3825   
+ Alabama    2005       67          4           7151          20.4167   
+ Alabama    2006       62          2           8243           8.8560   
+ Alabama    2007       58          1           6893           5.2952   
+ Alabama    2008       57          7           7027          36.3598   
+ Alabama    2009       55          5           7149          25.5280   

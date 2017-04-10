@@ -110,16 +110,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#introduction-1"><i class="fa fa-check"></i><b>2.1</b> Introduction</a><ul>
 <li class="chapter" data-level="2.1.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#packages-to-use"><i class="fa fa-check"></i><b>2.1.1</b> Packages to use</a></li>
 </ul></li>
-<li class="chapter" data-level="2.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#construct-dataset"><i class="fa fa-check"></i><b>2.2</b> Construct dataset</a></li>
-<li class="chapter" data-level="2.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#show-data"><i class="fa fa-check"></i><b>2.3</b> Show Data</a></li>
-<li class="chapter" data-level="2.4" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#simple-group-counts"><i class="fa fa-check"></i><b>2.4</b> Simple group counts</a><ul>
-<li class="chapter" data-level="2.4.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#simple-event-counts"><i class="fa fa-check"></i><b>2.4.1</b> Simple Event Counts</a></li>
+<li class="chapter" data-level="2.2" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#construct-dataset"><i class="fa fa-check"></i><b>2.2</b> Construct dataset</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#show-data"><i class="fa fa-check"></i><b>2.2.1</b> Show Data</a></li>
 </ul></li>
-<li class="chapter" data-level="2.5" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#cohort-entries-by-year-counts"><i class="fa fa-check"></i><b>2.5</b> Cohort entries by year counts</a></li>
-<li class="chapter" data-level="2.6" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence"><i class="fa fa-check"></i><b>2.6</b> Incidence</a></li>
-<li class="chapter" data-level="2.7" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#prevalence"><i class="fa fa-check"></i><b>2.7</b> Prevalence</a></li>
-<li class="chapter" data-level="2.8" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence-density"><i class="fa fa-check"></i><b>2.8</b> Incidence Density</a></li>
-<li class="chapter" data-level="2.9" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#tie-everything-together"><i class="fa fa-check"></i><b>2.9</b> Tie everything together</a></li>
+<li class="chapter" data-level="2.3" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#simple-group-counts"><i class="fa fa-check"></i><b>2.3</b> Simple group counts</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#simple-event-counts"><i class="fa fa-check"></i><b>2.3.1</b> Simple Event Counts</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#cohort-entries-by-year-counts"><i class="fa fa-check"></i><b>2.4</b> Cohort entries by year counts</a></li>
+<li class="chapter" data-level="2.5" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence"><i class="fa fa-check"></i><b>2.5</b> Incidence</a></li>
+<li class="chapter" data-level="2.6" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#prevalence"><i class="fa fa-check"></i><b>2.6</b> Prevalence</a></li>
+<li class="chapter" data-level="2.7" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#incidence-density"><i class="fa fa-check"></i><b>2.7</b> Incidence Density</a></li>
+<li class="chapter" data-level="2.8" data-path="creating-longitudinal-datasets-from-individual-records.html"><a href="creating-longitudinal-datasets-from-individual-records.html#tie-everything-together"><i class="fa fa-check"></i><b>2.8</b> Tie everything together</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html"><i class="fa fa-check"></i><b>3</b> Heteroskedastic &amp; Cluster Robust Standard Errors</a><ul>
 <li class="chapter" data-level="3.1" data-path="heteroskedastic-cluster-robust-standard-errors.html"><a href="heteroskedastic-cluster-robust-standard-errors.html#introduction-2"><i class="fa fa-check"></i><b>3.1</b> Introduction</a><ul>
@@ -335,9 +336,8 @@ df$Event &lt;-<span class="st"> </span><span class="kw">sapply</span>(df$id, fun
 </tr>
 </tbody>
 </table>
-</div>
-<div id="show-data" class="section level2">
-<h2><span class="header-section-number">2.3</span> Show Data</h2>
+<div id="show-data" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Show Data</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Scatter and Fitted Line </span>
 p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data=</span>df, <span class="kw">aes</span>(<span class="dt">x=</span>CohortEntry)) +<span class="st"> </span>
 <span class="st">  </span><span class="kw">geom_histogram</span>(<span class="kw">aes</span>(<span class="dt">y =</span> ..density..), <span class="dt">binwidth =</span> <span class="dv">4</span>, <span class="dt">fill=</span><span class="kw">I</span>(<span class="st">&quot;blue&quot;</span>), <span class="dt">alpha=</span><span class="kw">I</span>(<span class="fl">0.4</span>)) +
@@ -354,8 +354,9 @@ p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 <p><img src="01-MungeDays_files/figure-html/EntryDate-1.png" width="768" /></p>
 <p>A simple, even distribution to work with (cohort exit is even except for censored at study end date).</p>
 </div>
+</div>
 <div id="simple-group-counts" class="section level2">
-<h2><span class="header-section-number">2.4</span> Simple group counts</h2>
+<h2><span class="header-section-number">2.3</span> Simple group counts</h2>
 <p>If you simply seek to count the total no. of records by groups this is simple.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  dfState &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">group_by</span>(State) %&gt;%<span class="st"> </span><span class="co">#Tells dplyr to create grouped object, and then execute following at that unit</span>
@@ -416,7 +417,7 @@ p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </table>
 <p>Also, if you wish to see the quantity of some event, this is easy also:</p>
 <div id="simple-event-counts" class="section level3">
-<h3><span class="header-section-number">2.4.1</span> Simple Event Counts</h3>
+<h3><span class="header-section-number">2.3.1</span> Simple Event Counts</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  dfState &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">    </span><span class="kw">group_by</span>(State) %&gt;%<span class="st"> </span><span class="co">#Tells dplyr to create grouped object, and then execute following at that unit</span>
 <span class="st">      </span><span class="kw">summarise</span>(<span class="dt">Events =</span> <span class="kw">sum</span>(Event)) <span class="co">#count no of events</span>
@@ -478,7 +479,7 @@ p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </div>
 </div>
 <div id="cohort-entries-by-year-counts" class="section level2">
-<h2><span class="header-section-number">2.5</span> Cohort entries by year counts</h2>
+<h2><span class="header-section-number">2.4</span> Cohort entries by year counts</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#First make year var</span>
 df &lt;-<span class="st"> </span>df %&gt;%
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">EntryYear =</span> <span class="kw">year</span>(CohortEntry)) <span class="co">#year function from lubridate</span>
@@ -554,8 +555,8 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <p>Here you can see the number who enter the cohort by year, and among those how many events are observed.</p>
 </div>
 <div id="incidence" class="section level2">
-<h2><span class="header-section-number">2.6</span> Incidence</h2>
-<p>The next step will get a little trickier. Let’s say we aren’t interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the “population at risk”. We wish to estimate the the number of events / population at risk. This is <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence</a>. So we need to take the “CohortEntry”, “CohortExit” date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don’t start and stop at the same time and cross multiple time units (years in this case).</p>
+<h2><span class="header-section-number">2.5</span> Incidence</h2>
+<p>The next step will get a little trickier. Let’s say we aren’t interested in how many individuals entered/exited the cohort in a given year as above. Rather we want to identify how many patients are in the cohort during a specified period of time (e.g. year). This is the “population at risk”. We wish to estimate the number of events / population at risk. This is <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence</a>. So we need to take the “CohortEntry”, “CohortExit” date variables and compute how many individuals were in the cohort in year 1, year 2 etc. What makes this tricky is that individuals don’t start and stop at the same time and cross multiple time units (years in this case).</p>
 <p>Here is one method where I compute the no. of persons in the cohort in a given year, “incident” events and event rate:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Create New Dataframe by Time Unit</span>
   TimeMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) <span class="co">#lowest time unit observed</span>
@@ -670,7 +671,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <pre><code>## 2004 people : 3034</code></pre>
 </div>
 <div id="prevalence" class="section level2">
-<h2><span class="header-section-number">2.7</span> Prevalence</h2>
+<h2><span class="header-section-number">2.6</span> Prevalence</h2>
 <p>The primary difference between incidence and prevalence is that incidence is only counting <em>new cases</em>. In order to compute prevalence, we need to identify individuals still in the cohort in a given year, but having the event in previous years as well.</p>
 <p>Here’s how:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Code same as above</span>
@@ -774,7 +775,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <p>Note how the prevalence rate is higher, because you are counting events which happened in previous years. Also, the prevalence rate in the first year 2000 is the same as the incidence rate because we have no information before 2000 to add into the prevalent rate. If this is a problem in your empirical research, one approach would be to only count events from 2001 onward, and use the first year as a “lead-in” period.</p>
 </div>
 <div id="incidence-density" class="section level2">
-<h2><span class="header-section-number">2.8</span> Incidence Density</h2>
+<h2><span class="header-section-number">2.7</span> Incidence Density</h2>
 <p>The next goal is to report not the number of events per total population in a given time interval, but rather the number of events per person time. This is sometimes called <a href="https://en.wikipedia.org/wiki/Incidence_(epidemiology)">incidence density</a>, often reported as “x events per 100-person years”. Conceptually you are saying you would on average expect x events in 1 person followed for 100 years, or x events in 100 persons followed for one year. This can be very useful when there is differing time accrued by the unit of observation (person, admission etc.). However, the relevance and interpretability of this measure is very specific to the thing being studied, i.e. it may not be a reasonable assumption that the event rate is constant over 100 years!</p>
 <p>The key new measure here is person-time, heres how to compute it:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df &lt;-<span class="st"> </span>df %&gt;%
@@ -1075,7 +1076,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <p>The intepretation “In 2003, the event rate 29.7 per 100 person-years” or “In 2003, the 1-year risk of an event is 29.7 per 100 persons”.</p>
 </div>
 <div id="tie-everything-together" class="section level2">
-<h2><span class="header-section-number">2.9</span> Tie everything together</h2>
+<h2><span class="header-section-number">2.8</span> Tie everything together</h2>
 <p>Now that the methods are established, a panel dataset can be constructed where each row is a unique group, year. The primary measure will be the incidence density.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="co">#Panel parameters</span>
     YearMin &lt;-<span class="st"> </span><span class="kw">min</span>(<span class="kw">year</span>(df$CohortEntry)) 
@@ -1125,22 +1126,23 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
       <span class="kw">return</span>(PanelAdd)
     }
   dfPanel[,<span class="dv">3</span>:<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">apply</span>(dfPanel, <span class="dv">1</span>, function(x) <span class="kw">MakePanel</span>(x, df)))
-  <span class="kw">names</span>(dfPanel) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Residents&quot;</span>, <span class="st">&quot;Events&quot;</span>, <span class="st">&quot;Resident-Days&quot;</span>)
+  <span class="kw">names</span>(dfPanel)[<span class="dv">3</span>:<span class="dv">5</span>] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Residents&quot;</span>, <span class="st">&quot;Events&quot;</span>, <span class="st">&quot;Resident-Days&quot;</span>)
   dfPanel$<span class="st">`</span><span class="dt">Event Rate</span><span class="st">`</span> &lt;-<span class="st"> </span>dfPanel$Events /<span class="st"> </span>dfPanel$<span class="st">`</span><span class="dt">Resident-Days</span><span class="st">`</span> *<span class="st"> </span><span class="dv">365</span> *<span class="st"> </span><span class="dv">100</span>
     
     <span class="co">#This step could take a while</span>
-    <span class="co">#The apply function is pull each panel one at a time, MakePanel fills in extra values and returns row</span>
+    <span class="co">#The apply function pulls each panel one at a time, </span>
+    <span class="co">#MakePanel fills in extra values and returns row</span>
     <span class="co">#dfPanel &lt;- sapply(dfPanel, function(x) MakePanel(x, df))</span>
     
   <span class="kw">kable</span>(<span class="kw">head</span>(dfPanel, <span class="dt">n=</span><span class="dv">10</span>), <span class="dt">align=</span><span class="kw">c</span>(<span class="st">&#39;c&#39;</span>), <span class="dt">digits=</span><span class="dv">4</span>)  </code></pre></div>
 <table>
 <thead>
 <tr class="header">
+<th align="center">Group</th>
+<th align="center">Year</th>
 <th align="center">Residents</th>
 <th align="center">Events</th>
 <th align="center">Resident-Days</th>
-<th align="center">NA</th>
-<th align="center">NA</th>
 <th align="center">Event Rate</th>
 </tr>
 </thead>
@@ -1151,7 +1153,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">39</td>
 <td align="center">3</td>
 <td align="center">5227</td>
-<td align="center">1871795</td>
+<td align="center">20.9489</td>
 </tr>
 <tr class="even">
 <td align="center">Alabama</td>
@@ -1159,7 +1161,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">54</td>
 <td align="center">7</td>
 <td align="center">5331</td>
-<td align="center">1352528</td>
+<td align="center">47.9272</td>
 </tr>
 <tr class="odd">
 <td align="center">Alabama</td>
@@ -1167,7 +1169,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">60</td>
 <td align="center">6</td>
 <td align="center">7736</td>
-<td align="center">1217883</td>
+<td align="center">28.3092</td>
 </tr>
 <tr class="even">
 <td align="center">Alabama</td>
@@ -1175,7 +1177,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">58</td>
 <td align="center">5</td>
 <td align="center">6631</td>
-<td align="center">1260509</td>
+<td align="center">27.5222</td>
 </tr>
 <tr class="odd">
 <td align="center">Alabama</td>
@@ -1183,7 +1185,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">71</td>
 <td align="center">6</td>
 <td align="center">8628</td>
-<td align="center">1030225</td>
+<td align="center">25.3825</td>
 </tr>
 <tr class="even">
 <td align="center">Alabama</td>
@@ -1191,7 +1193,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">67</td>
 <td align="center">4</td>
 <td align="center">7151</td>
-<td align="center">1092276</td>
+<td align="center">20.4167</td>
 </tr>
 <tr class="odd">
 <td align="center">Alabama</td>
@@ -1199,7 +1201,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">62</td>
 <td align="center">2</td>
 <td align="center">8243</td>
-<td align="center">1180952</td>
+<td align="center">8.8560</td>
 </tr>
 <tr class="even">
 <td align="center">Alabama</td>
@@ -1207,7 +1209,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">58</td>
 <td align="center">1</td>
 <td align="center">6893</td>
-<td align="center">1263026</td>
+<td align="center">5.2952</td>
 </tr>
 <tr class="odd">
 <td align="center">Alabama</td>
@@ -1215,7 +1217,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">57</td>
 <td align="center">7</td>
 <td align="center">7027</td>
-<td align="center">1285825</td>
+<td align="center">36.3598</td>
 </tr>
 <tr class="even">
 <td align="center">Alabama</td>
@@ -1223,7 +1225,7 @@ dfGroup &lt;-<span class="st"> </span>df %&gt;%<span class="st"> </span>
 <td align="center">55</td>
 <td align="center">5</td>
 <td align="center">7149</td>
-<td align="center">1333245</td>
+<td align="center">25.5280</td>
 </tr>
 </tbody>
 </table>
