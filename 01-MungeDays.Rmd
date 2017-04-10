@@ -361,7 +361,7 @@ The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 pers
       return(PanelAdd)
     }
   dfPanel[,3:5] <- t(apply(dfPanel, 1, function(x) MakePanel(x, df)))
-  names(dfPanel) <- c("Residents", "Events", "Resident-Days")
+  names(dfPanel)[3:5] <- c("Residents", "Events", "Resident-Days")
   dfPanel$`Event Rate` <- dfPanel$Events / dfPanel$`Resident-Days` * 365 * 100
     
     #This step could take a while
