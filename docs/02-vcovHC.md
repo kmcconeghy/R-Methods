@@ -1,11 +1,13 @@
-# Heteroskedastic & Cluster Robust Standard Errors  
+# Heteroskedastic Robust Standard Errors  
 
 
 
 ## Introduction  
+
 In this chapter I evaluate R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
+
 <!--html_preserve--><pre>
  R version 3.3.2 (2016-10-31)
  Platform: x86_64-w64-mingw32/x64 (64-bit)
@@ -56,7 +58,7 @@ names(se_results) <- c("Program","VCE", "Income (Beta)","Income (SE)","Income^2 
 
 method <- c("manual","lm","manual","HC0", "HC1","HC2","HC3","HC4")
 
-type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (STATA)", "White", "White", "Cribari 2004")
+type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
 
 for (i in 1:nrow(se_results)) {
   se_results[i,1] <- method[i]
@@ -100,16 +102,16 @@ kable(se_results, align=c('c'), digits=3)
 
 
 
- Program         VCE         Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
----------  ---------------  ---------------  -------------  -----------------  ---------------
- manual          iid           -1834.203          NA            1587.042             NA       
-   lm            iid              NA              NA               NA                NA       
- manual      White (dfc)          NA              NA               NA                NA       
-   HC0      White (orig.)         NA              NA               NA                NA       
-   HC1      White (STATA)         NA              NA               NA                NA       
-   HC2          White             NA              NA               NA                NA       
-   HC3          White             NA              NA               NA                NA       
-   HC4      Cribari 2004          NA              NA               NA                NA       
+ Program           VCE            Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
+---------  --------------------  ---------------  -------------  -----------------  ---------------
+ manual            iid              -1834.203          NA            1587.042             NA       
+   lm              iid                 NA              NA               NA                NA       
+ manual        White (dfc)             NA              NA               NA                NA       
+   HC0        White (orig.)            NA              NA               NA                NA       
+   HC1         White (dfc)             NA              NA               NA                NA       
+   HC2      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC3      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC4        Cribari, 2004            NA              NA               NA                NA       
 
 ### Manually computed standard errors  
 
@@ -156,20 +158,21 @@ kable(se_results, align=c('c'), digits=3)
 
 
 
- Program         VCE         Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
----------  ---------------  ---------------  -------------  -----------------  ---------------
- manual          iid           -1834.203        828.985         1587.042           519.077    
-   lm            iid              NA              NA               NA                NA       
- manual      White (dfc)          NA              NA               NA                NA       
-   HC0      White (orig.)         NA              NA               NA                NA       
-   HC1      White (STATA)         NA              NA               NA                NA       
-   HC2          White             NA              NA               NA                NA       
-   HC3          White             NA              NA               NA                NA       
-   HC4      Cribari 2004          NA              NA               NA                NA       
+ Program           VCE            Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
+---------  --------------------  ---------------  -------------  -----------------  ---------------
+ manual            iid              -1834.203        828.985         1587.042           519.077    
+   lm              iid                 NA              NA               NA                NA       
+ manual        White (dfc)             NA              NA               NA                NA       
+   HC0        White (orig.)            NA              NA               NA                NA       
+   HC1         White (dfc)             NA              NA               NA                NA       
+   HC2      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC3      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC4        Cribari, 2004            NA              NA               NA                NA       
 
 ### R lm function
 
-To confirm the above we can compute the same with the the lm function
+To confirm the above we can compute the same with the the lm function:  
+
 
 ```r
   m1 <- lm(Expenditure ~ Income + `Income^2`, data = df)
@@ -182,16 +185,16 @@ To confirm the above we can compute the same with the the lm function
 
 
 
- Program         VCE         Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
----------  ---------------  ---------------  -------------  -----------------  ---------------
- manual          iid           -1834.203        828.985         1587.042           519.077    
-   lm            iid           -1834.203        828.985         1587.042           519.077    
- manual      White (dfc)          NA              NA               NA                NA       
-   HC0      White (orig.)         NA              NA               NA                NA       
-   HC1      White (STATA)         NA              NA               NA                NA       
-   HC2          White             NA              NA               NA                NA       
-   HC3          White             NA              NA               NA                NA       
-   HC4      Cribari 2004          NA              NA               NA                NA       
+ Program           VCE            Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
+---------  --------------------  ---------------  -------------  -----------------  ---------------
+ manual            iid              -1834.203        828.985         1587.042           519.077    
+   lm              iid              -1834.203        828.985         1587.042           519.077    
+ manual        White (dfc)             NA              NA               NA                NA       
+   HC0        White (orig.)            NA              NA               NA                NA       
+   HC1         White (dfc)             NA              NA               NA                NA       
+   HC2      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC3      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC4        Cribari, 2004            NA              NA               NA                NA       
 
 The estimates are identical. However the critical assumption here of $u$ being "iid", can often be wrong in the "real-world". In the following, I broadly define these concepts.
 
@@ -261,6 +264,7 @@ The full equation is:
 
 ### Manual estimator  
 
+
 ```r
 u <- matrix(resid(m1)) # residuals from model object
 meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
@@ -275,16 +279,16 @@ kable(se_results, align=c('c'), digits=3)
 
 
 
- Program         VCE         Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
----------  ---------------  ---------------  -------------  -----------------  ---------------
- manual          iid           -1834.203        828.985         1587.042           519.077    
-   lm            iid           -1834.203        828.985         1587.042           519.077    
- manual      White (dfc)       -1834.203       1282.101         1587.042           856.072    
-   HC0      White (orig.)         NA              NA               NA                NA       
-   HC1      White (STATA)         NA              NA               NA                NA       
-   HC2          White             NA              NA               NA                NA       
-   HC3          White             NA              NA               NA                NA       
-   HC4      Cribari 2004          NA              NA               NA                NA       
+ Program           VCE            Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
+---------  --------------------  ---------------  -------------  -----------------  ---------------
+ manual            iid              -1834.203        828.985         1587.042           519.077    
+   lm              iid              -1834.203        828.985         1587.042           519.077    
+ manual        White (dfc)          -1834.203       1282.101         1587.042           856.072    
+   HC0        White (orig.)            NA              NA               NA                NA       
+   HC1         White (dfc)             NA              NA               NA                NA       
+   HC2      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC3      Long & Ervin, 2000         NA              NA               NA                NA       
+   HC4        Cribari, 2004            NA              NA               NA                NA       
 
   You will find these "White" or robust standard errors are consistent with the second Peterson table.[@peterson2009]  They are also consistent with STATA's *robust* option. It is not technically the same as the White paper because STATA does a degree of freedom adjustment for small sample size.  
   
@@ -292,9 +296,9 @@ kable(se_results, align=c('c'), digits=3)
 
 Using the already written commands you can specify "White" standard errors with the vcovHC function in the sandwich package.[@Zeileis2006] You can report correct standard errors like below with vcovHC option in function coeftest.  
 
-vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' Omega X (X'X)^{-1}$.  
+vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' \Omega X (X'X)^{-1}$.  
 
-The specification of $Omega$ is determined by the `type=` option.  
+ $\Omega$ is a diagonal matrix determined by the `type=` option.  
 
 `type="cons"` $\omega_i = \sigma^2$ Constant variance  
 `type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix   
@@ -303,21 +307,21 @@ The specification of $Omega$ is determined by the `type=` option.
 `type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$  
 `type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$  
 
-Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC4 based on recent literature.[@Cribari2004]  
+Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix (also called the projection matrix) and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC3 based on recent literature.[@long2000, @Cribari2004] These other variance-covariance matrices account for leverage points in the design matrix (not a focus here).
 
-The general variance-covariance specification is sometimes called a "Sandwich" estimator because $(X'X)^{-1}$ sandwiches the "meat" $\Omega$.
+These are sometimes called "Sandwich" estimators because $(X'X)^{-1}$ sandwiches the "meat" $\Omega$.
 
 
- Program         VCE         Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
----------  ---------------  ---------------  -------------  -----------------  ---------------
- manual          iid           -1834.203        828.985         1587.042           519.077    
-   lm            iid           -1834.203        828.985         1587.042           519.077    
- manual      White (dfc)       -1834.203       1282.101         1587.042           856.072    
-   HC0      White (orig.)      -1834.203       1243.043         1587.042           829.993    
-   HC1      White (STATA)      -1834.203       1282.101         1587.042           856.072    
-   HC2          White          -1834.203       1866.406         1587.042          1250.147    
-   HC3          White          -1834.203       2975.411         1587.042          1995.242    
-   HC4      Cribari 2004       -1834.203       8183.191         1587.042          5488.929    
+ Program           VCE            Income (Beta)    Income (SE)    Income^2 (Beta)    Income^2 (SE) 
+---------  --------------------  ---------------  -------------  -----------------  ---------------
+ manual            iid              -1834.203        828.985         1587.042           519.077    
+   lm              iid              -1834.203        828.985         1587.042           519.077    
+ manual        White (dfc)          -1834.203       1282.101         1587.042           856.072    
+   HC0        White (orig.)         -1834.203       1243.043         1587.042           829.993    
+   HC1         White (dfc)          -1834.203       1282.101         1587.042           856.072    
+   HC2      Long & Ervin, 2000      -1834.203       1866.406         1587.042          1250.147    
+   HC3      Long & Ervin, 2000      -1834.203       2975.411         1587.042          1995.242    
+   HC4        Cribari, 2004         -1834.203       8183.191         1587.042          5488.929    
 
 Alternative to the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
 

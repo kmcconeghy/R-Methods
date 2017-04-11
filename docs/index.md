@@ -1,7 +1,7 @@
 --- 
 title: "R-methods"
 author: "Kevin W. McConeghy"
-date: "2017-04-09"
+date: "2017-04-10"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib]

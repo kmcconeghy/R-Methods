@@ -13,9 +13,11 @@ require("knitr", quietly=T, warn.conflicts = F)
 ```
 
 ## Introduction  
+
 In this chapter I evaluate R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
 
 ### Packages to use  
+
 `r mu$session(cite=F)`  
 
 "Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
@@ -37,7 +39,7 @@ names(se_results) <- c("Program","VCE", "Income (Beta)","Income (SE)","Income^2 
 
 method <- c("manual","lm","manual","HC0", "HC1","HC2","HC3","HC4")
 
-type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (STATA)", "White", "White", "Cribari 2004")
+type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
 
 for (i in 1:nrow(se_results)) {
   se_results[i,1] <- method[i]
@@ -122,7 +124,8 @@ kable(se_results, align=c('c'), digits=3)
 
 ### R lm function
 
-To confirm the above we can compute the same with the the lm function
+To confirm the above we can compute the same with the the lm function:  
+
 ```{r lm}
   m1 <- lm(Expenditure ~ Income + `Income^2`, data = df)
   se_results[2,3] <- coeftest(m1)[2,1]
@@ -190,6 +193,7 @@ In our "real-world" small sample of data a visual representation of data can be 
 The full equation is:  
 
 ### Manual estimator  
+
 ```{r manWhite}
 u <- matrix(resid(m1)) # residuals from model object
 meat1 <- t(X) %*% diag(diag(crossprod(t(u)))) %*% X # Sigma is a diagonal with u^2 as elements
@@ -208,9 +212,9 @@ kable(se_results, align=c('c'), digits=3)
 
 Using the already written commands you can specify "White" standard errors with the vcovHC function in the sandwich package.[@Zeileis2006] You can report correct standard errors like below with vcovHC option in function coeftest.  
 
-vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' Omega X (X'X)^{-1}$.  
+vcovHC has several types available. The general formula for the var-cov matrix is: $(X'X)^{-1} X' \Omega X (X'X)^{-1}$.  
 
-The specification of $Omega$ is determined by the `type=` option.  
+ $\Omega$ is a diagonal matrix determined by the `type=` option.  
 
 `type="cons"` $\omega_i = \sigma^2$ Constant variance  
 `type=HC0`    $\omega_i = \mu^2_i$ the White variance-covariance matrix   
@@ -219,42 +223,25 @@ The specification of $Omega$ is determined by the `type=` option.
 `type=HC3`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{2}}$  
 `type=HC4`    $\omega_i = \frac{\mu^2_i}{(1-h_i)^{\delta_i}}$  
 
-Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC4 based on recent literature.[@Cribari2004]  
+Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix (also called the projection matrix) and $\delta_i = min({4 }, {h_i}{h¯})$. The documentation for the sandwich package recommends HC3 based on recent literature.[@long2000, @Cribari2004] These other variance-covariance matrices account for leverage points in the design matrix (not a focus here).
 
-The general variance-covariance specification is sometimes called a "Sandwich" estimator because $(X'X)^{-1}$ sandwiches the "meat" $\Omega$.
+These are sometimes called "Sandwich" estimators because $(X'X)^{-1}$ sandwiches the "meat" $\Omega$.
 
 ```{r funcWhite, echo=F}
-hc <- coeftest(m1, vcovHC(m1, type="HC0")) #Standard
-se_results[4,3] <- hc[2,1]
-se_results[4,4] <- hc[2,2]
-se_results[4,5] <- hc[3,1]
-se_results[4,6] <- hc[3,2]
+vce <- c("HC0","HC1","HC2","HC3","HC4")
+for (i in 1:5) {
+  hc <- coeftest(m1, vcovHC(m1, type=vce[i])) #Standard
+  i <- i+3
+  se_results[i,3] <- hc[2,1]
+  se_results[i,4] <- hc[2,2]
+  se_results[i,5] <- hc[3,1]
+  se_results[i,6] <- hc[3,2]
+}
 
-hc <- coeftest(m1, vcovHC(m1, type="HC1")) #Standard
-se_results[5,3] <- hc[2,1]
-se_results[5,4] <- hc[2,2]
-se_results[5,5] <- hc[3,1]
-se_results[5,6] <- hc[3,2]
-
-hc <- coeftest(m1, vcovHC(m1, type="HC2")) #Standard
-se_results[6,3] <- hc[2,1]
-se_results[6,4] <- hc[2,2]
-se_results[6,5] <- hc[3,1]
-se_results[6,6] <- hc[3,2]
-
-hc <- coeftest(m1, vcovHC(m1, type="HC3")) #Standard
-se_results[7,3] <- hc[2,1]
-se_results[7,4] <- hc[2,2]
-se_results[7,5] <- hc[3,1]
-se_results[7,6] <- hc[3,2]
-
-hc <- coeftest(m1, vcovHC(m1, type="HC4")) #Standard
-se_results[8,3] <- hc[2,1]
-se_results[8,4] <- hc[2,2]
-se_results[8,5] <- hc[3,1]
-se_results[8,6] <- hc[3,2]
 kable(se_results, align=c('c'), digits=3)  
 ```
+
+As apparent here, what option you choose can have a significant effect on the SE values. This is problematic because which one you should choose is not exactly set in stone (although HC3 is the default).  
 
 Alternative to the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
 
