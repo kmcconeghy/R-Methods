@@ -3,20 +3,28 @@
 ```{r packages, include=F, echo=F}
 require("tidyverse", quietly=T, warn.conflicts = F)
 require("Hmisc", quietly=T, warn.conflicts = F)
+require("devtools", quietly=T, warn.conflicts = F)
 require("Scotty", quietly=T, warn.conflicts = F)
-mu <- markupSpecs$html  
+mu <- markupSpecs$html  
+require("sandwich", quietly=T, warn.conflicts = F)
+require("lmtest", quietly=T, warn.conflicts = F)
+require("boot", quietly=T, warn.conflicts = F)
+require("knitr", quietly=T, warn.conflicts = F)
 ```
 
 ## Introduction  
 
-In this chapter we are evaluating R's capability to compute different kinds of standard errors. Like with many things, R has extensive flexibility here but can be daunting when you want a quick option. To bring this flexibility down to earth, I lay out the background, provide practical recommendations, user-written commands and benchmark to STATA.  
+In this chapter we will evaluate how "clustering" affects standard error computations. In many cases where you are evaluating some exposure x on outcome y, the effect of x on y may be unique subgroups within the data. Many classic examples exist, such as n educational intervention, x, is implemented at the school level but the effect is evaluated on individual student outcome y. The schools represent "clusters" and violate the assumptions of standard errors (residuals are independent and identically distributed) if not accounted for. A special case of clustering occurs when you follow multiple individuals across multiple timepoints (i.e. a pre-post study design). In this case, the exposure and outcome is clustered at the person-level. This will be evaluated in a separate chapter. 
 
-### Packages to use  
+### Packages to use   
+
 `r mu$session(cite=F)`  
 
-"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful.
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich" and "lmtest" are specifically relevant to this chapter in order to compute various standard errors (SE).  
 
 ## Clustering  
+
+To illustrate how group-clustering can affect residuals, I will construct a test dataset and visually represent the residuals.
 
 ## Cluster robust errors in R  
 
