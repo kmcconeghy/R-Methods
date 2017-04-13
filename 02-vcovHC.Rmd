@@ -34,17 +34,8 @@ kable(head(df), align=c('c'), digits = 2)
 ```
 
 ```{r SetTab}
-se_results <- as_tibble(matrix(nrow=8,ncol=6))
+se_results <- as_tibble(matrix(nrow=1,ncol=6))
 names(se_results) <- c("Program","VCE", "Income (Beta)","Income (SE)","Income^2 (Beta)","Income^2 (SE)")
-
-method <- c("manual","lm","manual","HC0", "HC1","HC2","HC3","HC4")
-
-type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
-
-for (i in 1:nrow(se_results)) {
-  se_results[i,1] <- method[i]
-  se_results[i,2] <- type[i]
-}
 ```
 
 ## Linear Regression Model 
@@ -75,8 +66,13 @@ X = as.matrix(cbind(1,df$Income, df$`Income^2`)) #Add one for intercept
 beta = solve(t(X) %*% X) %*% (t(X) %*% Y) 
 rownames(beta) <- c("Int","Income",'Income^2') 
 colnames(beta) <- c("Beta")
-se_results[1,3] <- beta[2,1]
-se_results[1,5] <- beta[3,1]
+
+method <- c("manual","lm","manual","HC0", "HC1","HC2","HC3","HC4")
+
+type <- c("iid", "iid", "White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
+
+row <- c("Manual","cons.",round(beta[2,1],3),NA,round(beta[3,1],3),NA)
+se_results[1,] <- row
 kable(se_results, align=c('c'), digits=3)  
 ```
 
@@ -117,8 +113,14 @@ k <- dim(X)[2] # n of predictors
 SigmaSq <- sum((Y - X%*%beta)^2)/(n-k)  # (sum residuals)^2 / (degree of freedom correction) i.e. estimate of sigma-squared
 vcovMat <- SigmaSq*chol2inv(chol(t(X)%*%X)) # variance covariance matrix
 StdErr <- sqrt(diag(vcovMat)) #sq root of diagonal
-se_results[1,4] <- StdErr[2]
-se_results[1,6] <- StdErr[3]
+
+method <- c("lm","manual","HC0", "HC1","HC2","HC3","HC4")
+
+type <- c("iid", "White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
+
+row <- c("Manual","cons.",round(beta[2,1],3),round(StdErr[2],3),round(beta[3,1],3),round(StdErr[3],3))
+
+se_results[1,] <- row
 kable(se_results, align=c('c'), digits=3)  
 ```
 
@@ -128,10 +130,11 @@ To confirm the above we can compute the same with the the lm function:
 
 ```{r lm}
   m1 <- lm(Expenditure ~ Income + `Income^2`, data = df)
-  se_results[2,3] <- coeftest(m1)[2,1]
-  se_results[2,4] <- coeftest(m1)[2,2]
-  se_results[2,5] <- coeftest(m1)[3,1]
-  se_results[2,6] <- coeftest(m1)[3,2]
+  method <- c("manual","HC0", "HC1","HC2","HC3","HC4")
+  type <- c("White (dfc)", "White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
+
+  row <- c("lm","cons.",round(coeftest(m1)[2,1],3),round(coeftest(m1)[2,2],3),round(coeftest(m1)[3,1],3),round(coeftest(m1)[3,2],3))
+  se_results[2,] <- row
   kable(se_results, align=c('c'), digits=3)  
 ```
 
@@ -203,6 +206,13 @@ se_results[3,3] <- coeftest(m1)[2,1]
 se_results[3,5] <- coeftest(m1)[3,1]
 se_results[3,4] <- se[2]
 se_results[3,6] <- se[3]
+
+  method <- c("HC0", "HC1","HC2","HC3","HC4")
+  type <- c("White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004")
+
+  row <- c("manual","White (dfc)",round(coeftest(m1)[2,1],3),round(se[2],3),round(coeftest(m1)[3,1],3),round(se[3],3))
+  se_results[2,] <- row
+  
 kable(se_results, align=c('c'), digits=3)  
 ```
 
@@ -228,20 +238,20 @@ Where $h_i = H_{ii}$ are the diagonal elements of the hat matrix (also called th
 These are sometimes called "Sandwich" estimators because $(X'X)^{-1}$ sandwiches the "meat" $\Omega$.
 
 ```{r funcWhite, echo=F}
-vce <- c("HC0","HC1","HC2","HC3","HC4")
+vce <- list(c("HC0","HC1","HC2","HC3","HC4"),
+            c("White (orig.)", "White (dfc)", "Long & Ervin, 2000", "Long & Ervin, 2000", "Cribari, 2004"))
+
 for (i in 1:5) {
-  hc <- coeftest(m1, vcovHC(m1, type=vce[i])) #Standard
-  i <- i+3
-  se_results[i,3] <- hc[2,1]
-  se_results[i,4] <- hc[2,2]
-  se_results[i,5] <- hc[3,1]
-  se_results[i,6] <- hc[3,2]
+  hc <- coeftest(m1, vcovHC(m1, type=vce[[1]][i])) #Standard
+  j <- i+3
+  row <- c(vce[[1]][i],vce[[2]][i],"",round(hc[2,2],3),"",round(hc[3,2],3))
+  se_results[j,] <- row
 }
 
 kable(se_results, align=c('c'), digits=3)  
 ```
 
-As apparent here, what option you choose can have a significant effect on the SE values. This is problematic because which one you should choose is not exactly set in stone (although HC3 is the default).  
+The coefficients themselves do not change across different HC specifications because this computation is the same, it is only the standard errors which change. As apparent here, what option you choose can have a significant effect on the SE values. This is problematic because which one you should choose is not exactly set in stone (although HC3 is the default).  
 
 Alternative to the `coeftest` function you can also directly modify the standard errors in the regression summary object.  
 
@@ -251,6 +261,9 @@ s$coefficients[, 2] <- sqrt(diag(vcovHC(m1, type="HC1")))
 s
 ```
 
+## Bootstrap alternative  
+
+A further alternative to the above HC estimators is to perform specialized instances of bootstrapping. This will be covered in the subsequent chapter that covers cluster robust standard errors.   
 
 ## Acknowledgements  
 This chapter is heavily adapted from several StackExchange and other blog posts.

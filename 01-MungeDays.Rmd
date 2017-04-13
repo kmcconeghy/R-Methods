@@ -367,7 +367,5 @@ The intepretation "In 2003, the event rate `r round(dfTime[4,6],1)` per 100 pers
     #This step could take a while
     #The apply function pulls each panel one at a time, 
     #MakePanel fills in extra values and returns row
-    #dfPanel <- sapply(dfPanel, function(x) MakePanel(x, df))
-    
   kable(head(dfPanel, n=10), align=c('c'), digits=2)  
 ```
