@@ -20,7 +20,7 @@ In this chapter I evaluate R's capability to compute different kinds of standard
 
 `r mu$session(cite=F)`  
 
-"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich", "lmtest" and "boot" are specifically relevant to this chapter in order to compute various standard errors (SE).  
+"Scotty" is my own package. "tidyverse" is Wickam et al. general suite of packages/commands to work with R. "Hmisc" is Frank Harrel's miscellaneous commands, many of which are quite useful. "sandwich" and "lmtest" are specifically relevant to this chapter in order to compute various standard errors (SE).  
 
 ## Test data  
 
